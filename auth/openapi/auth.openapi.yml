@@ -1,0 +1,171 @@
+openapi: 3.0.3
+info:
+  title: Auth Service (Simple Flow)
+  version: 1.1.0
+  description: |
+    Упрощенный flow:
+    1) Фронт редиректит пользователя на /login?return_to=<callback фронта>
+    2) После успешного входа сервис редиректит на callback с ?code=...
+    3) Фронт меняет code на токены через POST /token
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: Auth
+  - name: Technical
+paths:
+  /health:
+    get:
+      tags: [Technical]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: Service alive
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true
+
+  /login:
+    get:
+      tags: [Auth]
+      summary: Страница входа (HTML)
+      parameters:
+        - in: query
+          name: return_to
+          required: true
+          schema:
+            type: string
+            format: uri
+          description: Callback URL фронтенда, куда вернется пользователь
+      responses:
+        "200":
+          description: HTML login page
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags: [Auth]
+      summary: Проверка логина/пароля и редирект на callback с code
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password, return_to]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                return_to:
+                  type: string
+                  format: uri
+      responses:
+        "302":
+          description: Редирект на return_to?code=...
+        "400":
+          description: Невалидный ввод
+
+  /token:
+    post:
+      tags: [Auth]
+      summary: Обмен кода на токены или refresh
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/AuthCodeTokenRequest"
+                - $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: OAuth-like error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
+
+  /logout:
+    post:
+      tags: [Auth]
+      summary: Logout session
+      responses:
+        "200":
+          description: Logged out
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+              example:
+                ok: true
+
+  /jwks:
+    get:
+      tags: [Technical]
+      summary: Public JWKS for backend token verification
+      responses:
+        "200":
+          description: Public keys
+          content:
+            application/json:
+              schema:
+                type: object
+
+components:
+  schemas:
+    OAuthError:
+      type: object
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
+    AuthCodeTokenRequest:
+      type: object
+      required: [grant_type, code]
+      properties:
+        grant_type:
+          type: string
+          enum: [authorization_code]
+        code:
+          type: string
+    RefreshTokenRequest:
+      type: object
+      required: [grant_type, refresh_token]
+      properties:
+        grant_type:
+          type: string
+          enum: [refresh_token]
+        refresh_token:
+          type: string
+    TokenResponse:
+      type: object
+      properties:
+        token_type:
+          type: string
+          example: Bearer
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        scope:
+          type: string
