@@ -1,9 +1,10 @@
 import {apiBuilder} from "./api/apiBuilder.ts";
+import {MainPage} from "./pages/MainPage";
 
 function App() {
 
   return (
-      <>app</>
+      <MainPage></MainPage>
   )
 }
 
