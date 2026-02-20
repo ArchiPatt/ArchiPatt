@@ -8,6 +8,7 @@ import {
   canCreateAccountFor,
   canCloseAccount,
 } from "../security/access";
+import { env } from "../env";
 
 async function authPayloadOrNull(req: { headers: { authorization?: string } }) {
   try {
@@ -55,6 +56,40 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     }
 
     return account;
+  });
+
+  app.get<{
+    Params: { id: string };
+    Querystring: { limit?: string; offset?: string; sort?: string };
+  }>("/accounts/:id/operations", async (req, reply) => {
+    const payload = await authPayloadOrNull(req);
+    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+
+    const account = await app.db
+      .getRepository(Account)
+      .findOne({ where: { id: req.params.id } });
+    if (!account) return reply.code(404).send({ error: "account_not_found" });
+    if (!canReadAccount(payload, account.clientId)) {
+      return reply.code(403).send({ error: "forbidden" });
+    }
+
+    const limit = Math.min(
+      Math.max(1, parseInt(req.query.limit ?? "20", 10) || 20),
+      100,
+    );
+    const offset = Math.max(0, parseInt(req.query.offset ?? "0", 10) || 0);
+    const sort = req.query.sort === "asc" ? "ASC" : "DESC";
+
+    const [items, total] = await app.db
+      .getRepository(AccountOperation)
+      .findAndCount({
+        where: { accountId: req.params.id },
+        order: { createdAt: sort },
+        take: limit,
+        skip: offset,
+      });
+
+    return { items, total };
   });
 
   app.post<{ Body: { clientId?: string } }>("/accounts", async (req, reply) => {
@@ -192,5 +227,84 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     if (result === "insufficient_balance")
       return reply.code(400).send({ error: "insufficient_balance" });
     return result;
+  });
+
+  app.post<{
+    Params: { id: string };
+    Body: {
+      amount?: unknown;
+      idempotencyKey?: string;
+      type?: string;
+      correlationId?: string;
+      meta?: Record<string, unknown>;
+    };
+  }>("/internal/accounts/:id/operations", async (req, reply) => {
+    const token = req.headers["x-internal-token"];
+    if (token !== env.internalToken) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+
+    const idempotencyKey = req.body?.idempotencyKey?.trim();
+    if (!idempotencyKey) {
+      return reply.code(400).send({ error: "idempotency_key_required" });
+    }
+
+    const n =
+      typeof req.body?.amount === "string"
+        ? parseFloat(req.body.amount)
+        : typeof req.body?.amount === "number"
+          ? req.body.amount
+          : NaN;
+    if (!Number.isFinite(n) || n === 0) {
+      return reply.code(400).send({ error: "invalid_amount" });
+    }
+
+    const opRepo = app.db.getRepository(AccountOperation);
+    const existing = await opRepo.findOne({
+      where: { accountId: req.params.id, idempotencyKey },
+    });
+    if (existing) return existing;
+
+    const result = await app.db.manager.transaction(async (em) => {
+      const dup = await em.findOne(AccountOperation, {
+        where: { accountId: req.params.id, idempotencyKey },
+      });
+      if (dup) return { op: dup, created: false };
+
+      const account = await em.findOne(Account, {
+        where: { id: req.params.id },
+        lock: { mode: "pessimistic_write" },
+      });
+      if (!account) return null;
+      if (account.status === "closed") return "closed";
+
+      const prev = parseFloat(account.balance);
+      const next = (prev + n).toFixed(2);
+      if (parseFloat(next) < 0) return "insufficient_balance";
+
+      account.balance = next;
+      await em.save(account);
+      const op = await em.save(
+        em.create(AccountOperation, {
+          accountId: account.id,
+          amount: n.toFixed(2),
+          type: req.body?.type ?? null,
+          correlationId: req.body?.correlationId ?? null,
+          idempotencyKey,
+          meta: req.body?.meta ?? null,
+        }),
+      );
+      return { op, created: true };
+    });
+
+    if (result === null)
+      return reply.code(404).send({ error: "account_not_found" });
+    if (result === "closed")
+      return reply.code(400).send({ error: "account_closed" });
+    if (result === "insufficient_balance")
+      return reply.code(400).send({ error: "insufficient_balance" });
+    return result.created
+      ? reply.code(201).send(result.op)
+      : reply.send(result.op);
   });
 }

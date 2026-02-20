@@ -20,6 +20,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: num("PORT", 4000),
   authIssuer: must("AUTH_ISSUER"),
+  internalToken: must("INTERNAL_TOKEN"),
   db: {
     host: process.env.DB_HOST ?? "localhost",
     port: num("DB_PORT", 5432),
