@@ -1,6 +1,9 @@
 import { createHash, timingSafeEqual } from "crypto";
 
-export function verifyPkceS256(codeVerifier: string, expectedChallenge: string): boolean {
+export function verifyPkceS256(
+  codeVerifier: string,
+  expectedChallenge: string,
+): boolean {
   const digest = createHash("sha256").update(codeVerifier).digest();
   const challenge = base64UrlEncode(digest);
   return safeEqual(challenge, expectedChallenge);
@@ -20,4 +23,3 @@ function safeEqual(a: string, b: string): boolean {
   if (aBuf.length !== bBuf.length) return false;
   return timingSafeEqual(aBuf, bBuf);
 }
-

@@ -14,8 +14,7 @@ const AppDataSource = new DataSource({
   entities: [UserProfile],
   migrations: [path.join(process.cwd(), "src/migrations/*.{ts,js}")],
   synchronize: false,
-  logging: false
+  logging: false,
 });
 
 export default AppDataSource;
-

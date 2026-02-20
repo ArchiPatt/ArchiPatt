@@ -5,4 +5,3 @@ export async function initDataSource() {
   await AppDataSource.initialize();
   return AppDataSource;
 }
-

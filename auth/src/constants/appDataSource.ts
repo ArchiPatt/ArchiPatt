@@ -18,8 +18,7 @@ const AppDataSource = new DataSource({
   entities: [User, OAuthClient, Session, AuthorizationCode, RefreshToken],
   migrations: [path.join(process.cwd(), "src/migrations/*.{ts,js}")],
   synchronize: false,
-  logging: false
+  logging: false,
 });
 
 export default AppDataSource;
-

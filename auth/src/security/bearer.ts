@@ -11,8 +11,7 @@ export async function verifyAccessToken(authorizationHeader?: string) {
   if (!token) return null;
 
   const { payload } = await jwtVerify(token, jwks, {
-    issuer: env.issuer
+    issuer: env.issuer,
   });
   return payload;
 }
-

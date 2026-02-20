@@ -9,8 +9,8 @@ import { registerUsersRoutes } from "./routes/users";
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
-      level: env.nodeEnv === "development" ? "info" : "info"
-    }
+      level: env.nodeEnv === "development" ? "info" : "info",
+    },
   });
 
   await app.register(formbody);
@@ -32,4 +32,3 @@ declare module "fastify" {
     db: Awaited<ReturnType<typeof initDataSource>>;
   }
 }
-

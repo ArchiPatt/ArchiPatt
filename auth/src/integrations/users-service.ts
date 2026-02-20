@@ -7,13 +7,15 @@ export type ExternalUserProfile = {
   isBlocked: boolean;
 };
 
-export async function fetchUserProfileByUsername(username: string): Promise<ExternalUserProfile | null> {
+export async function fetchUserProfileByUsername(
+  username: string,
+): Promise<ExternalUserProfile | null> {
   const url = `${env.usersService.baseUrl}/internal/users/by-username/${encodeURIComponent(username)}`;
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      "x-internal-token": env.usersService.internalToken
-    }
+      "x-internal-token": env.usersService.internalToken,
+    },
   });
 
   if (res.status === 404) return null;
@@ -25,4 +27,3 @@ export async function fetchUserProfileByUsername(username: string): Promise<Exte
   const data = (await res.json()) as ExternalUserProfile;
   return data;
 }
-

@@ -13,17 +13,17 @@ import { seedInitialData } from "./bootstrap/seed";
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
-      level: env.nodeEnv === "development" ? "info" : "info"
-    }
+      level: env.nodeEnv === "development" ? "info" : "info",
+    },
   });
 
   await app.register(cookie, {
-    hook: "onRequest"
+    hook: "onRequest",
   });
   await app.register(formbody);
   await app.register(fastifyStatic, {
     root: path.join(process.cwd(), "node_modules", "swagger-ui-dist"),
-    prefix: "/swagger-static/"
+    prefix: "/swagger-static/",
   });
 
   const ds = await initDataSource();
@@ -45,4 +45,3 @@ declare module "fastify" {
     db: Awaited<ReturnType<typeof initDataSource>>;
   }
 }
-

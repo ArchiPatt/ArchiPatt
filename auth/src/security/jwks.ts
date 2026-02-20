@@ -39,4 +39,3 @@ export async function getJwks(): Promise<{ keys: JWK[] }> {
   const { publicJwk } = await loadKeys();
   return { keys: [publicJwk] };
 }
-
