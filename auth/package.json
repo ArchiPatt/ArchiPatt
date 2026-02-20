@@ -8,8 +8,10 @@
     "dev": "tsx watch src/main.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node dist/main.js",
-    "db:migrate": "tsx src/db/migrate.ts",
-    "db:revert": "tsx src/db/revert.ts",
+    "typeorm": "npx ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli -d ./src/constants/appDataSource.ts",
+    "migration:generate": "npm run typeorm migration:generate ./src/migrations/migration",
+    "migration:run": "npm run typeorm migration:run",
+    "migration:revert": "npm run typeorm migration:revert",
     "keys:generate": "tsx src/scripts/generate-jwk.ts"
   },
   "dependencies": {
@@ -29,6 +31,8 @@
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/node": "^20.17.19",
+    "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }
