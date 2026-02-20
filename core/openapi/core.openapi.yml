@@ -102,6 +102,76 @@ paths:
           description: Forbidden
         "404":
           description: Account not found
+  /accounts/{id}/deposit:
+    post:
+      tags: [Core]
+      summary: Deposit to account
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  minimum: 0.01
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid amount or account closed
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
+  /accounts/{id}/withdraw:
+    post:
+      tags: [Core]
+      summary: Withdraw from account
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  minimum: 0.01
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid amount, account closed, or insufficient balance
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
 components:
   securitySchemes:
     bearerAuth:

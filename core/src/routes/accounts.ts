@@ -1,5 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { Account } from "../db/entities/Account";
+import { AccountOperation } from "../db/entities/AccountOperation";
 import { verifyBearerToken } from "../security/jwt";
 import {
   canReadAccount,
@@ -96,4 +97,100 @@ export function registerAccountsRoutes(app: FastifyInstance) {
       return account;
     },
   );
+
+  const parseAmount = (v: unknown): number | null => {
+    const n =
+      typeof v === "string" ? parseFloat(v) : typeof v === "number" ? v : NaN;
+    return Number.isFinite(n) && n > 0 ? n : null;
+  };
+
+  app.post<{
+    Params: { id: string };
+    Body: { amount?: unknown };
+  }>("/accounts/:id/deposit", async (req, reply) => {
+    const payload = await authPayloadOrNull(req);
+    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+
+    const amount = parseAmount(req.body?.amount);
+    if (amount == null)
+      return reply.code(400).send({ error: "invalid_amount" });
+
+    const result = await app.db.manager.transaction(async (em) => {
+      const account = await em.findOne(Account, {
+        where: { id: req.params.id },
+        lock: { mode: "pessimistic_write" },
+      });
+      if (!account) return null;
+      if (!canReadAccount(payload, account.clientId)) return "forbidden";
+      if (account.status === "closed") return "closed";
+
+      const prev = parseFloat(account.balance);
+      const next = (prev + amount).toFixed(2);
+      account.balance = next;
+      await em.save(account);
+      await em.save(
+        em.create(AccountOperation, {
+          accountId: account.id,
+          amount: amount.toFixed(2),
+          type: "deposit",
+        }),
+      );
+      return account;
+    });
+
+    if (result === null)
+      return reply.code(404).send({ error: "account_not_found" });
+    if (result === "forbidden")
+      return reply.code(403).send({ error: "forbidden" });
+    if (result === "closed")
+      return reply.code(400).send({ error: "account_closed" });
+    return result;
+  });
+
+  app.post<{
+    Params: { id: string };
+    Body: { amount?: unknown };
+  }>("/accounts/:id/withdraw", async (req, reply) => {
+    const payload = await authPayloadOrNull(req);
+    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+
+    const amount = parseAmount(req.body?.amount);
+    if (amount == null)
+      return reply.code(400).send({ error: "invalid_amount" });
+
+    const result = await app.db.manager.transaction(async (em) => {
+      const account = await em.findOne(Account, {
+        where: { id: req.params.id },
+        lock: { mode: "pessimistic_write" },
+      });
+      if (!account) return null;
+      if (!canReadAccount(payload, account.clientId)) return "forbidden";
+      if (account.status === "closed") return "closed";
+
+      const prev = parseFloat(account.balance);
+      if (prev < amount) return "insufficient_balance";
+
+      const next = (prev - amount).toFixed(2);
+      account.balance = next;
+      await em.save(account);
+      await em.save(
+        em.create(AccountOperation, {
+          accountId: account.id,
+          amount: (-amount).toFixed(2),
+          type: "withdraw",
+        }),
+      );
+      return account;
+    });
+
+    if (result === null)
+      return reply.code(404).send({ error: "account_not_found" });
+    if (result === "forbidden")
+      return reply.code(403).send({ error: "forbidden" });
+    if (result === "closed")
+      return reply.code(400).send({ error: "account_closed" });
+    if (result === "insufficient_balance")
+      return reply.code(400).send({ error: "insufficient_balance" });
+    return result;
+  });
 }
