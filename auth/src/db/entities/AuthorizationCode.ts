@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-@Entity({ name: "authorization_codes" })
+@Entity()
 export class AuthorizationCode {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -16,34 +16,34 @@ export class AuthorizationCode {
   code!: string;
 
   @Index()
-  @Column({ name: "client_id", type: "text" })
+  @Column({ type: "text" })
   clientId!: string;
 
   @Index()
-  @Column({ name: "user_id", type: "uuid" })
+  @Column({ type: "uuid" })
   userId!: string;
 
-  @Column({ name: "redirect_uri", type: "text" })
+  @Column({ type: "text" })
   redirectUri!: string;
 
   @Column({ type: "text", array: true })
   scopes!: string[];
 
-  @Column({ name: "code_challenge", type: "text" })
+  @Column({ type: "text" })
   codeChallenge!: string;
 
-  @Column({ name: "code_challenge_method", type: "text" })
+  @Column({ type: "text" })
   codeChallengeMethod!: "S256";
 
-  @Column({ name: "nonce", type: "text", nullable: true })
+  @Column({ type: "text", nullable: true })
   nonce!: string | null;
 
-  @Column({ name: "expires_at", type: "timestamptz" })
+  @Column({ type: "timestamptz" })
   expiresAt!: Date;
 
-  @Column({ name: "consumed_at", type: "timestamptz", nullable: true })
+  @Column({ type: "timestamptz", nullable: true })
   consumedAt!: Date | null;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

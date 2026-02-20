@@ -1,28 +1,34 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
 export type CreditPaymentType = "issue" | "repayment" | "accrual";
 
-@Entity({ name: "credit_payments" })
+@Entity()
 export class CreditPayment {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Index()
-  @Column({ name: "credit_id", type: "uuid" })
+  @Column({ type: "uuid" })
   creditId!: string;
 
   @Column({ type: "numeric", precision: 18, scale: 2 })
   amount!: string;
 
-  @Column({ name: "payment_type", type: "text" })
+  @Column({ type: "text" })
   paymentType!: CreditPaymentType;
 
-  @Column({ name: "performed_by", type: "text" })
+  @Column({ type: "text" })
   performedBy!: string;
 
-  @Column({ name: "performed_at", type: "timestamptz" })
+  @Column({ type: "timestamptz" })
   performedAt!: Date;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

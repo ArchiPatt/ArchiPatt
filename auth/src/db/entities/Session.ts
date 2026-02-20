@@ -6,18 +6,18 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-@Entity({ name: "sessions" })
+@Entity()
 export class Session {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Index()
-  @Column({ name: "user_id", type: "uuid" })
+  @Column({ type: "uuid" })
   userId!: string;
 
-  @Column({ name: "expires_at", type: "timestamptz" })
+  @Column({ type: "timestamptz" })
   expiresAt!: Date;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

@@ -40,4 +40,3 @@ export function registerDocsRoutes(app: FastifyInstance) {
 </html>`;
   });
 }
-

@@ -3,13 +3,15 @@ import { env } from "../env";
 
 const jwks = createRemoteJWKSet(new URL(`${env.authIssuer}/jwks`));
 
-export async function verifyBearerToken(authorization?: string): Promise<JWTPayload | null> {
+export async function verifyBearerToken(
+  authorization?: string,
+): Promise<JWTPayload | null> {
   if (!authorization?.startsWith("Bearer ")) return null;
   const token = authorization.slice("Bearer ".length).trim();
   if (!token) return null;
 
   const { payload } = await jwtVerify(token, jwks, {
-    issuer: env.authIssuer
+    issuer: env.authIssuer,
   });
   return payload;
 }

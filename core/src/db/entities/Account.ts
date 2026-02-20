@@ -7,16 +7,16 @@ import {
 } from "typeorm";
 
 @Entity()
-export class User {
+export class Account {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
-  @Index({ unique: true })
-  @Column({ type: "text" })
-  username!: string;
+  @Index()
+  @Column({ type: "uuid" })
+  clientId!: string;
 
-  @Column({ type: "text" })
-  passwordHash!: string;
+  @Column({ type: "numeric", precision: 18, scale: 2, default: "0" })
+  balance!: string;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;

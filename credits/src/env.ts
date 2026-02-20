@@ -25,6 +25,6 @@ export const env = {
     port: num("DB_PORT", 5432),
     user: process.env.DB_USER ?? "postgres",
     password: process.env.DB_PASSWORD ?? "1234",
-    name: process.env.DB_NAME ?? "credits"
-  }
+    name: process.env.DB_NAME ?? "credits",
+  },
 };

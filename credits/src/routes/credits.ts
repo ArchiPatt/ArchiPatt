@@ -52,13 +52,17 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     const payload = await authPayloadOrNull(req);
     if (!payload) return reply.code(401).send({ error: "unauthorized" });
     const repo = app.db.getRepository(CreditTariff);
-    return await repo.find({ where: { isActive: true }, order: { createdAt: "DESC" } });
+    return await repo.find({
+      where: { isActive: true },
+      order: { createdAt: "DESC" },
+    });
   });
 
   app.post<{ Body: CreateTariffBody }>("/tariffs", async (req, reply) => {
     const payload = await authPayloadOrNull(req);
     if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    if (!canManageAll(payload)) return reply.code(403).send({ error: "forbidden" });
+    if (!canManageAll(payload))
+      return reply.code(403).send({ error: "forbidden" });
 
     const name = req.body?.name?.trim();
     const interestRate = req.body?.interestRate;
@@ -80,8 +84,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         name,
         interestRate: interestRate.toFixed(4),
         billingPeriodDays,
-        isActive: true
-      })
+        isActive: true,
+      }),
     );
     return reply.code(201).send(tariff);
   });
@@ -94,7 +98,13 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     const tariffId = req.body?.tariffId;
     const amount = req.body?.amount;
 
-    if (!clientId || !accountId || !tariffId || typeof amount !== "number" || amount <= 0) {
+    if (
+      !clientId ||
+      !accountId ||
+      !tariffId ||
+      typeof amount !== "number" ||
+      amount <= 0
+    ) {
       return reply.code(400).send({ error: "invalid_input" });
     }
     const isOwner = payload?.sub === clientId;
@@ -102,7 +112,9 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     if (!allowed) return reply.code(403).send({ error: "forbidden" });
 
     const tariffRepo = app.db.getRepository(CreditTariff);
-    const tariff = await tariffRepo.findOne({ where: { id: tariffId, isActive: true } });
+    const tariff = await tariffRepo.findOne({
+      where: { id: tariffId, isActive: true },
+    });
     if (!tariff) return reply.code(404).send({ error: "tariff_not_found" });
 
     const creditsRepo = app.db.getRepository(Credit);
@@ -118,8 +130,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         status: "active",
         issuedAt: new Date(),
         nextPaymentDueAt: nowPlusDays(tariff.billingPeriodDays),
-        closedAt: null
-      })
+        closedAt: null,
+      }),
     );
 
     await paymentsRepo.save(
@@ -128,8 +140,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         amount: toMoneyString(amount),
         paymentType: "issue",
         performedBy: String(payload?.sub ?? "unknown"),
-        performedAt: new Date()
-      })
+        performedAt: new Date(),
+      }),
     );
 
     return reply.code(201).send(credit);
@@ -149,7 +161,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     const paymentsRepo = app.db.getRepository(CreditPayment);
     const credit = await creditsRepo.findOne({ where: { id: creditId } });
     if (!credit) return reply.code(404).send({ error: "credit_not_found" });
-    if (credit.status !== "active") return reply.code(400).send({ error: "credit_not_active" });
+    if (credit.status !== "active")
+      return reply.code(400).send({ error: "credit_not_active" });
 
     const isOwner = payload?.sub === credit.clientId;
     const allowed = isEmployee(payload) || isOwner;
@@ -170,15 +183,15 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         amount: toMoneyString(amount),
         paymentType: "repayment",
         performedBy: String(payload?.sub ?? "unknown"),
-        performedAt: new Date()
-      })
+        performedAt: new Date(),
+      }),
     );
 
     return {
       id: credit.id,
       status: credit.status,
       outstandingAmount: credit.outstandingAmount,
-      closedAt: credit.closedAt
+      closedAt: credit.closedAt,
     };
   });
 
@@ -191,7 +204,10 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     if (!allowed) return reply.code(403).send({ error: "forbidden" });
 
     const repo = app.db.getRepository(Credit);
-    return await repo.find({ where: { clientId }, order: { issuedAt: "DESC" } });
+    return await repo.find({
+      where: { clientId },
+      order: { issuedAt: "DESC" },
+    });
   });
 
   app.get("/credits/:id", async (req, reply) => {
@@ -222,6 +238,9 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     if (!allowed) return reply.code(403).send({ error: "forbidden" });
 
     const repo = app.db.getRepository(CreditPayment);
-    return await repo.find({ where: { creditId: id }, order: { performedAt: "DESC" } });
+    return await repo.find({
+      where: { creditId: id },
+      order: { performedAt: "DESC" },
+    });
   });
 }

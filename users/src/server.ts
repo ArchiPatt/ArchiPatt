@@ -19,7 +19,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(formbody);
   await app.register(fastifyStatic, {
     root: path.join(process.cwd(), "node_modules", "swagger-ui-dist"),
-    prefix: "/swagger-static/"
+    prefix: "/swagger-static/",
   });
 
   const ds = await initDataSource();
