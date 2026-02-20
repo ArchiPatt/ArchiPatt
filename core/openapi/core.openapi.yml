@@ -1,0 +1,42 @@
+openapi: 3.0.3
+info:
+  title: Core Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: Core
+paths:
+  /health:
+    get:
+      tags: [Core]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+  /accounts:
+    get:
+      tags: [Core]
+      summary: List accounts (stub)
+      responses:
+        "200":
+          description: OK
+    post:
+      tags: [Core]
+      summary: Create account (stub)
+      responses:
+        "201":
+          description: Created
+  /accounts/{id}:
+    get:
+      tags: [Core]
+      summary: Get account (stub)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
