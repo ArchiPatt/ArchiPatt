@@ -12,3 +12,18 @@ export function canReadAccount(
   if (!payload?.sub) return false;
   return payload.sub === clientId || canManageAll(payload);
 }
+
+export function canCreateAccountFor(
+  payload: JWTPayload | null,
+  clientId: string,
+): boolean {
+  if (!payload?.sub) return false;
+  return payload.sub === clientId || canManageAll(payload);
+}
+
+export function canCloseAccount(
+  payload: JWTPayload | null,
+  clientId: string,
+): boolean {
+  return canReadAccount(payload, clientId);
+}

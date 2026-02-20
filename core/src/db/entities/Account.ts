@@ -18,6 +18,9 @@ export class Account {
   @Column({ type: "numeric", precision: 18, scale: 2, default: "0" })
   balance!: string;
 
+  @Column({ type: "text", default: "open" })
+  status!: "open" | "closed";
+
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }
