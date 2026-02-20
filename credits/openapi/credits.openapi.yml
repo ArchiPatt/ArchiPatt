@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: Credits Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4002
+tags:
+  - name: Credits
+paths:
+  /health:
+    get:
+      tags: [Credits]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+  /tariffs:
+    get:
+      tags: [Credits]
+      summary: Active tariffs
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Tariffs list
+    post:
+      tags: [Credits]
+      summary: Create tariff (employee/admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                interestRate:
+                  type: number
+                billingPeriodDays:
+                  type: integer
+      responses:
+        "201":
+          description: Tariff created
+  /credits/issue:
+    post:
+      tags: [Credits]
+      summary: Issue credit
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                accountId:
+                  type: string
+                tariffId:
+                  type: string
+                amount:
+                  type: number
+      responses:
+        "201":
+          description: Credit created
+  /credits/{id}/repay:
+    post:
+      tags: [Credits]
+      summary: Repay credit
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  type: number
+      responses:
+        "200":
+          description: Credit updated
+  /credits/by-client/{clientId}:
+    get:
+      tags: [Credits]
+      summary: Credits by client
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Credits list
+  /credits/{id}:
+    get:
+      tags: [Credits]
+      summary: Credit details
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Credit
+  /credits/{id}/payments:
+    get:
+      tags: [Credits]
+      summary: Credit payment history
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Payments list
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+

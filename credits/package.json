@@ -1,5 +1,5 @@
 {
-  "name": "users",
+  "name": "credits",
   "private": true,
   "version": "0.1.0",
   "type": "commonjs",
@@ -19,7 +19,6 @@
     "dotenv": "^16.4.7",
     "fastify": "^5.2.1",
     "jose": "^6.1.0",
-    "nanoid": "^5.1.2",
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "swagger-ui-dist": "^5.17.14",
