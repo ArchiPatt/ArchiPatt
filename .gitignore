@@ -1,5 +1,4 @@
-auth/.env
-auth/node_modules
-
-users/.env
-users/node_modules
+.env
+dist
+/data
+node_modules

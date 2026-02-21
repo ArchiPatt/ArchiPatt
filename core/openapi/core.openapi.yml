@@ -1,0 +1,264 @@
+openapi: 3.0.3
+info:
+  title: Core Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4000
+tags:
+  - name: Core
+  - name: Internal
+paths:
+  /health:
+    get:
+      tags: [Core]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+  /accounts:
+    get:
+      tags: [Core]
+      summary: List accounts
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          schema:
+            type: string
+            format: uuid
+          description: Filter by client (employee/admin only)
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+    post:
+      tags: [Core]
+      summary: Create account
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+                  format: uuid
+                  description: Client ID (employee/admin only)
+      responses:
+        "201":
+          description: Created
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+  /accounts/{id}:
+    get:
+      tags: [Core]
+      summary: Get account
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
+  /accounts/{id}/close:
+    post:
+      tags: [Core]
+      summary: Close account
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Account already closed
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
+  /accounts/{id}/deposit:
+    post:
+      tags: [Core]
+      summary: Deposit to account
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  minimum: 0.01
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid amount or account closed
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
+  /accounts/{id}/withdraw:
+    post:
+      tags: [Core]
+      summary: Withdraw from account
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount]
+              properties:
+                amount:
+                  type: number
+                  minimum: 0.01
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Invalid amount, account closed, or insufficient balance
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
+  /accounts/{id}/operations:
+    get:
+      tags: [Core]
+      summary: List account operations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: OK
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
+        "404":
+          description: Account not found
+  /internal/accounts/{id}/operations:
+    post:
+      tags: [Internal]
+      summary: Internal create operation (for integrations)
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [amount, idempotencyKey]
+              properties:
+                amount:
+                  type: number
+                  description: Positive for credit, negative for debit
+                idempotencyKey:
+                  type: string
+                type:
+                  type: string
+                correlationId:
+                  type: string
+                  format: uuid
+                meta:
+                  type: object
+      responses:
+        "201":
+          description: Created
+        "200":
+          description: Idempotent replay, existing operation returned
+        "400":
+          description: Invalid amount, idempotency key required, account closed, or insufficient balance
+        "401":
+          description: Unauthorized internal token
+        "404":
+          description: Account not found
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

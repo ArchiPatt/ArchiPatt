@@ -30,7 +30,7 @@ export const env = {
   port: num("PORT", 4001),
 
   auth: {
-    issuer: must("AUTH_ISSUER")
+    issuer: must("AUTH_ISSUER"),
   },
 
   internalToken: must("INTERNAL_TOKEN"),
@@ -40,14 +40,13 @@ export const env = {
     port: num("DB_PORT", 5432),
     user: process.env.DB_USER ?? "users",
     password: process.env.DB_PASSWORD ?? "users",
-    name: process.env.DB_NAME ?? "users"
+    name: process.env.DB_NAME ?? "users",
   },
 
   seed: {
     adminUsername: process.env.SEED_ADMIN_USERNAME ?? "admin",
     adminRoles: list("SEED_ADMIN_ROLES", ["admin", "employee", "client"]),
     clientUsername: process.env.SEED_CLIENT_USERNAME ?? "client1",
-    clientRoles: list("SEED_CLIENT_ROLES", ["client"])
-  }
+    clientRoles: list("SEED_CLIENT_ROLES", ["client"]),
+  },
 };
-

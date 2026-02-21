@@ -33,7 +33,7 @@ type TokenBody =
 function oauthError(error: string, description?: string) {
   return {
     error,
-    error_description: description
+    error_description: description,
   };
 }
 
@@ -97,7 +97,10 @@ export function registerAuthRoutes(app: FastifyInstance) {
   // Login page
   app.get<{ Querystring: LoginQuery }>("/login", async (req, reply) => {
     const returnTo = req.query.return_to ?? "";
-    const err = typeof req.query.return_to === "string" && req.query.return_to === "error" ? "Ошибка" : null;
+    const err =
+      typeof req.query.return_to === "string" && req.query.return_to === "error"
+        ? "Ошибка"
+        : null;
 
     reply.type("text/html; charset=utf-8");
     return htmlPage(
@@ -119,7 +122,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
             : `<div class="muted">После входа вы будете возвращены на callback URL приложения.</div>`
         }
       </form>
-    `
+    `,
     );
   });
 
@@ -131,14 +134,17 @@ export function registerAuthRoutes(app: FastifyInstance) {
     const normalizedReturnTo = normalizeReturnTo(returnTo);
 
     if (!username || !password || !normalizedReturnTo) {
-      return reply.code(400).type("text/html; charset=utf-8").send(
-        htmlPage(
-          "Вход",
-          `<h2>Вход</h2><div class="error">Проверьте логин, пароль и return_to</div><div class="muted"><a href="/login?return_to=${encodeURIComponent(
-            returnTo
-          )}">Назад</a></div>`
-        )
-      );
+      return reply
+        .code(400)
+        .type("text/html; charset=utf-8")
+        .send(
+          htmlPage(
+            "Вход",
+            `<h2>Вход</h2><div class="error">Проверьте логин, пароль и return_to</div><div class="muted"><a href="/login?return_to=${encodeURIComponent(
+              returnTo,
+            )}">Назад</a></div>`,
+          ),
+        );
     }
 
     const userRepo = app.db.getRepository(User);
@@ -164,7 +170,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
       httpOnly: true,
       sameSite: "lax",
       path: "/",
-      secure: false
+      secure: false,
     });
 
     const codeRepo = app.db.getRepository(AuthorizationCode);
@@ -181,8 +187,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
         codeChallengeMethod: "S256",
         nonce: null,
         expiresAt: authCodeExpiresAt,
-        consumedAt: null
-      })
+        consumedAt: null,
+      }),
     );
     const redirect = new URL(normalizedReturnTo);
     redirect.searchParams.set("code", code);
@@ -195,36 +201,53 @@ export function registerAuthRoutes(app: FastifyInstance) {
 
     if (body.grant_type === "authorization_code") {
       if (!body.code) {
-        return reply.code(400).send(oauthError("invalid_request", "code обязателен"));
+        return reply
+          .code(400)
+          .send(oauthError("invalid_request", "code обязателен"));
       }
 
       const codeRepo = app.db.getRepository(AuthorizationCode);
       const row = await codeRepo.findOne({ where: { code: body.code } });
-      if (!row) return reply.code(400).send(oauthError("invalid_grant", "код не найден"));
-      if (row.consumedAt) return reply.code(400).send(oauthError("invalid_grant", "код уже использован"));
-      if (row.expiresAt.getTime() < Date.now()) return reply.code(400).send(oauthError("invalid_grant", "код истёк"));
+      if (!row)
+        return reply
+          .code(400)
+          .send(oauthError("invalid_grant", "код не найден"));
+      if (row.consumedAt)
+        return reply
+          .code(400)
+          .send(oauthError("invalid_grant", "код уже использован"));
+      if (row.expiresAt.getTime() < Date.now())
+        return reply.code(400).send(oauthError("invalid_grant", "код истёк"));
 
       row.consumedAt = new Date();
       await codeRepo.save(row);
 
       const userRepo = app.db.getRepository(User);
       const user = await userRepo.findOne({ where: { id: row.userId } });
-      if (!user) return reply.code(400).send(oauthError("invalid_grant", "пользователь недоступен"));
+      if (!user)
+        return reply
+          .code(400)
+          .send(oauthError("invalid_grant", "пользователь недоступен"));
 
       const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant", "пользователь недоступен"));
+      if (!profile || profile.isBlocked)
+        return reply
+          .code(400)
+          .send(oauthError("invalid_grant", "пользователь недоступен"));
 
       const scopeStr = row.scopes.join(" ");
       const accessToken = await issueAccessToken({
         sub: profile.id,
         roles: profile.roles,
         scope: scopeStr,
-        aud: "bank-app"
+        aud: "bank-app",
       });
 
       const refreshRepo = app.db.getRepository(RefreshToken);
       const refreshTokenValue = nanoid(48);
-      const refreshExpiresAt = new Date(Date.now() + env.tokens.refreshTtlSeconds * 1000);
+      const refreshExpiresAt = new Date(
+        Date.now() + env.tokens.refreshTtlSeconds * 1000,
+      );
       await refreshRepo.save(
         refreshRepo.create({
           token: refreshTokenValue,
@@ -232,8 +255,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
           username: user.username,
           scopes: row.scopes,
           expiresAt: refreshExpiresAt,
-          revokedAt: null
-        })
+          revokedAt: null,
+        }),
       );
 
       return reply.send({
@@ -241,34 +264,44 @@ export function registerAuthRoutes(app: FastifyInstance) {
         access_token: accessToken,
         expires_in: env.tokens.accessTtlSeconds,
         refresh_token: refreshTokenValue,
-        scope: scopeStr
+        scope: scopeStr,
       });
     }
 
     if (body.grant_type === "refresh_token") {
-      if (!body.refresh_token) return reply.code(400).send(oauthError("invalid_request", "refresh_token обязателен"));
+      if (!body.refresh_token)
+        return reply
+          .code(400)
+          .send(oauthError("invalid_request", "refresh_token обязателен"));
       const refreshRepo = app.db.getRepository(RefreshToken);
-      const row = await refreshRepo.findOne({ where: { token: body.refresh_token } });
+      const row = await refreshRepo.findOne({
+        where: { token: body.refresh_token },
+      });
       if (!row) return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.revokedAt) return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.expiresAt.getTime() < Date.now()) return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.revokedAt)
+        return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.expiresAt.getTime() < Date.now())
+        return reply.code(400).send(oauthError("invalid_grant"));
 
       // Rotate refresh token
       row.revokedAt = new Date();
       await refreshRepo.save(row);
 
       const userRepo = app.db.getRepository(User);
-      const user = await userRepo.findOne({ where: { username: row.username } });
+      const user = await userRepo.findOne({
+        where: { username: row.username },
+      });
       if (!user) return reply.code(400).send(oauthError("invalid_grant"));
       const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant"));
+      if (!profile || profile.isBlocked)
+        return reply.code(400).send(oauthError("invalid_grant"));
 
       const scopeStr = row.scopes.join(" ");
       const accessToken = await issueAccessToken({
         sub: profile.id,
         roles: profile.roles,
         scope: scopeStr,
-        aud: "bank-app"
+        aud: "bank-app",
       });
 
       const newRefresh = nanoid(48);
@@ -279,8 +312,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
           username: user.username,
           scopes: row.scopes,
           expiresAt: new Date(Date.now() + env.tokens.refreshTtlSeconds * 1000),
-          revokedAt: null
-        })
+          revokedAt: null,
+        }),
       );
 
       return reply.send({
@@ -288,7 +321,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
         access_token: accessToken,
         expires_in: env.tokens.accessTtlSeconds,
         refresh_token: newRefresh,
-        scope: scopeStr
+        scope: scopeStr,
       });
     }
 
@@ -304,4 +337,3 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.send({ ok: true });
   });
 }
-

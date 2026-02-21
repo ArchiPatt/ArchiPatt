@@ -1,19 +1,26 @@
 import Fastify, { FastifyInstance } from "fastify";
 import formbody from "@fastify/formbody";
+import fastifyStatic from "@fastify/static";
+import path from "path";
 
 import { env } from "./env";
 import { initDataSource } from "./db/data-source";
 import { seedInitialUsers } from "./bootstrap/seed";
 import { registerUsersRoutes } from "./routes/users";
+import { registerDocsRoutes } from "./routes/docs";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
-      level: env.nodeEnv === "development" ? "info" : "info"
-    }
+      level: env.nodeEnv === "development" ? "info" : "info",
+    },
   });
 
   await app.register(formbody);
+  await app.register(fastifyStatic, {
+    root: path.join(process.cwd(), "node_modules", "swagger-ui-dist"),
+    prefix: "/swagger-static/",
+  });
 
   const ds = await initDataSource();
   await ds.runMigrations();
@@ -21,6 +28,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   app.decorate("db", ds);
 
+  registerDocsRoutes(app);
   registerUsersRoutes(app);
   app.get("/health", async () => ({ ok: true }));
 
@@ -32,4 +40,3 @@ declare module "fastify" {
     db: Awaited<ReturnType<typeof initDataSource>>;
   }
 }
-

@@ -1,0 +1,120 @@
+openapi: 3.0.3
+info:
+  title: Users Service API
+  version: 1.0.0
+servers:
+  - url: http://localhost:4001
+tags:
+  - name: Users
+  - name: Internal
+paths:
+  /health:
+    get:
+      tags: [Users]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+  /me:
+    get:
+      tags: [Users]
+      summary: Current user profile
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: User profile
+        "401":
+          description: Unauthorized
+  /users:
+    get:
+      tags: [Users]
+      summary: List users (employee/admin)
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Users list
+    post:
+      tags: [Users]
+      summary: Create user (employee/admin)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                displayName:
+                  type: string
+                roles:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Created
+  /users/{id}:
+    get:
+      tags: [Users]
+      summary: Get user by id (employee/admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User
+  /users/{id}/block:
+    patch:
+      tags: [Users]
+      summary: Block/unblock user (employee/admin)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                isBlocked:
+                  type: boolean
+      responses:
+        "200":
+          description: Updated
+  /internal/users/by-username/{username}:
+    get:
+      tags: [Internal]
+      summary: Internal lookup for auth service
+      parameters:
+        - in: path
+          name: username
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: User data
+        "401":
+          description: Unauthorized internal token
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

@@ -9,13 +9,15 @@ export type AccessTokenClaims = {
   aud: string;
 };
 
-export async function issueAccessToken(claims: AccessTokenClaims): Promise<string> {
+export async function issueAccessToken(
+  claims: AccessTokenClaims,
+): Promise<string> {
   const now = Math.floor(Date.now() / 1000);
   const privateKey = await getPrivateKey();
 
   return await new SignJWT({
     roles: claims.roles,
-    scope: claims.scope
+    scope: claims.scope,
   })
     .setProtectedHeader({ alg: "RS256", kid: "auth-default", typ: "JWT" })
     .setIssuer(env.issuer)
@@ -48,4 +50,3 @@ export async function issueIdToken(params: {
     .setExpirationTime(now + env.tokens.idTtlSeconds)
     .sign(privateKey);
 }
-

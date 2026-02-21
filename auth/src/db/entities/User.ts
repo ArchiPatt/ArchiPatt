@@ -1,6 +1,12 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
-@Entity({ name: "users" })
+@Entity()
 export class User {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -9,10 +15,9 @@ export class User {
   @Column({ type: "text" })
   username!: string;
 
-  @Column({ name: "password_hash", type: "text" })
+  @Column({ type: "text" })
   passwordHash!: string;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }
-
