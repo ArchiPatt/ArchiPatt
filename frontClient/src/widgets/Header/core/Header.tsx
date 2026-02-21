@@ -1,64 +1,36 @@
-import { useState } from "react";
 import {
     AppShell,
+    Container,
     Group,
-    Burger,
-    Menu,
-    Avatar,
-    Text,
-    UnstyledButton,
-} from "@mantine/core";
-import { IconLogout } from "@tabler/icons-react";
+    Text
+} from '@mantine/core';
+import { IconBuildingBank } from '@tabler/icons-react';
+import { Navbar } from "../../Navbar";
 
-function Header() {
-    const [opened, setOpened] = useState(false);
-
+const Header = ({ children }: { children: React.ReactNode }) => {
     return (
-        <AppShell
-            header={{ height: 60 }}
-            padding="md"
-        >
-            <AppShell.Header
-                style={{
-                    backgroundColor: "#0072CE",
-                    borderBottom: "1px solid #005FA3",
-                }}
-            >
-                <Group h="100%" px="md" justify="space-between">
-                    <Menu shadow="md" width={180}>
-                        <Menu.Target>
-                            <Burger
-                                opened={opened}
-                                onClick={() => setOpened((o) => !o)}
-                                size="sm"
-                                color="white"
-                            />
-                        </Menu.Target>
-
-                        <Menu.Dropdown>
-                            <Menu.Item
-                                leftSection={<IconLogout size={16} />}
-                                color="red"
-                            >
-                                Выйти
-                            </Menu.Item>
-                        </Menu.Dropdown>
-                    </Menu>
-
-                    <UnstyledButton>
-                        <Group gap="sm">
-                            <Text c="white" fw={500}>
-                                Имя
+        <AppShell header={{ height: 80 }}>
+            <AppShell.Header>
+                <Container size="lg" h="100%">
+                    <Group h="100%" justify="space-between">
+                        <Group
+                            // component={Link}
+                            to="/"
+                            gap="xs"
+                            style={{ textDecoration: 'none' }}
+                        >
+                            <IconBuildingBank size={28} />
+                            <Text fw={700} size="lg">
+                                БанкПро
                             </Text>
-                            <Avatar radius="xl" color="white">
-                                ИМ
-                            </Avatar>
                         </Group>
-                    </UnstyledButton>
-                </Group>
+                        <Navbar/>
+                    </Group>
+                </Container>
             </AppShell.Header>
 
             <AppShell.Main>
+                {children}
             </AppShell.Main>
         </AppShell>
     );

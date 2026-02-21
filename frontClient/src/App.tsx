@@ -1,13 +1,11 @@
-import {apiBuilder} from "./api/apiBuilder.ts";
-import {MainPage} from "./pages/MainPage";
 import {MantineProvider} from "@mantine/core";
-import {Header} from "./widgets/Header";
+import {MainPage} from "./pages/MainPage";
 
 function App() {
 
   return (
-      <MantineProvider withGlobalStyles withNormalizeCSS>
-       <Header/>
+      <MantineProvider>
+          <MainPage/>
       </MantineProvider>
   )
 }
