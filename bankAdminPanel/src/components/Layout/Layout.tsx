@@ -10,9 +10,11 @@ import {
    useMantineColorScheme
 } from '@mantine/core'
 import { Outlet, useLocation, Link } from 'react-router-dom'
-import { useUser } from '../../hooks/useUser'
-import { useLogout } from '../../hooks/useLogout'
+import { useUserQuery } from '../../hooks/useUserQuery'
+import { useLogoutMutation } from '../../hooks/useLogoutMutation'
 import classes from './Layout.module.css'
+import { useEffect } from 'react'
+import type { AxiosError } from 'axios'
 
 const PROJECT_NAME = 'Панель управления банком'
 
@@ -24,12 +26,19 @@ const NAV_ITEMS = [
 
 export const Layout = () => {
    const { pathname } = useLocation()
-   const { data: user } = useUser()
-   const logout = useLogout()
+   const user = useUserQuery()
+   const logout = useLogoutMutation()
    const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
-   const displayName =
-      user?.displayName ?? user?.username ?? 'Пользователь'
+   const displayName = user.data?.data?.displayName ?? user.data?.data?.username ?? 'Пользователь'
+
+   useEffect(() => {
+      const status = (user.error as AxiosError | null)?.response?.status || 200
+      console.log(status, user.data, user.error, user.error?.name)
+      if (user.isError) {
+         window.location.replace('http://localhost:4000/login?return_to=http://localhost:5173/')
+      }
+   }, [user.error])
 
    return (
       <AppShell header={{ height: 64 }} padding="md">

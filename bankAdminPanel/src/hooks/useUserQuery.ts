@@ -6,12 +6,9 @@ export type Me = {
    username?: string
 }
 
-export const useUser = () => {
+export const useUserQuery = () => {
    return useQuery({
       queryKey: ['me'],
-      queryFn: async () => {
-         const { data } = await getMe()
-         return data as Me
-      }
+      queryFn: () => getMe()
    })
 }

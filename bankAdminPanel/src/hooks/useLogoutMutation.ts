@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import Cookies from 'js-cookie'
 import { postLogout } from '../../generated/api/auth'
 
-export const useLogout = () => {
+export const useLogoutMutation = () => {
    const queryClient = useQueryClient()
 
    return useMutation({
