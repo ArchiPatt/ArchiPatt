@@ -1,5 +1,6 @@
 import Fastify, { FastifyInstance } from "fastify";
 import proxy from "@fastify/http-proxy";
+import cors from "@fastify/cors";
 import path from "path";
 import { readFile } from "fs/promises";
 import { env } from "./env";
@@ -14,6 +15,11 @@ export async function buildApp(): Promise<FastifyInstance> {
     logger: {
       level: env.nodeEnv === "development" ? "info" : "info"
     }
+  });
+
+  await app.register(cors, {
+    origin: true,
+    credentials: true
   });
 
   app.get("/health", async () => ({ ok: true }));
