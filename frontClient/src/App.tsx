@@ -4,9 +4,7 @@ import {MainPage} from "./pages/MainPage";
 function App() {
 
   return (
-      <MantineProvider>
-          <MainPage/>
-      </MantineProvider>
+      <MainPage/>
   )
 }
 

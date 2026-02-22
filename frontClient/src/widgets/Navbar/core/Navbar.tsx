@@ -11,35 +11,40 @@ import {
 } from '@tabler/icons-react';
 import Divider = Menu.Divider;
 
+import { Link } from "react-router-dom"
+
+import {LINK_PATHS} from "../../../shared/static/LINK_PATHS.ts";
+
 const Navbar = () => {
 
     return (
         <Group gap="md">
+            <Link to={LINK_PATHS.MAIN}>
+                <Button
+                    variant="subtle"
+                >
+                    Мои счета
+                </Button>
+            </Link>
 
-            <Button
-                // component={Link}
-                to="/"
-                variant="subtle"
-            >
-                Мои счета
-            </Button>
+            <Link to={LINK_PATHS.OPEN_ACCOUNT}>
+                <Button
+                    variant="outline"
+                    leftSection={<IconPlus size={16} />}
+                >
+                    Открыть счет
+                </Button>
+            </Link>
 
-            <Button
-                // component={Link}
-                to="/open-account"
-                variant="outline"
-                leftSection={<IconPlus size={16} />}
+            <Link
+                to={LINK_PATHS.OPEN_CREDIT}
             >
-                Открыть счет
-            </Button>
-
-            <Button
-                // component={Link}
-                to="/take-credit"
-                leftSection={<IconCreditCard size={16} />}
-            >
-                Оформить кредит
-            </Button>
+                <Button
+                    leftSection={<IconCreditCard size={16} />}
+                >
+                    Оформить кредит
+                </Button>
+            </Link>
 
             <Menu width={220} position="bottom-end" shadow="md">
                 <Menu.Target>
@@ -62,12 +67,13 @@ const Navbar = () => {
 
                     <Divider my="xs" />
 
-                    <Menu.Item
-                        to="/profile"
-                        leftSection={<IconUser size={14} />}
-                    >
-                        Мой профиль
-                    </Menu.Item>
+                    <Link to={LINK_PATHS.PROFILE}>
+                        <Menu.Item
+                            leftSection={<IconUser size={14} />}
+                        >
+                            Мой профиль
+                        </Menu.Item>
+                    </Link>
 
                     <Divider my="xs" />
 
