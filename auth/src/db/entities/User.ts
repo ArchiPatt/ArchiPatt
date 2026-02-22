@@ -15,8 +15,8 @@ export class User {
   @Column({ type: "text" })
   username!: string;
 
-  @Column({ type: "text" })
-  passwordHash!: string;
+  @Column({ name: "password_hash", type: "text", nullable: true })
+  passwordHash!: string | null;
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
