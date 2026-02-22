@@ -1,11 +1,15 @@
-import { MantineProvider } from '@mantine/core';
-import { Notifications } from '@mantine/notifications';
+import { MantineProvider } from '@mantine/core'
+import { Notifications } from '@mantine/notifications'
+import { queryClient } from '../../consts/queryClient'
+import { QueryClientProvider } from '@tanstack/react-query'
 
 export const Providers = ({ children }: { children: React.ReactNode }) => {
-  return (
-    <MantineProvider>
-        {children}
-      <Notifications />
-    </MantineProvider>
-  );
-};
+   return (
+      <QueryClientProvider client={queryClient}>
+         <MantineProvider>
+            {children}
+            <Notifications />
+         </MantineProvider>
+      </QueryClientProvider>
+   )
+}
