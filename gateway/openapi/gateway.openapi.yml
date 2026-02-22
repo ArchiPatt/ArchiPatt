@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: Gateway API
+  version: 1.0.0
+  description: |
+    Единая точка входа в систему.
+    Gateway проксирует запросы в auth/users/credits.
+    Ввод пароля допускается только на страницах auth.
+servers:
+  - url: http://localhost:4004
+tags:
+  - name: Gateway
+  - name: Auth
+  - name: Users
+  - name: Credits
+  - name: Core
+paths:
+  /health:
+    get:
+      tags: [Gateway]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+  /swagger:
+    get:
+      tags: [Gateway]
+      summary: Swagger UI for gateway
+      responses:
+        "200":
+          description: HTML page
+  /swagger.yml:
+    get:
+      tags: [Gateway]
+      summary: OpenAPI YAML for gateway
+      responses:
+        "200":
+          description: YAML spec
+
+  /login:
+    get:
+      tags: [Auth]
+      summary: Redirect to auth login page
+      responses:
+        "302":
+          description: Redirect to auth
+    post:
+      tags: [Auth]
+      summary: Disabled on gateway (password only on auth page)
+      responses:
+        "400":
+          description: login_via_auth_only
+
+  /setup-password:
+    get:
+      tags: [Auth]
+      summary: Redirect to auth password setup page
+      responses:
+        "302":
+          description: Redirect to auth
+    post:
+      tags: [Auth]
+      summary: Disabled on gateway (password only on auth page)
+      responses:
+        "400":
+          description: password_setup_via_auth_only
+
+  /token:
+    post:
+      tags: [Auth]
+      summary: Proxied to auth /token
+      responses:
+        "200":
+          description: Proxied response from auth
+  /logout:
+    post:
+      tags: [Auth]
+      summary: Proxied to auth /logout
+      responses:
+        "200":
+          description: Proxied response from auth
+  /jwks:
+    get:
+      tags: [Auth]
+      summary: Proxied to auth /jwks
+      responses:
+        "200":
+          description: Proxied response from auth
+
+  /me:
+    get:
+      tags: [Users]
+      summary: Proxied to users /me
+      responses:
+        "200":
+          description: Proxied response from users
+  /users:
+    get:
+      tags: [Users]
+      summary: Proxied to users /users
+      responses:
+        "200":
+          description: Proxied response from users
+    post:
+      tags: [Users]
+      summary: Proxied to users /users
+      responses:
+        "201":
+          description: Proxied response from users
+
+  /credits:
+    get:
+      tags: [Credits]
+      summary: Prefix proxied to credits service
+      responses:
+        "200":
+          description: Proxied response from credits
+  /tariffs:
+    get:
+      tags: [Credits]
+      summary: Proxied to credits /tariffs
+      responses:
+        "200":
+          description: Proxied response from credits
+    post:
+      tags: [Credits]
+      summary: Proxied to credits /tariffs
+      responses:
+        "201":
+          description: Proxied response from credits
+
+  /accounts:
+    get:
+      tags: [Core]
+      summary: Proxied to core /accounts
+      responses:
+        "200":
+          description: Proxied response from core
+    post:
+      tags: [Core]
+      summary: Proxied to core /accounts
+      responses:
+        "201":
+          description: Proxied response from core
