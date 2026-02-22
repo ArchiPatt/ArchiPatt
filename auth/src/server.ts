@@ -2,6 +2,7 @@ import Fastify, { FastifyInstance } from "fastify";
 import cookie from "@fastify/cookie";
 import formbody from "@fastify/formbody";
 import fastifyStatic from "@fastify/static";
+import cors from "@fastify/cors";
 import path from "path";
 
 import { env } from "./env";
@@ -19,6 +20,10 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await app.register(cookie, {
     hook: "onRequest",
+  });
+  await app.register(cors, {
+    origin: true,
+    credentials: true,
   });
   await app.register(formbody);
   await app.register(fastifyStatic, {
