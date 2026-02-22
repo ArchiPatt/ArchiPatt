@@ -1,6 +1,6 @@
 import { FastifyInstance } from "fastify";
 import { env } from "../env";
-import { accrueDueCredits } from "../services/credits";
+import { accrueDueCredits } from "../routes/credits";
 
 export function startAccrualWorker(app: FastifyInstance): () => void {
   if (!env.accrualWorker.enabled) {
