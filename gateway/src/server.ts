@@ -85,37 +85,45 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   await app.register(proxy, {
     upstream: env.authServiceUrl,
-    prefix: "/token"
+    prefix: "/token",
+    rewritePrefix: "/token"
   });
   await app.register(proxy, {
     upstream: env.authServiceUrl,
-    prefix: "/logout"
+    prefix: "/logout",
+    rewritePrefix: "/logout"
   });
   await app.register(proxy, {
     upstream: env.authServiceUrl,
-    prefix: "/jwks"
+    prefix: "/jwks",
+    rewritePrefix: "/jwks"
   });
 
   await app.register(proxy, {
     upstream: env.usersServiceUrl,
-    prefix: "/users"
+    prefix: "/users",
+    rewritePrefix: "/users"
   });
   await app.register(proxy, {
     upstream: env.usersServiceUrl,
-    prefix: "/me"
+    prefix: "/me",
+    rewritePrefix: "/me"
   });
 
   await app.register(proxy, {
     upstream: env.creditsServiceUrl,
-    prefix: "/credits"
+    prefix: "/credits",
+    rewritePrefix: "/credits"
   });
   await app.register(proxy, {
     upstream: env.creditsServiceUrl,
-    prefix: "/tariffs"
+    prefix: "/tariffs",
+    rewritePrefix: "/tariffs"
   });
   await app.register(proxy, {
     upstream: env.coreServiceUrl,
-    prefix: "/accounts"
+    prefix: "/accounts",
+    rewritePrefix: "/accounts"
   });
 
   return app;
