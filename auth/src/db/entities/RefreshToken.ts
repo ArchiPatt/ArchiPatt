@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-@Entity({ name: "refresh_tokens" })
+@Entity()
 export class RefreshToken {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -16,22 +16,22 @@ export class RefreshToken {
   token!: string;
 
   @Index()
-  @Column({ name: "client_id", type: "text" })
+  @Column({ type: "text" })
   clientId!: string;
 
   @Index()
-  @Column({ name: "username", type: "text" })
+  @Column({ type: "text" })
   username!: string;
 
   @Column({ type: "text", array: true })
   scopes!: string[];
 
-  @Column({ name: "expires_at", type: "timestamptz" })
+  @Column({ type: "timestamptz" })
   expiresAt!: Date;
 
-  @Column({ name: "revoked_at", type: "timestamptz", nullable: true })
+  @Column({ type: "timestamptz", nullable: true })
   revokedAt!: Date | null;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

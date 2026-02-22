@@ -6,7 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-@Entity({ name: "users" })
+@Entity()
 export class User {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -18,6 +18,6 @@ export class User {
   @Column({ name: "password_hash", type: "text", nullable: true })
   passwordHash!: string | null;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

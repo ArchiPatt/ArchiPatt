@@ -2,12 +2,10 @@ import Fastify, { FastifyInstance } from "fastify";
 import formbody from "@fastify/formbody";
 import fastifyStatic from "@fastify/static";
 import path from "path";
-
 import { env } from "./env";
 import { initDataSource } from "./db/data-source";
-import { seedInitialUsers } from "./bootstrap/seed";
-import { registerUsersRoutes } from "./routes/users";
 import { registerDocsRoutes } from "./routes/docs";
+import { registerAccountsRoutes } from "./routes/accounts";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -23,13 +21,10 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   const ds = await initDataSource();
-  await ds.runMigrations();
-  await seedInitialUsers(ds);
-
   app.decorate("db", ds);
 
   registerDocsRoutes(app);
-  registerUsersRoutes(app);
+  registerAccountsRoutes(app);
   app.get("/health", async () => ({ ok: true }));
 
   return app;

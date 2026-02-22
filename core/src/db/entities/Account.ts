@@ -7,16 +7,19 @@ import {
 } from "typeorm";
 
 @Entity()
-export class Session {
+export class Account {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Index()
   @Column({ type: "uuid" })
-  userId!: string;
+  clientId!: string;
 
-  @Column({ type: "timestamptz" })
-  expiresAt!: Date;
+  @Column({ type: "numeric", precision: 18, scale: 2, default: "0" })
+  balance!: string;
+
+  @Column({ type: "text", default: "open" })
+  status!: "open" | "closed";
 
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;

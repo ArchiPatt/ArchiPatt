@@ -1,6 +1,12 @@
-import { Column, CreateDateColumn, Entity, Index, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  Index,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 
-@Entity({ name: "credit_tariffs" })
+@Entity()
 export class CreditTariff {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
@@ -9,15 +15,15 @@ export class CreditTariff {
   @Column({ type: "text" })
   name!: string;
 
-  @Column({ name: "interest_rate", type: "numeric", precision: 10, scale: 4 })
+  @Column({ type: "numeric", precision: 10, scale: 4 })
   interestRate!: string;
 
-  @Column({ name: "billing_period_days", type: "integer", default: 1 })
+  @Column({ type: "integer", default: 1 })
   billingPeriodDays!: number;
 
-  @Column({ name: "is_active", type: "boolean", default: true })
+  @Column({ type: "boolean", default: true })
   isActive!: boolean;
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

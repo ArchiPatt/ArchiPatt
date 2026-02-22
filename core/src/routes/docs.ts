@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 
 export function registerDocsRoutes(app: FastifyInstance) {
   app.get("/swagger.yml", async (_req, reply) => {
-    const filePath = path.join(process.cwd(), "openapi", "credits.openapi.yml");
+    const filePath = path.join(process.cwd(), "openapi", "core.openapi.yml");
     const yml = await readFile(filePath, "utf-8");
     reply.type("application/yaml; charset=utf-8");
     return yml;
@@ -17,7 +17,7 @@ export function registerDocsRoutes(app: FastifyInstance) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Credits Swagger</title>
+    <title>Core Swagger</title>
     <link rel="stylesheet" href="/swagger-static/swagger-ui.css" />
     <style>
       body { margin: 0; background: #fff0f6; }

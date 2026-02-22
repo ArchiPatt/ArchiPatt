@@ -18,21 +18,14 @@ function num(name: string, fallback: number): number {
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
-  port: num("PORT", 4002),
+  port: num("PORT", 4000),
   authIssuer: must("AUTH_ISSUER"),
-  coreService: {
-    baseUrl: process.env.CORE_SERVICE_URL ?? "http://localhost:4003",
-    internalToken: process.env.CORE_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? ""
-  },
-  accrualWorker: {
-    enabled: (process.env.ACCRUAL_WORKER_ENABLED ?? "true").toLowerCase() !== "false",
-    intervalSeconds: num("ACCRUAL_WORKER_INTERVAL_SECONDS", 60)
-  },
+  internalToken: must("INTERNAL_TOKEN"),
   db: {
     host: process.env.DB_HOST ?? "localhost",
     port: num("DB_PORT", 5432),
-    user: process.env.DB_USER ?? "postgres",
-    password: process.env.DB_PASSWORD ?? "1234",
-    name: process.env.DB_NAME ?? "credits",
+    user: process.env.DB_USER ?? "core",
+    password: process.env.DB_PASSWORD ?? "core",
+    name: process.env.DB_NAME ?? "core",
   },
 };

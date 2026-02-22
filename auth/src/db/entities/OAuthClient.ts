@@ -6,24 +6,24 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 
-@Entity({ name: "oauth_clients" })
+@Entity()
 export class OAuthClient {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
   @Index({ unique: true })
-  @Column({ name: "client_id", type: "text" })
+  @Column({ type: "text" })
   clientId!: string;
 
-  @Column({ name: "client_secret_hash", type: "text", nullable: true })
+  @Column({ type: "text", nullable: true })
   clientSecretHash!: string | null;
 
-  @Column({ name: "redirect_uris", type: "text", array: true })
+  @Column({ type: "text", array: true })
   redirectUris!: string[];
 
-  @Column({ name: "allowed_scopes", type: "text", array: true })
+  @Column({ type: "text", array: true })
   allowedScopes!: string[];
 
-  @CreateDateColumn({ name: "created_at", type: "timestamptz" })
+  @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }
