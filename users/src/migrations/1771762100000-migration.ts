@@ -50,6 +50,19 @@ export class Migration1771762100000 implements MigrationInterface {
         false
       ]
     );
+
+    await queryRunner.query(
+      `INSERT INTO "${tableName}" ("id", "username", "${displayNameCol}", "roles", "${isBlockedCol}")
+       SELECT $1, $2, $3, $4::text[], $5
+       WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
+      [
+        "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        "qa_client2",
+        "QA Client 2",
+        ["client"],
+        false
+      ]
+    );
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
@@ -61,8 +74,8 @@ export class Migration1771762100000 implements MigrationInterface {
     if (!tableName) return;
 
     await queryRunner.query(
-      `DELETE FROM "${tableName}" WHERE "username" IN ($1, $2)`,
-      ["qa_employee", "qa_client"]
+      `DELETE FROM "${tableName}" WHERE "username" IN ($1, $2, $3)`,
+      ["qa_employee", "qa_client", "qa_client2"]
     );
   }
 }
