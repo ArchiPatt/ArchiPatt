@@ -55,6 +55,7 @@ paths:
                   type: array
                   items:
                     type: string
+              required: [username, roles]
       responses:
         "201":
           description: Created

@@ -1,6 +1,7 @@
 import { FastifyInstance } from "fastify";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
+import { IsNull } from "typeorm";
 
 import { env } from "../env";
 import { User } from "../db/entities/User";
@@ -10,25 +11,29 @@ import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 
-type LoginQuery = {
-  return_to?: string;
-};
-
 type LoginBody = {
   username?: string;
   password?: string;
-  return_to?: string;
 };
 
-type TokenBody =
-  | {
-      grant_type: "authorization_code";
-      code?: string;
-    }
-  | {
-      grant_type: "refresh_token";
-      refresh_token?: string;
-    };
+type TokenBody = {
+  grant_type: "refresh_token";
+  refresh_token?: string;
+};
+
+type InternalCreateUserBody = {
+  username?: string;
+};
+
+type SetupPasswordQuery = {
+  token?: string;
+};
+
+type SetupPasswordBody = {
+  token?: string;
+  password?: string;
+  passwordRepeat?: string;
+};
 
 function oauthError(error: string, description?: string) {
   return {
@@ -83,32 +88,55 @@ function escapeHtml(s: string) {
   });
 }
 
-function normalizeReturnTo(returnTo: string): string | null {
-  try {
-    const url = new URL(returnTo);
-    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
-    return url.toString();
-  } catch {
-    return null;
-  }
+async function issueTokensForProfile(
+  app: FastifyInstance,
+  username: string,
+  profile: { id: string; roles: string[] },
+  scopes: string[] = ["openid", "profile", "roles"],
+) {
+  const scopeStr = scopes.join(" ");
+  const accessToken = await issueAccessToken({
+    sub: profile.id,
+    roles: profile.roles,
+    scope: scopeStr,
+    aud: "bank-app",
+  });
+
+  const refreshRepo = app.db.getRepository(RefreshToken);
+  const refreshTokenValue = nanoid(48);
+  const refreshExpiresAt = new Date(
+    Date.now() + env.tokens.refreshTtlSeconds * 1000,
+  );
+
+  await refreshRepo.save(
+    refreshRepo.create({
+      token: refreshTokenValue,
+      clientId: "frontend",
+      username,
+      scopes,
+      expiresAt: refreshExpiresAt,
+      revokedAt: null,
+    }),
+  );
+
+  return {
+    token_type: "Bearer" as const,
+    access_token: accessToken,
+    expires_in: env.tokens.accessTtlSeconds,
+    refresh_token: refreshTokenValue,
+    scope: scopeStr,
+  };
 }
 
 export function registerAuthRoutes(app: FastifyInstance) {
   // Login page
-  app.get<{ Querystring: LoginQuery }>("/login", async (req, reply) => {
-    const returnTo = req.query.return_to ?? "";
-    const err =
-      typeof req.query.return_to === "string" && req.query.return_to === "error"
-        ? "Ошибка"
-        : null;
-
+  app.get("/login", async (_req, reply) => {
     reply.type("text/html; charset=utf-8");
     return htmlPage(
       "Вход",
       `
       <h2>Вход</h2>
       <form method="post" action="/login">
-        <input type="hidden" name="return_to" value="${escapeHtml(returnTo)}" />
         <label>Логин
           <input name="username" autocomplete="username" />
         </label>
@@ -116,11 +144,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
           <input name="password" type="password" autocomplete="current-password" />
         </label>
         <button type="submit">Войти</button>
-        ${
-          err
-            ? `<div class="error">${escapeHtml(err)}</div>`
-            : `<div class="muted">После входа вы будете возвращены на callback URL приложения.</div>`
-        }
+        <div class="muted">После входа сервис сразу вернет access/refresh токены.</div>
       </form>
     `,
     );
@@ -130,35 +154,47 @@ export function registerAuthRoutes(app: FastifyInstance) {
   app.post<{ Body: LoginBody }>("/login", async (req, reply) => {
     const username = req.body?.username?.trim();
     const password = req.body?.password ?? "";
-    const returnTo = req.body?.return_to ?? "";
-    const normalizedReturnTo = normalizeReturnTo(returnTo);
 
-    if (!username || !password || !normalizedReturnTo) {
+    if (!username || !password) {
       return reply
         .code(400)
-        .type("text/html; charset=utf-8")
-        .send(
-          htmlPage(
-            "Вход",
-            `<h2>Вход</h2><div class="error">Проверьте логин, пароль и return_to</div><div class="muted"><a href="/login?return_to=${encodeURIComponent(
-              returnTo,
-            )}">Назад</a></div>`,
-          ),
-        );
+        .send({ error: "username_and_password_required" });
     }
 
     const userRepo = app.db.getRepository(User);
     const user = await userRepo.findOne({ where: { username } });
     if (!user) {
-      return reply.redirect(`/login?return_to=${encodeURIComponent(returnTo)}`);
+      return reply.code(401).send({ error: "invalid_credentials" });
     }
+    if (!user.passwordHash) {
+      const setupToken = await app.db.getRepository(AuthorizationCode).findOne({
+        where: {
+          userId: user.id,
+          clientId: "password-setup",
+          consumedAt: IsNull()
+        },
+        order: { createdAt: "DESC" }
+      });
+      if (setupToken && setupToken.expiresAt.getTime() >= Date.now()) {
+        return reply.code(403).send({
+          error: "password_setup_required",
+          message: "сначала подтвердите пароль",
+          setupUrl: `${env.issuer}/setup-password?token=${encodeURIComponent(setupToken.code)}`
+        });
+      }
+      return reply.code(403).send({
+        error: "password_setup_required",
+        message: "сначала подтвердите пароль"
+      });
+    }
+
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      return reply.redirect(`/login?return_to=${encodeURIComponent(returnTo)}`);
+      return reply.code(401).send({ error: "invalid_credentials" });
     }
     const profile = await fetchUserProfileByUsername(user.username);
     if (!profile || profile.isBlocked) {
-      return reply.redirect(`/login?return_to=${encodeURIComponent(returnTo)}`);
+      return reply.code(403).send({ error: "user_blocked_or_not_found" });
     }
 
     const sessRepo = app.db.getRepository(Session);
@@ -173,100 +209,16 @@ export function registerAuthRoutes(app: FastifyInstance) {
       secure: false,
     });
 
-    const codeRepo = app.db.getRepository(AuthorizationCode);
-    const code = nanoid(32);
-    const authCodeExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
-    await codeRepo.save(
-      codeRepo.create({
-        code,
-        clientId: "frontend",
-        userId: user.id,
-        redirectUri: normalizedReturnTo,
-        scopes: ["openid", "profile", "roles"],
-        codeChallenge: "simple-login-flow",
-        codeChallengeMethod: "S256",
-        nonce: null,
-        expiresAt: authCodeExpiresAt,
-        consumedAt: null,
-      }),
-    );
-    const redirect = new URL(normalizedReturnTo);
-    redirect.searchParams.set("code", code);
-    return reply.redirect(redirect.toString());
+    const tokens = await issueTokensForProfile(app, user.username, {
+      id: profile.id,
+      roles: profile.roles,
+    });
+    return reply.send(tokens);
   });
 
-  // Token endpoint (simple auth code + refresh)
+  // Token endpoint (refresh only)
   app.post<{ Body: TokenBody }>("/token", async (req, reply) => {
     const body = req.body as TokenBody;
-
-    if (body.grant_type === "authorization_code") {
-      if (!body.code) {
-        return reply
-          .code(400)
-          .send(oauthError("invalid_request", "code обязателен"));
-      }
-
-      const codeRepo = app.db.getRepository(AuthorizationCode);
-      const row = await codeRepo.findOne({ where: { code: body.code } });
-      if (!row)
-        return reply
-          .code(400)
-          .send(oauthError("invalid_grant", "код не найден"));
-      if (row.consumedAt)
-        return reply
-          .code(400)
-          .send(oauthError("invalid_grant", "код уже использован"));
-      if (row.expiresAt.getTime() < Date.now())
-        return reply.code(400).send(oauthError("invalid_grant", "код истёк"));
-
-      row.consumedAt = new Date();
-      await codeRepo.save(row);
-
-      const userRepo = app.db.getRepository(User);
-      const user = await userRepo.findOne({ where: { id: row.userId } });
-      if (!user)
-        return reply
-          .code(400)
-          .send(oauthError("invalid_grant", "пользователь недоступен"));
-
-      const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked)
-        return reply
-          .code(400)
-          .send(oauthError("invalid_grant", "пользователь недоступен"));
-
-      const scopeStr = row.scopes.join(" ");
-      const accessToken = await issueAccessToken({
-        sub: profile.id,
-        roles: profile.roles,
-        scope: scopeStr,
-        aud: "bank-app",
-      });
-
-      const refreshRepo = app.db.getRepository(RefreshToken);
-      const refreshTokenValue = nanoid(48);
-      const refreshExpiresAt = new Date(
-        Date.now() + env.tokens.refreshTtlSeconds * 1000,
-      );
-      await refreshRepo.save(
-        refreshRepo.create({
-          token: refreshTokenValue,
-          clientId: "frontend",
-          username: user.username,
-          scopes: row.scopes,
-          expiresAt: refreshExpiresAt,
-          revokedAt: null,
-        }),
-      );
-
-      return reply.send({
-        token_type: "Bearer",
-        access_token: accessToken,
-        expires_in: env.tokens.accessTtlSeconds,
-        refresh_token: refreshTokenValue,
-        scope: scopeStr,
-      });
-    }
 
     if (body.grant_type === "refresh_token") {
       if (!body.refresh_token)
@@ -296,36 +248,135 @@ export function registerAuthRoutes(app: FastifyInstance) {
       if (!profile || profile.isBlocked)
         return reply.code(400).send(oauthError("invalid_grant"));
 
-      const scopeStr = row.scopes.join(" ");
-      const accessToken = await issueAccessToken({
-        sub: profile.id,
-        roles: profile.roles,
-        scope: scopeStr,
-        aud: "bank-app",
-      });
-
-      const newRefresh = nanoid(48);
-      await refreshRepo.save(
-        refreshRepo.create({
-          token: newRefresh,
-          clientId: "frontend",
-          username: user.username,
-          scopes: row.scopes,
-          expiresAt: new Date(Date.now() + env.tokens.refreshTtlSeconds * 1000),
-          revokedAt: null,
-        }),
+      const tokenPayload = await issueTokensForProfile(
+        app,
+        user.username,
+        { id: profile.id, roles: profile.roles },
+        row.scopes,
       );
-
-      return reply.send({
-        token_type: "Bearer",
-        access_token: accessToken,
-        expires_in: env.tokens.accessTtlSeconds,
-        refresh_token: newRefresh,
-        scope: scopeStr,
-      });
+      return reply.send(tokenPayload);
     }
 
     return reply.code(400).send(oauthError("unsupported_grant_type"));
+  });
+
+  app.post<{ Body: InternalCreateUserBody }>("/internal/users", async (req, reply) => {
+    if (!env.internalToken || req.headers["x-internal-token"] !== env.internalToken) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+
+    const username = req.body?.username?.trim();
+    if (!username) {
+      return reply.code(400).send({ error: "invalid_input" });
+    }
+
+    const userRepo = app.db.getRepository(User);
+    const exists = await userRepo.findOne({ where: { username } });
+    if (exists) {
+      return reply.code(409).send({ error: "username_exists" });
+    }
+
+    const user = await userRepo.save(
+      userRepo.create({
+        username,
+        passwordHash: null
+      })
+    );
+
+    const codeRepo = app.db.getRepository(AuthorizationCode);
+    const setupToken = nanoid(48);
+    await codeRepo.save(
+      codeRepo.create({
+        code: setupToken,
+        clientId: "password-setup",
+        userId: user.id,
+        redirectUri: "",
+        scopes: [],
+        codeChallenge: "password-setup",
+        codeChallengeMethod: "S256",
+        nonce: null,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        consumedAt: null
+      })
+    );
+
+    return reply.code(201).send({
+      id: user.id,
+      username: user.username,
+      setupUrl: `${env.issuer}/setup-password?token=${encodeURIComponent(setupToken)}`
+    });
+  });
+
+  app.get<{ Querystring: SetupPasswordQuery }>("/setup-password", async (req, reply) => {
+    const token = req.query?.token?.trim();
+    if (!token) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Токен обязателен</div>`)
+      );
+    }
+
+    const row = await app.db.getRepository(AuthorizationCode).findOne({ where: { code: token } });
+    if (!row || row.clientId !== "password-setup" || row.consumedAt || row.expiresAt.getTime() < Date.now()) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Токен недействителен или истёк</div>`)
+      );
+    }
+
+    return reply.type("text/html; charset=utf-8").send(
+      htmlPage(
+        "Установка пароля",
+        `
+        <h2>Установка пароля</h2>
+        <form method="post" action="/setup-password">
+          <input type="hidden" name="token" value="${escapeHtml(token)}" />
+          <label>Новый пароль
+            <input name="password" type="password" autocomplete="new-password" />
+          </label>
+          <label>Повторите пароль
+            <input name="passwordRepeat" type="password" autocomplete="new-password" />
+          </label>
+          <button type="submit">Сохранить пароль</button>
+        </form>
+      `
+      )
+    );
+  });
+
+  app.post<{ Body: SetupPasswordBody }>("/setup-password", async (req, reply) => {
+    const token = req.body?.token?.trim();
+    const password = req.body?.password ?? "";
+    const passwordRepeat = req.body?.passwordRepeat ?? "";
+
+    if (!token || password.length < 6 || password !== passwordRepeat) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Проверьте токен и пароль (мин. 6 символов)</div>`)
+      );
+    }
+
+    const codeRepo = app.db.getRepository(AuthorizationCode);
+    const row = await codeRepo.findOne({ where: { code: token } });
+    if (!row || row.clientId !== "password-setup" || row.consumedAt || row.expiresAt.getTime() < Date.now()) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Токен недействителен или истёк</div>`)
+      );
+    }
+
+    const userRepo = app.db.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: row.userId } });
+    if (!user) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Пользователь не найден</div>`)
+      );
+    }
+
+    user.passwordHash = await bcrypt.hash(password, 10);
+    await userRepo.save(user);
+    row.consumedAt = new Date();
+    await codeRepo.save(row);
+
+    return reply.type("text/html; charset=utf-8").send(
+      htmlPage("Установка пароля", `<h2>Готово</h2><div class="muted">Пароль установлен. Теперь можно войти через /login.</div>`)
+    );
   });
 
   app.post("/logout", async (req, reply) => {

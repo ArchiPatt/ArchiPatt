@@ -32,6 +32,10 @@ export const env = {
   auth: {
     issuer: must("AUTH_ISSUER"),
   },
+  authService: {
+    baseUrl: process.env.AUTH_SERVICE_URL ?? "http://localhost:4000",
+    internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? ""
+  },
 
   internalToken: must("INTERNAL_TOKEN"),
 

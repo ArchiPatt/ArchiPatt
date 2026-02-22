@@ -57,6 +57,7 @@ export const env = {
     baseUrl: must("USERS_SERVICE_URL"),
     internalToken: must("USERS_INTERNAL_TOKEN"),
   },
+  internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? process.env.USERS_INTERNAL_TOKEN ?? "",
 
   seed: {
     adminUsername: process.env.SEED_ADMIN_USERNAME ?? "admin",
