@@ -5,7 +5,6 @@ import { IsNull } from "typeorm";
 
 import { env } from "../env";
 import { User } from "../db/entities/User";
-import { Session } from "../db/entities/Session";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
@@ -197,18 +196,6 @@ export function registerAuthRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: "user_blocked_or_not_found" });
     }
 
-    const sessRepo = app.db.getRepository(Session);
-    const expiresAt = new Date(Date.now() + env.session.ttlSeconds * 1000);
-    const session = sessRepo.create({ userId: user.id, expiresAt });
-    const saved = await sessRepo.save(session);
-
-    reply.setCookie(env.session.cookieName, saved.id, {
-      httpOnly: true,
-      sameSite: "lax",
-      path: "/",
-      secure: false,
-    });
-
     const tokens = await issueTokensForProfile(app, user.username, {
       id: profile.id,
       roles: profile.roles,
@@ -379,12 +366,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
     );
   });
 
-  app.post("/logout", async (req, reply) => {
-    const sid = req.cookies[env.session.cookieName];
-    if (sid) {
-      await app.db.getRepository(Session).delete({ id: sid });
-    }
-    reply.clearCookie(env.session.cookieName, { path: "/" });
+  app.post("/logout", async (_req, reply) => {
     return reply.send({ ok: true });
   });
 }

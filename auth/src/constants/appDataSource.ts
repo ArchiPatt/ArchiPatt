@@ -3,8 +3,6 @@ import { DataSource } from "typeorm";
 import path from "path";
 import { env } from "../env";
 import { User } from "../db/entities/User";
-import { OAuthClient } from "../db/entities/OAuthClient";
-import { Session } from "../db/entities/Session";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 
@@ -15,7 +13,7 @@ const AppDataSource = new DataSource({
   username: env.db.user,
   password: env.db.password,
   database: env.db.name,
-  entities: [User, OAuthClient, Session, AuthorizationCode, RefreshToken],
+  entities: [User, AuthorizationCode, RefreshToken],
   migrations: [path.join(process.cwd(), "src/migrations/*.{ts,js}")],
   synchronize: false,
   logging: false,
