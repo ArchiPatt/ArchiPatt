@@ -10,15 +10,26 @@ import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 
+type LoginQuery = {
+  return_to?: string;
+  error?: string;
+};
+
 type LoginBody = {
   username?: string;
   password?: string;
+  return_to?: string;
 };
 
-type TokenBody = {
-  grant_type: "refresh_token";
-  refresh_token?: string;
-};
+type TokenBody =
+  | {
+      grant_type: "authorization_code";
+      code?: string;
+    }
+  | {
+      grant_type: "refresh_token";
+      refresh_token?: string;
+    };
 
 type InternalCreateUserBody = {
   username?: string;
@@ -87,6 +98,16 @@ function escapeHtml(s: string) {
   });
 }
 
+function normalizeReturnTo(returnTo: string): string | null {
+  try {
+    const url = new URL(returnTo);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    return url.toString();
+  } catch {
+    return null;
+  }
+}
+
 async function issueTokensForProfile(
   app: FastifyInstance,
   username: string,
@@ -129,13 +150,16 @@ async function issueTokensForProfile(
 
 export function registerAuthRoutes(app: FastifyInstance) {
   // Login page
-  app.get("/login", async (_req, reply) => {
+  app.get<{ Querystring: LoginQuery }>("/login", async (req, reply) => {
+    const returnTo = req.query.return_to ?? "";
+    const err = req.query.error ?? "";
     reply.type("text/html; charset=utf-8");
     return htmlPage(
       "Вход",
       `
       <h2>Вход</h2>
       <form method="post" action="/login">
+        <input type="hidden" name="return_to" value="${escapeHtml(returnTo)}" />
         <label>Логин
           <input name="username" autocomplete="username" />
         </label>
@@ -143,7 +167,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
           <input name="password" type="password" autocomplete="current-password" />
         </label>
         <button type="submit">Войти</button>
-        <div class="muted">После входа сервис сразу вернет access/refresh токены.</div>
+        ${err ? `<div class="error">${escapeHtml(err)}</div>` : `<div class="muted">После входа сервис перенаправит вас на return_to с code.</div>`}
       </form>
     `,
     );
@@ -153,17 +177,21 @@ export function registerAuthRoutes(app: FastifyInstance) {
   app.post<{ Body: LoginBody }>("/login", async (req, reply) => {
     const username = req.body?.username?.trim();
     const password = req.body?.password ?? "";
+    const returnTo = req.body?.return_to ?? "";
+    const normalizedReturnTo = normalizeReturnTo(returnTo);
 
-    if (!username || !password) {
-      return reply
-        .code(400)
-        .send({ error: "username_and_password_required" });
+    if (!username || !password || !normalizedReturnTo) {
+      return reply.redirect(
+        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("Проверьте логин, пароль и return_to")}`
+      );
     }
 
     const userRepo = app.db.getRepository(User);
     const user = await userRepo.findOne({ where: { username } });
     if (!user) {
-      return reply.code(401).send({ error: "invalid_credentials" });
+      return reply.redirect(
+        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`
+      );
     }
     if (!user.passwordHash) {
       const setupToken = await app.db.getRepository(AuthorizationCode).findOne({
@@ -189,23 +217,69 @@ export function registerAuthRoutes(app: FastifyInstance) {
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
-      return reply.code(401).send({ error: "invalid_credentials" });
+      return reply.redirect(
+        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`
+      );
     }
     const profile = await fetchUserProfileByUsername(user.username);
     if (!profile || profile.isBlocked) {
       return reply.code(403).send({ error: "user_blocked_or_not_found" });
     }
 
-    const tokens = await issueTokensForProfile(app, user.username, {
-      id: profile.id,
-      roles: profile.roles,
-    });
-    return reply.send(tokens);
+    const codeRepo = app.db.getRepository(AuthorizationCode);
+    const code = nanoid(32);
+    await codeRepo.save(
+      codeRepo.create({
+        code,
+        clientId: "frontend",
+        userId: user.id,
+        redirectUri: normalizedReturnTo,
+        scopes: ["openid", "profile", "roles"],
+        codeChallenge: "simple-login-flow",
+        codeChallengeMethod: "S256",
+        nonce: null,
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        consumedAt: null
+      })
+    );
+
+    const redirect = new URL(normalizedReturnTo);
+    redirect.searchParams.set("code", code);
+    return reply.redirect(redirect.toString());
   });
 
   // Token endpoint (refresh only)
   app.post<{ Body: TokenBody }>("/token", async (req, reply) => {
     const body = req.body as TokenBody;
+
+    if (body.grant_type === "authorization_code") {
+      if (!body.code) {
+        return reply.code(400).send(oauthError("invalid_request", "code обязателен"));
+      }
+
+      const codeRepo = app.db.getRepository(AuthorizationCode);
+      const row = await codeRepo.findOne({ where: { code: body.code } });
+      if (!row) return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.consumedAt) return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.expiresAt.getTime() < Date.now()) return reply.code(400).send(oauthError("invalid_grant"));
+
+      row.consumedAt = new Date();
+      await codeRepo.save(row);
+
+      const userRepo = app.db.getRepository(User);
+      const user = await userRepo.findOne({ where: { id: row.userId } });
+      if (!user) return reply.code(400).send(oauthError("invalid_grant"));
+      const profile = await fetchUserProfileByUsername(user.username);
+      if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant"));
+
+      const tokenPayload = await issueTokensForProfile(
+        app,
+        user.username,
+        { id: profile.id, roles: profile.roles },
+        row.scopes.length ? row.scopes : ["openid", "profile", "roles"]
+      );
+      return reply.send(tokenPayload);
+    }
 
     if (body.grant_type === "refresh_token") {
       if (!body.refresh_token)
