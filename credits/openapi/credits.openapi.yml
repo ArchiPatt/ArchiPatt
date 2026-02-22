@@ -14,6 +14,10 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
   /tariffs:
     get:
       tags: [Credits]
@@ -23,6 +27,18 @@ paths:
       responses:
         "200":
           description: Tariffs list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/TariffResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Credits]
       summary: Create tariff (employee/admin)
@@ -33,17 +49,38 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                interestRate:
-                  type: number
-                billingPeriodDays:
-                  type: integer
+              $ref: "#/components/schemas/CreateTariffRequest"
       responses:
         "201":
           description: Tariff created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TariffResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Tariff exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /credits/issue:
     post:
       tags: [Credits]
@@ -55,19 +92,38 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                clientId:
-                  type: string
-                accountId:
-                  type: string
-                tariffId:
-                  type: string
-                amount:
-                  type: number
+              $ref: "#/components/schemas/IssueCreditRequest"
       responses:
         "201":
           description: Credit created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Tariff not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /credits/{id}/repay:
     post:
       tags: [Credits]
@@ -80,18 +136,44 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                amount:
-                  type: number
+              $ref: "#/components/schemas/RepayCreditRequest"
       responses:
         "200":
           description: Credit updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepayCreditResponse"
+        "400":
+          description: Invalid state or amount
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Credit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /credits/by-client/{clientId}:
     get:
       tags: [Credits]
@@ -104,9 +186,28 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: Credits list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /credits/{id}:
     get:
       tags: [Credits]
@@ -119,9 +220,32 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: Credit
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Credit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /credits/{id}/payments:
     get:
       tags: [Credits]
@@ -134,9 +258,34 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: Payments list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditPaymentResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Credit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /credits/accrue/run:
     post:
       tags: [Credits]
@@ -146,9 +295,169 @@ paths:
       responses:
         "200":
           description: Accrual summary
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccrualSummaryResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    CreateTariffRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        interestRate:
+          type: number
+        billingPeriodDays:
+          type: integer
+      required: [name, interestRate]
+    TariffResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        interestRate:
+          type: string
+        billingPeriodDays:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, name, interestRate, billingPeriodDays, isActive, createdAt]
+    IssueCreditRequest:
+      type: object
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        tariffId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+      required: [clientId, accountId, tariffId, amount]
+    RepayCreditRequest:
+      type: object
+      properties:
+        amount:
+          type: number
+      required: [amount]
+    CreditResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        tariffId:
+          type: string
+          format: uuid
+        principalAmount:
+          type: string
+        outstandingAmount:
+          type: string
+        status:
+          type: string
+        issuedAt:
+          type: string
+          format: date-time
+        nextPaymentDueAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, clientId, accountId, tariffId, principalAmount, outstandingAmount, status, issuedAt, nextPaymentDueAt, createdAt]
+    RepayCreditResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+        outstandingAmount:
+          type: string
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+      required: [id, status, outstandingAmount]
+    CreditPaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        creditId:
+          type: string
+          format: uuid
+        amount:
+          type: string
+        paymentType:
+          type: string
+        performedBy:
+          type: string
+        performedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+      required: [id, creditId, amount, paymentType, performedBy, performedAt, createdAt]
+    AccrualSummaryResponse:
+      type: object
+      properties:
+        processedCredits:
+          type: integer
+        accrualsCreated:
+          type: integer
+        accruedTotal:
+          type: string
+      required: [processedCredits, accrualsCreated, accruedTotal]

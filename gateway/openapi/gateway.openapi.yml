@@ -22,6 +22,10 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
   /swagger:
     get:
       tags: [Gateway]
@@ -50,6 +54,10 @@ paths:
       responses:
         "400":
           description: login_via_auth_only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorWithMessageResponse"
 
   /setup-password:
     get:
@@ -64,14 +72,33 @@ paths:
       responses:
         "400":
           description: password_setup_via_auth_only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorWithMessageResponse"
 
   /token:
     post:
       tags: [Auth]
       summary: Proxied to auth /token
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                refresh_token:
+                  type: string
       responses:
         "200":
           description: Proxied response from auth
+          content:
+            application/json:
+              schema:
+                type: object
   /logout:
     post:
       tags: [Auth]
@@ -79,6 +106,10 @@ paths:
       responses:
         "200":
           description: Proxied response from auth
+          content:
+            application/json:
+              schema:
+                type: object
   /jwks:
     get:
       tags: [Auth]
@@ -86,6 +117,10 @@ paths:
       responses:
         "200":
           description: Proxied response from auth
+          content:
+            application/json:
+              schema:
+                type: object
 
   /me:
     get:
@@ -94,6 +129,10 @@ paths:
       responses:
         "200":
           description: Proxied response from users
+          content:
+            application/json:
+              schema:
+                type: object
   /users:
     get:
       tags: [Users]
@@ -101,12 +140,38 @@ paths:
       responses:
         "200":
           description: Proxied response from users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
     post:
       tags: [Users]
       summary: Proxied to users /users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                displayName:
+                  type: string
+                  nullable: true
+                roles:
+                  type: array
+                  items:
+                    type: string
       responses:
         "201":
           description: Proxied response from users
+          content:
+            application/json:
+              schema:
+                type: object
 
   /credits:
     get:
@@ -115,6 +180,10 @@ paths:
       responses:
         "200":
           description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: object
   /tariffs:
     get:
       tags: [Credits]
@@ -122,12 +191,35 @@ paths:
       responses:
         "200":
           description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
     post:
       tags: [Credits]
       summary: Proxied to credits /tariffs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                interestRate:
+                  type: number
+                billingPeriodDays:
+                  type: integer
       responses:
         "201":
           description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: object
 
   /accounts:
     get:
@@ -136,9 +228,44 @@ paths:
       responses:
         "200":
           description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
     post:
       tags: [Core]
       summary: Proxied to core /accounts
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
       responses:
         "201":
           description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+    ErrorWithMessageResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error, message]

@@ -115,6 +115,10 @@ paths:
                 type: string
         "400":
           description: Token invalid or expired
+          content:
+            text/html:
+              schema:
+                type: string
     post:
       tags: [Auth]
       summary: Установка пароля по одноразовому token
@@ -142,6 +146,10 @@ paths:
                 type: string
         "400":
           description: Validation or token error
+          content:
+            text/html:
+              schema:
+                type: string
 
   /token:
     post:
@@ -232,10 +240,22 @@ paths:
                     type: string
         "400":
           description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
         "401":
           description: Invalid internal token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
         "409":
           description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
 
 components:
   schemas:
