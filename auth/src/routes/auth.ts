@@ -7,6 +7,7 @@ import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
+import { getJwks } from "../security/jwks";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 
 type InternalCreateUserBody = {
@@ -148,6 +149,11 @@ async function issueTokensForProfile(
 }
 
 export function registerAuthRoutes(app: FastifyInstance) {
+  app.get("/jwks", async (_req, reply) => {
+    const jwks = await getJwks();
+    return reply.send(jwks);
+  });
+
   app.get<{ Querystring: LoginQuery }>("/login", async (req, reply) => {
     const returnTo = req.query.return_to ?? "";
     const err = req.query.error ?? "";
