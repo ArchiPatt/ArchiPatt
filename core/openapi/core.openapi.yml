@@ -3,7 +3,7 @@ info:
   title: Core Service API
   version: 1.0.0
 servers:
-  - url: http://localhost:4000
+  - url: http://localhost:4003
 tags:
   - name: Core
   - name: Internal
