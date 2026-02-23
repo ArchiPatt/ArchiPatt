@@ -2,13 +2,16 @@ import { FastifyInstance } from "fastify";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
 import { IsNull } from "typeorm";
-
 import { env } from "../env";
 import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
+
+type InternalCreateUserBody = {
+  username?: string;
+};
 
 type LoginQuery = {
   return_to?: string;
@@ -21,11 +24,6 @@ type LoginBody = {
   return_to?: string;
 };
 
-type DevLoginBody = {
-  username?: string;
-  password?: string;
-};
-
 type TokenBody =
   | {
       grant_type: "authorization_code";
@@ -35,10 +33,6 @@ type TokenBody =
       grant_type: "refresh_token";
       refresh_token?: string;
     };
-
-type InternalCreateUserBody = {
-  username?: string;
-};
 
 type SetupPasswordQuery = {
   token?: string;
@@ -117,7 +111,7 @@ async function issueTokensForProfile(
   app: FastifyInstance,
   username: string,
   profile: { id: string; roles: string[] },
-  scopes: string[] = ["openid", "profile", "roles"],
+  scopes: string[] = ["profile", "roles"],
 ) {
   const scopeStr = scopes.join(" ");
   const accessToken = await issueAccessToken({
@@ -147,14 +141,13 @@ async function issueTokensForProfile(
   return {
     token_type: "Bearer" as const,
     access_token: accessToken,
-    expires_in: env.tokens.accessTtlSeconds,
     refresh_token: refreshTokenValue,
+    expires_in: env.tokens.accessTtlSeconds,
     scope: scopeStr,
   };
 }
 
 export function registerAuthRoutes(app: FastifyInstance) {
-  // Login page
   app.get<{ Querystring: LoginQuery }>("/login", async (req, reply) => {
     const returnTo = req.query.return_to ?? "";
     const err = req.query.error ?? "";
@@ -178,7 +171,6 @@ export function registerAuthRoutes(app: FastifyInstance) {
     );
   });
 
-  // Login action
   app.post<{ Body: LoginBody }>("/login", async (req, reply) => {
     const username = req.body?.username?.trim();
     const password = req.body?.password ?? "";
@@ -187,7 +179,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
 
     if (!username || !password || !normalizedReturnTo) {
       return reply.redirect(
-        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("Проверьте логин, пароль и return_to")}`
+        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("Проверьте логин, пароль и return_to")}`,
       );
     }
 
@@ -195,37 +187,39 @@ export function registerAuthRoutes(app: FastifyInstance) {
     const user = await userRepo.findOne({ where: { username } });
     if (!user) {
       return reply.redirect(
-        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`
+        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`,
       );
     }
+
     if (!user.passwordHash) {
       const setupToken = await app.db.getRepository(AuthorizationCode).findOne({
         where: {
           userId: user.id,
           clientId: "password-setup",
-          consumedAt: IsNull()
+          consumedAt: IsNull(),
         },
-        order: { createdAt: "DESC" }
+        order: { createdAt: "DESC" },
       });
       if (setupToken && setupToken.expiresAt.getTime() >= Date.now()) {
         return reply.code(403).send({
           error: "password_setup_required",
           message: "сначала подтвердите пароль",
-          setupUrl: `${env.issuer}/setup-password?token=${encodeURIComponent(setupToken.code)}`
+          setupUrl: `${env.issuer}/setup-password?token=${encodeURIComponent(setupToken.code)}`,
         });
       }
       return reply.code(403).send({
         error: "password_setup_required",
-        message: "сначала подтвердите пароль"
+        message: "сначала подтвердите пароль",
       });
     }
 
     const ok = await bcrypt.compare(password, user.passwordHash);
     if (!ok) {
       return reply.redirect(
-        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`
+        `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`,
       );
     }
+
     const profile = await fetchUserProfileByUsername(user.username);
     if (!profile || profile.isBlocked) {
       return reply.code(403).send({ error: "user_blocked_or_not_found" });
@@ -238,14 +232,9 @@ export function registerAuthRoutes(app: FastifyInstance) {
         code,
         clientId: "frontend",
         userId: user.id,
-        redirectUri: normalizedReturnTo,
-        scopes: ["openid", "profile", "roles"],
-        codeChallenge: "simple-login-flow",
-        codeChallengeMethod: "S256",
-        nonce: null,
         expiresAt: new Date(Date.now() + 10 * 60 * 1000),
-        consumedAt: null
-      })
+        consumedAt: null,
+      }),
     );
 
     const redirect = new URL(normalizedReturnTo);
@@ -253,39 +242,6 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.redirect(redirect.toString());
   });
 
-  if (env.serverType === "DEV") {
-    app.post<{ Body: DevLoginBody }>("/dev/login", async (req, reply) => {
-      const username = req.body?.username?.trim();
-      const password = req.body?.password ?? "";
-      if (!username || !password) {
-        return reply.code(400).send({ error: "username_and_password_required" });
-      }
-
-      const userRepo = app.db.getRepository(User);
-      const user = await userRepo.findOne({ where: { username } });
-      if (!user || !user.passwordHash) {
-        return reply.code(401).send({ error: "invalid_credentials" });
-      }
-
-      const ok = await bcrypt.compare(password, user.passwordHash);
-      if (!ok) {
-        return reply.code(401).send({ error: "invalid_credentials" });
-      }
-
-      const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked) {
-        return reply.code(403).send({ error: "user_blocked_or_not_found" });
-      }
-
-      const tokens = await issueTokensForProfile(app, user.username, {
-        id: profile.id,
-        roles: profile.roles,
-      });
-      return reply.send(tokens);
-    });
-  }
-
-  // Token endpoint (refresh only)
   app.post<{ Body: TokenBody }>("/token", async (req, reply) => {
     const body = req.body as TokenBody;
 
@@ -309,31 +265,28 @@ export function registerAuthRoutes(app: FastifyInstance) {
       const profile = await fetchUserProfileByUsername(user.username);
       if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant"));
 
-      const tokenPayload = await issueTokensForProfile(
-        app,
-        user.username,
-        { id: profile.id, roles: profile.roles },
-        row.scopes.length ? row.scopes : ["openid", "profile", "roles"]
-      );
+      const tokenPayload = await issueTokensForProfile(app, user.username, {
+        id: profile.id,
+        roles: profile.roles,
+      });
       return reply.send(tokenPayload);
     }
 
     if (body.grant_type === "refresh_token") {
-      if (!body.refresh_token)
+      if (!body.refresh_token) {
         return reply
           .code(400)
           .send(oauthError("invalid_request", "refresh_token обязателен"));
+      }
+
       const refreshRepo = app.db.getRepository(RefreshToken);
       const row = await refreshRepo.findOne({
         where: { token: body.refresh_token },
       });
       if (!row) return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.revokedAt)
-        return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.expiresAt.getTime() < Date.now())
-        return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.revokedAt) return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.expiresAt.getTime() < Date.now()) return reply.code(400).send(oauthError("invalid_grant"));
 
-      // Rotate refresh token
       row.revokedAt = new Date();
       await refreshRepo.save(row);
 
@@ -343,8 +296,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
       });
       if (!user) return reply.code(400).send(oauthError("invalid_grant"));
       const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked)
-        return reply.code(400).send(oauthError("invalid_grant"));
+      if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant"));
 
       const tokenPayload = await issueTokensForProfile(
         app,
@@ -388,11 +340,6 @@ export function registerAuthRoutes(app: FastifyInstance) {
         code: setupToken,
         clientId: "password-setup",
         userId: user.id,
-        redirectUri: "",
-        scopes: [],
-        codeChallenge: "password-setup",
-        codeChallengeMethod: "S256",
-        nonce: null,
         expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
         consumedAt: null
       })
@@ -473,7 +420,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
     await codeRepo.save(row);
 
     return reply.type("text/html; charset=utf-8").send(
-      htmlPage("Установка пароля", `<h2>Готово</h2><div class="muted">Пароль установлен. Теперь можно войти через /login.</div>`)
+      htmlPage("Установка пароля", `<h2>Готово</h2><div class="muted">Пароль установлен. Теперь можно входить в приложение.</div>`)
     );
   });
 

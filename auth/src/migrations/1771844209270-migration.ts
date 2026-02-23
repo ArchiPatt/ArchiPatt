@@ -1,12 +1,12 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Migration1771765215314 implements MigrationInterface {
-    name = 'Migration1771765215314'
+export class Migration1771844209270 implements MigrationInterface {
+    name = 'Migration1771844209270'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "username" text NOT NULL, "password_hash" text, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_78a916df40e02a9deb1c4b75ed" ON "user" ("username") `);
-        await queryRunner.query(`CREATE TABLE "authorization_code" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "code" text NOT NULL, "clientId" text NOT NULL, "userId" uuid NOT NULL, "redirectUri" text NOT NULL, "scopes" text array NOT NULL, "codeChallenge" text NOT NULL, "codeChallengeMethod" text NOT NULL, "nonce" text, "expiresAt" TIMESTAMP WITH TIME ZONE NOT NULL, "consumedAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_586233caf7e281dc24aaedd1335" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "authorization_code" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "code" text NOT NULL, "clientId" text NOT NULL, "userId" uuid NOT NULL, "expiresAt" TIMESTAMP WITH TIME ZONE NOT NULL, "consumedAt" TIMESTAMP WITH TIME ZONE, "createdAt" TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT now(), CONSTRAINT "PK_586233caf7e281dc24aaedd1335" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE UNIQUE INDEX "IDX_1a83c8414bc822e77b0a0c161b" ON "authorization_code" ("code") `);
         await queryRunner.query(`CREATE INDEX "IDX_ffbeadc85eea5dabbbcaf4f6b0" ON "authorization_code" ("clientId") `);
         await queryRunner.query(`CREATE INDEX "IDX_c84c3d4d0e6344f36785f679e4" ON "authorization_code" ("userId") `);
