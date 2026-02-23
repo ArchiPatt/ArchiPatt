@@ -75,7 +75,7 @@ const MainPage = () => {
                     ) : (
                         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
                             {accounts.map((_, i) => (
-                                <AccountCard key={i} />
+                                <AccountCard />
                             ))}
                         </SimpleGrid>
                     )}
@@ -137,7 +137,7 @@ const MainPage = () => {
                     ) : (
                         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
                             {allCredits.map((_, i) => (
-                                <CreditCard key={i} />
+                                <CreditCard />
                             ))}
                         </SimpleGrid>
                     )}

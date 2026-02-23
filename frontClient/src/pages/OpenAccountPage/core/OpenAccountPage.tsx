@@ -66,20 +66,20 @@ const OpenAccountPage = () => {
                         <Divider />
 
                         <Text>
-                            <strong>Номер счета:</strong> {createdAccount.accountNumber}
+                            <strong>Номер счета:</strong> 123
                         </Text>
                         <Text>
                             <strong>Тип:</strong>{' '}
-                            {createdAccount.type === 'checking'
-                                ? 'Текущий счет'
-                                : 'Сберегательный счет'}
+                            {/*{createdAccount.type === 'checking'*/}
+                            {/*    ? 'Текущий счет'*/}
+                            {/*    : 'Сберегательный счет'}*/}
                         </Text>
                         <Text>
                             <strong>Баланс:</strong>{' '}
-                            {formatCurrency(createdAccount.balance)}
+                            231
                         </Text>
                         <Text>
-                            <strong>Дата открытия:</strong> {createdAccount.openDate}
+                            <strong>Дата открытия:</strong> 123
                         </Text>
 
                         <Button
