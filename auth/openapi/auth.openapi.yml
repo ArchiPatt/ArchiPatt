@@ -4,8 +4,7 @@ info:
   version: 1.2.0
   description: |
     Упрощенный auth без OAuth/OIDC:
-    1) В DEV используется прямой вход через POST /dev/login
-    2) Для новых пользователей пароль задается через страницу Auth: /setup-password?token=...
+    1) Для новых пользователей пароль задается через страницу Auth: /setup-password?token=...
 servers:
   - url: http://localhost:4000
 tags:
@@ -83,49 +82,6 @@ paths:
             text/html:
               schema:
                 type: string
-
-  /dev/login:
-    post:
-      tags: [Auth]
-      summary: DEV-only direct login without redirect
-      description: Доступен только если SERVER_TYPE=DEV.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [username, password]
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        "200":
-          description: Tokens issued
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
-        "401":
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
-        "403":
-          description: User blocked or profile not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
 
   /logout:
     post:
@@ -227,18 +183,4 @@ components:
           type: string
           example: сначала подтвердите пароль
         setupUrl:
-          type: string
-    TokenResponse:
-      type: object
-      properties:
-        token_type:
-          type: string
-          example: Bearer
-        access_token:
-          type: string
-        refresh_token:
-          type: string
-        expires_in:
-          type: integer
-        scope:
           type: string

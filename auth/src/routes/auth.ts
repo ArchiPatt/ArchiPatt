@@ -1,18 +1,9 @@
 import { FastifyInstance } from "fastify";
 import bcrypt from "bcryptjs";
 import { nanoid } from "nanoid";
-
 import { env } from "../env";
 import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
-import { RefreshToken } from "../db/entities/RefreshToken";
-import { issueAccessToken } from "../security/tokens";
-import { fetchUserProfileByUsername } from "../integrations/users-service";
-
-type DevLoginBody = {
-  username?: string;
-  password?: string;
-};
 
 type InternalCreateUserBody = {
   username?: string;
@@ -74,78 +65,7 @@ function escapeHtml(s: string) {
   });
 }
 
-async function issueDevTokensForProfile(
-  app: FastifyInstance,
-  username: string,
-  profile: { id: string; roles: string[] },
-) {
-  const scope = "profile roles";
-  const accessToken = await issueAccessToken({
-    sub: profile.id,
-    roles: profile.roles,
-    scope,
-    aud: "bank-app",
-  });
-
-  const refreshRepo = app.db.getRepository(RefreshToken);
-  const refreshTokenValue = nanoid(48);
-  const refreshExpiresAt = new Date(
-    Date.now() + env.tokens.refreshTtlSeconds * 1000,
-  );
-
-  await refreshRepo.save(
-    refreshRepo.create({
-      token: refreshTokenValue,
-      clientId: "frontend",
-      username,
-      scopes: ["profile", "roles"],
-      expiresAt: refreshExpiresAt,
-      revokedAt: null,
-    }),
-  );
-
-  return {
-    token_type: "Bearer" as const,
-    access_token: accessToken,
-    refresh_token: refreshTokenValue,
-    expires_in: env.tokens.accessTtlSeconds,
-    scope,
-  };
-}
-
 export function registerAuthRoutes(app: FastifyInstance) {
-  if (env.serverType === "DEV") {
-    app.post<{ Body: DevLoginBody }>("/dev/login", async (req, reply) => {
-      const username = req.body?.username?.trim();
-      const password = req.body?.password ?? "";
-      if (!username || !password) {
-        return reply.code(400).send({ error: "username_and_password_required" });
-      }
-
-      const userRepo = app.db.getRepository(User);
-      const user = await userRepo.findOne({ where: { username } });
-      if (!user || !user.passwordHash) {
-        return reply.code(401).send({ error: "invalid_credentials" });
-      }
-
-      const ok = await bcrypt.compare(password, user.passwordHash);
-      if (!ok) {
-        return reply.code(401).send({ error: "invalid_credentials" });
-      }
-
-      const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked) {
-        return reply.code(403).send({ error: "user_blocked_or_not_found" });
-      }
-
-      const tokens = await issueDevTokensForProfile(app, user.username, {
-        id: profile.id,
-        roles: profile.roles,
-      });
-      return reply.send(tokens);
-    });
-  }
-
   app.post<{ Body: InternalCreateUserBody }>("/internal/users", async (req, reply) => {
     if (!env.internalToken || req.headers["x-internal-token"] !== env.internalToken) {
       return reply.code(401).send({ error: "unauthorized" });
