@@ -27,6 +27,7 @@ function list(name: string, fallback: string[] = []): string[] {
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
+  serverType: (process.env.SERVER_TYPE ?? "DEV").toUpperCase(),
   port: num("PORT", 4000),
   issuer: process.env.ISSUER ?? `http://localhost:${num("PORT", 4000)}`,
 
@@ -53,16 +54,4 @@ export const env = {
     internalToken: must("USERS_INTERNAL_TOKEN"),
   },
   internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? process.env.USERS_INTERNAL_TOKEN ?? "",
-
-  seed: {
-    adminUsername: process.env.SEED_ADMIN_USERNAME ?? "admin",
-    adminPassword: process.env.SEED_ADMIN_PASSWORD ?? "admin",
-
-    clientId: process.env.SEED_CLIENT_ID ?? "demo-client",
-    clientSecret: process.env.SEED_CLIENT_SECRET ?? "demo-secret",
-    clientRedirectUris: list("SEED_CLIENT_REDIRECT_URIS", [
-      "http://localhost:5173/callback",
-    ]),
-    clientScopes: list("SEED_CLIENT_SCOPES", ["openid", "profile", "roles"]),
-  },
 };

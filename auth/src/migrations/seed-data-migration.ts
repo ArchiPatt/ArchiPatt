@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class Migration1771762000000 implements MigrationInterface {
-  name = "Migration1771762000000";
+export class SeedDataMigration1771769000000 implements MigrationInterface {
+  name = "SeedDataMigration1771769000000";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const usersTable = (await queryRunner.hasTable("users"))
@@ -11,7 +11,15 @@ export class Migration1771762000000 implements MigrationInterface {
         : null;
     if (!usersTable) return;
 
-    const hashColumn = usersTable === "users" ? "password_hash" : "passwordHash";
+    const table = await queryRunner.getTable(usersTable);
+    if (!table) return;
+    const columns = table.columns.map((c) => c.name);
+    const hashColumn = columns.includes("password_hash")
+      ? "password_hash"
+      : columns.includes("passwordHash")
+        ? "passwordHash"
+        : null;
+    if (!hashColumn) return;
 
     await queryRunner.query(
       `INSERT INTO "${usersTable}" ("id", "username", "${hashColumn}")

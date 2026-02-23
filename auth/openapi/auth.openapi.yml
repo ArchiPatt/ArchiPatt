@@ -1,12 +1,12 @@
 openapi: 3.0.3
 info:
   title: Auth Service (Simple Flow)
-  version: 1.0.0
+  version: 1.2.0
   description: |
-    Упрощенный flow без authorization code:
-    1) Клиент отправляет логин/пароль на POST /login
-    2) Auth сразу возвращает access/refresh токены
-    3) Обновление access выполняется через POST /token (grant_type=refresh_token)
+    Redirect flow с authorization code:
+    1) Клиент открывает GET /login?return_to=<callback>
+    2) POST /login проверяет логин/пароль и редиректит на return_to?code=...
+    3) Клиент обменивает code на токены через POST /token
     4) Для новых пользователей пароль задается только через страницу Auth: /setup-password?token=...
 servers:
   - url: http://localhost:4000
@@ -35,6 +35,13 @@ paths:
     get:
       tags: [Auth]
       summary: Страница входа (HTML)
+      parameters:
+        - in: query
+          name: return_to
+          required: false
+          schema:
+            type: string
+            format: uri
       responses:
         "200":
           description: HTML login page
@@ -44,34 +51,25 @@ paths:
                 type: string
     post:
       tags: [Auth]
-      summary: Проверка логина/пароля и немедленная выдача токенов
+      summary: Проверка логина/пароля и redirect на return_to с code
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
               type: object
-              required: [username, password]
+              required: [username, password, return_to]
               properties:
                 username:
                   type: string
                 password:
                   type: string
+                return_to:
+                  type: string
+                  format: uri
       responses:
-        "200":
-          description: Tokens issued
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
-        "401":
-          description: Неверные учетные данные
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
-              example:
-                error: invalid_credentials
+        "302":
+          description: Redirect to return_to with code
         "403":
           description: Пользователь заблокирован или требуется первичная установка пароля
           content:
@@ -154,13 +152,15 @@ paths:
   /token:
     post:
       tags: [Auth]
-      summary: Обновление токенов по refresh_token
+      summary: Обмен authorization_code на токены или refresh
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
-              $ref: "#/components/schemas/RefreshTokenRequest"
+              oneOf:
+                - $ref: "#/components/schemas/AuthCodeRequest"
+                - $ref: "#/components/schemas/RefreshTokenRequest"
       responses:
         "200":
           description: Tokens issued
@@ -174,6 +174,49 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/OAuthError"
+
+  /dev/login:
+    post:
+      tags: [Auth]
+      summary: DEV-only direct login without redirect
+      description: Доступен только если SERVER_TYPE=DEV.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username, password]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        "200":
+          description: Tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+        "401":
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+        "403":
+          description: User blocked or profile not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
 
   /logout:
     post:
@@ -291,6 +334,15 @@ components:
           type: string
           enum: [refresh_token]
         refresh_token:
+          type: string
+    AuthCodeRequest:
+      type: object
+      required: [grant_type, code]
+      properties:
+        grant_type:
+          type: string
+          enum: [authorization_code]
+        code:
           type: string
     TokenResponse:
       type: object
