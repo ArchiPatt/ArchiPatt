@@ -23,21 +23,6 @@ export class AuthorizationCode {
   @Column({ type: "uuid" })
   userId!: string;
 
-  @Column({ type: "text" })
-  redirectUri!: string;
-
-  @Column({ type: "text", array: true })
-  scopes!: string[];
-
-  @Column({ type: "text" })
-  codeChallenge!: string;
-
-  @Column({ type: "text" })
-  codeChallengeMethod!: "S256";
-
-  @Column({ type: "text", nullable: true })
-  nonce!: string | null;
-
   @Column({ type: "timestamptz" })
   expiresAt!: Date;
 

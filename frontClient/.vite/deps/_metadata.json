@@ -1,0 +1,15 @@
+{
+  "hash": "7cd714ae",
+  "configHash": "4ded20cc",
+  "lockfileHash": "fcedeaa9",
+  "browserHash": "a3cbbd73",
+  "optimized": {
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "5635dd24",
+      "needsInterop": false
+    }
+  },
+  "chunks": {}
+}

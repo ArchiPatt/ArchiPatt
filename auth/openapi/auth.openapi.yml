@@ -7,7 +7,7 @@ info:
     1) Клиент открывает GET /login?return_to=<callback>
     2) POST /login проверяет логин/пароль и редиректит на return_to?code=...
     3) Клиент обменивает code на токены через POST /token
-    4) Для новых пользователей пароль задается только через страницу Auth: /setup-password?token=...
+    4) Для новых пользователей пароль задается через /setup-password?token=...
 servers:
   - url: http://localhost:4000
 tags:
@@ -78,21 +78,38 @@ paths:
                 oneOf:
                   - $ref: "#/components/schemas/PasswordSetupRequiredError"
                   - $ref: "#/components/schemas/SimpleError"
-              examples:
-                password_setup_required:
-                  value:
-                    error: password_setup_required
-                    message: сначала подтвердите пароль
-                    setupUrl: http://localhost:4000/setup-password?token=abc123
-                blocked_user:
-                  value:
-                    error: user_blocked_or_not_found
         "400":
           description: Невалидный ввод
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/SimpleError"
+
+  /token:
+    post:
+      tags: [Auth]
+      summary: Обмен authorization_code на токены или refresh
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/AuthCodeRequest"
+                - $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: OAuth-like error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
 
   /setup-password:
     get:
@@ -148,75 +165,6 @@ paths:
             text/html:
               schema:
                 type: string
-
-  /token:
-    post:
-      tags: [Auth]
-      summary: Обмен authorization_code на токены или refresh
-      requestBody:
-        required: true
-        content:
-          application/x-www-form-urlencoded:
-            schema:
-              oneOf:
-                - $ref: "#/components/schemas/AuthCodeRequest"
-                - $ref: "#/components/schemas/RefreshTokenRequest"
-      responses:
-        "200":
-          description: Tokens issued
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
-        "400":
-          description: OAuth-like error
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/OAuthError"
-
-  /dev/login:
-    post:
-      tags: [Auth]
-      summary: DEV-only direct login without redirect
-      description: Доступен только если SERVER_TYPE=DEV.
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required: [username, password]
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-      responses:
-        "200":
-          description: Tokens issued
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/TokenResponse"
-        "400":
-          description: Invalid input
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
-        "401":
-          description: Invalid credentials
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
-        "403":
-          description: User blocked or profile not found
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/SimpleError"
 
   /logout:
     post:
@@ -304,6 +252,7 @@ components:
   schemas:
     OAuthError:
       type: object
+      required: [error]
       properties:
         error:
           type: string
@@ -346,6 +295,7 @@ components:
           type: string
     TokenResponse:
       type: object
+      required: [token_type, access_token, refresh_token, expires_in, scope]
       properties:
         token_type:
           type: string
