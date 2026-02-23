@@ -1,7 +1,7 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class SeedDataMigration1771769000000 implements MigrationInterface {
-  name = "SeedDataMigration1771769000000";
+export class SeedDataMigration1971769000000 implements MigrationInterface {
+  name = "SeedDataMigration1971769000000";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const usersTable = (await queryRunner.hasTable("users"))
