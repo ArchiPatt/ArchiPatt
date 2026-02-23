@@ -2,11 +2,19 @@ openapi: 3.0.3
 info:
   title: Core Service API
   version: 1.0.0
+  description: |
+    Core — сервис счетов и операций.
+
+    **Договорённости по форматам данных**
+    - Денежные значения в ответах (`balance`, `amount`) отдаются строкой, чтобы не терять точность на фронте (decimal с 2 знаками после точки), например `"1250.00"` или `"-10.50"`.
+    - Все даты/время — ISO 8601 в UTC (`date-time`), например `"2026-02-23T12:34:56.000Z"`.
 servers:
-  - url: http://localhost:4000
+  - url: http://localhost:4003
 tags:
   - name: Core
+    description: Публичные методы для клиента/сотрудника банка (требуют Bearer JWT).
   - name: Internal
+    description: Интеграционные методы между сервисами (защищены `x-internal-token`).
 paths:
   /health:
     get:
@@ -15,6 +23,12 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+              example:
+                ok: true
   /accounts:
     get:
       tags: [Core]
@@ -27,36 +41,70 @@ paths:
           schema:
             type: string
             format: uuid
-          description: Filter by client (employee/admin only)
+          description: |
+            Фильтр по владельцу счета.
+
+            - **client**: параметр игнорируется, всегда вернутся только свои счета (`clientId = token.sub`)
+            - **employee/admin**: можно указать `clientId` и получить счета конкретного клиента, либо без фильтра — все счета
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Account"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
     post:
       tags: [Core]
       summary: Create account
       security:
         - bearerAuth: []
       requestBody:
+        required: false
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                clientId:
-                  type: string
-                  format: uuid
-                  description: Client ID (employee/admin only)
+              $ref: "#/components/schemas/CreateAccountRequest"
       responses:
         "201":
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
   /accounts/{id}:
     get:
       tags: [Core]
@@ -73,12 +121,34 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
   /accounts/{id}/close:
     post:
       tags: [Core]
@@ -95,14 +165,42 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
         "400":
           description: Account already closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_already_closed
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
   /accounts/{id}/deposit:
     post:
       tags: [Core]
@@ -121,23 +219,51 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [amount]
-              properties:
-                amount:
-                  type: number
-                  minimum: 0.01
+              $ref: "#/components/schemas/DepositWithdrawRequest"
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
         "400":
           description: Invalid amount or account closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_amount:
+                  summary: Некорректная сумма
+                  value: { error: invalid_amount }
+                account_closed:
+                  summary: Счёт закрыт
+                  value: { error: account_closed }
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
   /accounts/{id}/withdraw:
     post:
       tags: [Core]
@@ -156,23 +282,54 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [amount]
-              properties:
-                amount:
-                  type: number
-                  minimum: 0.01
+              $ref: "#/components/schemas/DepositWithdrawRequest"
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
         "400":
           description: Invalid amount, account closed, or insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_amount:
+                  summary: Некорректная сумма
+                  value: { error: invalid_amount }
+                account_closed:
+                  summary: Счёт закрыт
+                  value: { error: account_closed }
+                insufficient_balance:
+                  summary: Недостаточно средств
+                  value: { error: insufficient_balance }
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
   /accounts/{id}/operations:
     get:
       tags: [Core]
@@ -193,31 +350,65 @@ paths:
             minimum: 1
             maximum: 100
             default: 20
+          description: Размер страницы.
         - in: query
           name: offset
           schema:
             type: integer
             minimum: 0
             default: 0
+          description: Смещение от начала списка (для пагинации).
         - in: query
           name: sort
           schema:
             type: string
             enum: [asc, desc]
             default: desc
+          description: Сортировка по `createdAt` (новые сверху по умолчанию).
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountOperationsPage"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
   /internal/accounts/{id}/operations:
     post:
       tags: [Internal]
       summary: Internal create operation (for integrations)
+      description: |
+        Интеграционный метод для других сервисов (например, `credits`).
+
+        Важно:
+        - Требуется заголовок `x-internal-token`
+        - `idempotencyKey` обеспечивает идемпотентность: повторный запрос с тем же ключом вернёт **уже созданную** операцию
+        - `amount` может быть положительным (зачисление) или отрицательным (списание)
+      security:
+        - internalToken: []
       parameters:
         - in: path
           name: id
@@ -230,35 +421,245 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required: [amount, idempotencyKey]
-              properties:
-                amount:
-                  type: number
-                  description: Positive for credit, negative for debit
-                idempotencyKey:
-                  type: string
-                type:
-                  type: string
-                correlationId:
-                  type: string
-                  format: uuid
-                meta:
-                  type: object
+              $ref: "#/components/schemas/InternalCreateAccountOperationRequest"
       responses:
         "201":
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountOperation"
         "200":
           description: Idempotent replay, existing operation returned
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountOperation"
         "400":
           description: Invalid amount, idempotency key required, account closed, or insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                idempotency_key_required:
+                  value: { error: idempotency_key_required }
+                invalid_amount:
+                  value: { error: invalid_amount }
+                account_closed:
+                  value: { error: account_closed }
+                insufficient_balance:
+                  value: { error: insufficient_balance }
         "401":
           description: Unauthorized internal token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "404":
           description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: x-internal-token
+      description: |
+        Внутренний токен для межсервисных интеграций.
+        Используется **только** в `Internal` эндпоинтах.
+  schemas:
+    HealthResponse:
+      type: object
+      description: Стандартный ответ healthcheck.
+      required: [ok]
+      properties:
+        ok:
+          type: boolean
+          description: Признак, что сервис жив.
+          example: true
+
+    ErrorResponse:
+      type: object
+      description: |
+        Единый формат ошибки в JSON.
+
+        `error` — машинно-читаемый код, по нему удобно делать маппинг на фронте.
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: unauthorized
+
+    MoneyString:
+      type: string
+      description: |
+        Денежное значение **строкой** с 2 знаками после точки (decimal).
+
+        Почему строкой: чтобы не ловить проблемы точности `number` (IEEE754) на фронте.
+      pattern: "^-?\\d+(\\.\\d{2})$"
+      examples: ["0.00", "10.50", "-3.20"]
+
+    Account:
+      type: object
+      description: Банковский счёт клиента.
+      required: [id, clientId, balance, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID счёта.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        clientId:
+          type: string
+          format: uuid
+          description: ID владельца счёта (это `user.id` из Users Service).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        balance:
+          $ref: "#/components/schemas/MoneyString"
+        status:
+          type: string
+          description: |
+            Статус счёта:
+            - `open` — активен
+            - `closed` — закрыт (операции списания/зачисления запрещены)
+          enum: [open, closed]
+          example: open
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания счёта.
+          example: "2026-02-23T12:34:56.000Z"
+
+    DepositWithdrawRequest:
+      type: object
+      description: Тело запроса для пополнения/снятия.
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+          description: Сумма операции. Должна быть строго больше 0.
+          example: 250.5
+
+    AccountOperation:
+      type: object
+      description: |
+        Операция по счёту (движение денег).
+
+        Важно: `amount` может быть отрицательным (списание), положительным (зачисление).
+      required: [id, accountId, amount, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID операции.
+        accountId:
+          type: string
+          format: uuid
+          description: ID счёта.
+        amount:
+          $ref: "#/components/schemas/MoneyString"
+        type:
+          type: string
+          nullable: true
+          description: |
+            Тип операции (бизнес-метка).
+            Для публичных операций может быть `deposit` или `withdraw`.
+            Для интеграций может быть любая строка или `null`.
+          example: deposit
+        correlationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: ID корреляции (для сквозной трассировки между сервисами).
+        idempotencyKey:
+          type: string
+          nullable: true
+          description: |
+            Ключ идемпотентности (используется в internal-операциях).
+            Уникален в рамках `accountId`.
+          example: credits:issue:0gYdK0oZyVg8fC3fV7S5cE
+        meta:
+          type: object
+          nullable: true
+          description: Произвольные метаданные операции (JSON).
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+          description: Время создания операции.
+
+    AccountOperationsPage:
+      type: object
+      description: Пагинированный список операций по счёту.
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountOperation"
+        total:
+          type: integer
+          minimum: 0
+          description: Общее количество операций по счёту (без учёта limit/offset).
+          example: 42
+
+    CreateAccountRequest:
+      type: object
+      description: |
+        Создание счёта.
+
+        - **client**: тело можно не передавать — счёт создаётся на `token.sub`
+        - **employee/admin**: можно указать `clientId`, чтобы создать счёт на конкретного клиента
+      properties:
+        clientId:
+          type: string
+          format: uuid
+          description: ID клиента, для которого создаём счёт (только employee/admin).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+
+    InternalCreateAccountOperationRequest:
+      type: object
+      description: Запрос на создание операции по счёту из другого сервиса.
+      required: [amount, idempotencyKey]
+      properties:
+        amount:
+          type: number
+          description: |
+            Сумма операции.
+            - положительное число — зачисление
+            - отрицательное число — списание
+          example: 1000
+        idempotencyKey:
+          type: string
+          minLength: 1
+          description: |
+            Ключ идемпотентности. Повтор запроса с тем же ключом вернёт ту же операцию.
+          example: credits:repay:2d5b2f7d-0db5-4f3e-8c2c-4b0d02c1b76e
+        type:
+          type: string
+          nullable: true
+          description: Бизнес-тип операции (опционально).
+          example: credit
+        correlationId:
+          type: string
+          format: uuid
+          nullable: true
+          description: Идентификатор корреляции (опционально).
+        meta:
+          type: object
+          nullable: true
+          description: Любые метаданные (JSON), например `{ creditId, clientId }`.
+          additionalProperties: true

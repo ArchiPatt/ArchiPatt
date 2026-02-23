@@ -6,6 +6,12 @@ info:
     Единая точка входа в систему.
     Gateway проксирует запросы в auth/users/credits.
     Ввод пароля допускается только на страницах auth.
+
+    **Полезные ссылки на Swagger конкретных сервисов (для деталей)**
+    - Auth: `http://localhost:4000/swagger`
+    - Users: `http://localhost:4001/swagger`
+    - Credits: `http://localhost:4002/swagger`
+    - Core: `http://localhost:4003/swagger`
 servers:
   - url: http://localhost:4004
 tags:
@@ -86,19 +92,22 @@ paths:
         content:
           application/x-www-form-urlencoded:
             schema:
-              type: object
-              properties:
-                grant_type:
-                  type: string
-                refresh_token:
-                  type: string
+              oneOf:
+                - $ref: "#/components/schemas/AuthCodeRequest"
+                - $ref: "#/components/schemas/RefreshTokenRequest"
       responses:
         "200":
           description: Proxied response from auth
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: OAuth-like error from auth
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
   /logout:
     post:
       tags: [Auth]
@@ -120,23 +129,39 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/JwksResponse"
 
   /me:
     get:
       tags: [Users]
       summary: Proxied to users /me
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Proxied response from users
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/UserProfileResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /users:
     get:
       tags: [Users]
       summary: Proxied to users /users
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Proxied response from users
@@ -145,49 +170,283 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/UserListItemResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Users]
       summary: Proxied to users /users
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                displayName:
-                  type: string
-                  nullable: true
-                roles:
-                  type: array
-                  items:
-                    type: string
+              $ref: "#/components/schemas/CreateUserRequest"
       responses:
         "201":
           description: Proxied response from users
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/CreateUserResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Conflict
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Auth service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
-  /credits:
+  /credits/issue:
+    post:
+      tags: [Credits]
+      summary: Proxied to credits /credits/issue
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IssueCreditRequest"
+      responses:
+        "201":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Tariff not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /credits/{id}:
     get:
       tags: [Credits]
-      summary: Prefix proxied to credits service
+      summary: Proxied to credits /credits/{id}
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
       responses:
         "200":
           description: Proxied response from credits
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Credit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /credits/{id}/repay:
+    post:
+      tags: [Credits]
+      summary: Proxied to credits /credits/{id}/repay
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RepayCreditRequest"
+      responses:
+        "200":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RepayCreditResponse"
+        "400":
+          description: Invalid state or amount
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Credit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /credits/by-client/{clientId}:
+    get:
+      tags: [Credits]
+      summary: Proxied to credits /credits/by-client/{clientId}
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /credits/{id}/payments:
+    get:
+      tags: [Credits]
+      summary: Proxied to credits /credits/{id}/payments
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditPaymentResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Credit not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /tariffs:
     get:
       tags: [Credits]
       summary: Proxied to credits /tariffs
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Proxied response from credits
@@ -196,35 +455,62 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/TariffResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Credits]
       summary: Proxied to credits /tariffs
+      security:
+        - bearerAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                name:
-                  type: string
-                interestRate:
-                  type: number
-                billingPeriodDays:
-                  type: integer
+              $ref: "#/components/schemas/CreateTariffRequest"
       responses:
         "201":
           description: Proxied response from credits
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/TariffResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Tariff exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 
   /accounts:
     get:
       tags: [Core]
       summary: Proxied to core /accounts
+      security:
+        - bearerAuth: []
       responses:
         "200":
           description: Proxied response from core
@@ -233,39 +519,728 @@ paths:
               schema:
                 type: array
                 items:
-                  type: object
+                  $ref: "#/components/schemas/Account"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Core]
       summary: Proxied to core /accounts
+      security:
+        - bearerAuth: []
       requestBody:
         required: false
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                clientId:
-                  type: string
+              $ref: "#/components/schemas/CreateAccountRequest"
       responses:
         "201":
           description: Proxied response from core
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/Account"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /accounts/{id}:
+    get:
+      tags: [Core]
+      summary: Proxied to core /accounts/{id}
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/{id}/close:
+    post:
+      tags: [Core]
+      summary: Proxied to core /accounts/{id}/close
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "400":
+          description: Account already closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/{id}/deposit:
+    post:
+      tags: [Core]
+      summary: Proxied to core /accounts/{id}/deposit
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositWithdrawRequest"
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "400":
+          description: Invalid amount or account closed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/{id}/withdraw:
+    post:
+      tags: [Core]
+      summary: Proxied to core /accounts/{id}/withdraw
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DepositWithdrawRequest"
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "400":
+          description: Invalid amount, account closed, or insufficient balance
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /accounts/{id}/operations:
+    get:
+      tags: [Core]
+      summary: Proxied to core /accounts/{id}/operations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - in: query
+          name: sort
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountOperationsPage"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   schemas:
     HealthResponse:
       type: object
+      description: Стандартный ответ healthcheck.
+      required: [ok]
       properties:
         ok:
           type: boolean
-      required: [ok]
-    ErrorWithMessageResponse:
+          example: true
+
+    ErrorResponse:
       type: object
+      description: Единый формат ошибки в JSON.
+      required: [error]
       properties:
         error:
           type: string
+          example: unauthorized
+
+    ErrorWithMessageResponse:
+      type: object
+      description: Ошибка с человекочитаемым сообщением (используется в gateway для запрета POST /login).
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          example: login_via_auth_only
         message:
           type: string
-      required: [error, message]
+          example: Введите пароль только на странице auth (/login)
+
+    OAuthError:
+      type: object
+      description: Ошибка в OAuth-like формате (из auth `/token`).
+      required: [error]
+      properties:
+        error:
+          type: string
+          example: invalid_grant
+        error_description:
+          type: string
+          nullable: true
+          example: code обязателен
+
+    RefreshTokenRequest:
+      type: object
+      description: Запрос обновления токенов по refresh token.
+      required: [grant_type, refresh_token]
+      properties:
+        grant_type:
+          type: string
+          enum: [refresh_token]
+          description: Тип гранта.
+        refresh_token:
+          type: string
+          description: Refresh token (opaque строка).
+
+    AuthCodeRequest:
+      type: object
+      description: Запрос обмена authorization code на токены.
+      required: [grant_type, code]
+      properties:
+        grant_type:
+          type: string
+          enum: [authorization_code]
+          description: Тип гранта.
+        code:
+          type: string
+          description: Authorization code, полученный после редиректа с `/login`.
+
+    TokenResponse:
+      type: object
+      description: |
+        Ответ с access/refresh токенами.
+
+        `access_token` — JWT (Bearer). Его нужно класть в заголовок:
+        `Authorization: Bearer <access_token>`.
+      required: [token_type, access_token, refresh_token, expires_in, scope]
+      properties:
+        token_type:
+          type: string
+          example: Bearer
+          description: Тип токена для заголовка Authorization.
+        access_token:
+          type: string
+          description: JWT access token.
+        refresh_token:
+          type: string
+          description: Refresh token (хранить безопасно, не логировать).
+        expires_in:
+          type: integer
+          example: 900
+          description: Время жизни access token в секундах.
+        scope:
+          type: string
+          example: "profile roles"
+          description: Scope строкой (через пробел).
+
+    JwksResponse:
+      type: object
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+
+    CreateUserRequest:
+      type: object
+      description: |
+        Создание пользователя (доступно `employee/admin`).
+
+        После создания профиля сервис вернёт `setupUrl`, чтобы пользователь мог установить пароль в Auth.
+      required: [username, roles]
+      properties:
+        username:
+          type: string
+          description: Логин (уникальный).
+          example: client1
+        displayName:
+          type: string
+          nullable: true
+          description: Отображаемое имя (опционально).
+          example: "Иван Петров"
+        roles:
+          type: array
+          minItems: 1
+          uniqueItems: true
+          description: |
+            Роли пользователя.
+
+            Обычно: `client`, `employee`, `admin`.
+          items:
+            type: string
+          example: ["client"]
+
+    UserProfileResponse:
+      type: object
+      description: Профиль пользователя (без паролей/секретов).
+      required: [id, username, roles, isBlocked]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID пользователя (используется как `sub` в JWT).
+        username:
+          type: string
+          description: Логин.
+        displayName:
+          type: string
+          nullable: true
+          description: Отображаемое имя.
+        roles:
+          type: array
+          items:
+            type: string
+          description: Список ролей.
+        isBlocked:
+          type: boolean
+          description: Если `true` — пользователь заблокирован.
+
+    UserListItemResponse:
+      allOf:
+        - $ref: "#/components/schemas/UserProfileResponse"
+        - type: object
+          required: [createdAt]
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+
+    CreateUserResponse:
+      allOf:
+        - $ref: "#/components/schemas/UserProfileResponse"
+        - type: object
+          required: [setupUrl]
+          properties:
+            setupUrl:
+              type: string
+              nullable: true
+
+    CreateTariffRequest:
+      type: object
+      description: |
+        Создание тарифа (доступно `employee/admin`).
+
+        `interestRate` — доля начисления за период, например `0.015` = 1.5% за `billingPeriodDays` дней.
+      required: [name, interestRate]
+      properties:
+        name:
+          type: string
+          example: "Стандартный 1.5%/день"
+        interestRate:
+          type: number
+          minimum: 0
+          example: 0.015
+        billingPeriodDays:
+          type: integer
+          minimum: 1
+          default: 1
+          example: 1
+
+    TariffResponse:
+      type: object
+      description: Кредитный тариф.
+      required: [id, name, interestRate, billingPeriodDays, isActive, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        interestRate:
+          type: string
+          description: Ставка строкой (decimal, 4 знака), например `"0.0150"`.
+        billingPeriodDays:
+          type: integer
+        isActive:
+          type: boolean
+        createdAt:
+          type: string
+          format: date-time
+
+    IssueCreditRequest:
+      type: object
+      required: [clientId, accountId, tariffId, amount]
+      properties:
+        clientId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        tariffId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0.01
+
+    RepayCreditRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+
+    CreditResponse:
+      type: object
+      description: |
+        Кредит.
+
+        Денежные значения отдаются строкой (decimal).
+      required:
+        [
+          id,
+          clientId,
+          accountId,
+          tariffId,
+          principalAmount,
+          outstandingAmount,
+          status,
+          issuedAt,
+          nextPaymentDueAt,
+          createdAt,
+        ]
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        tariffId:
+          type: string
+          format: uuid
+        principalAmount:
+          type: string
+          description: Первоначальная сумма (decimal строкой).
+        outstandingAmount:
+          type: string
+          description: Остаток долга (decimal строкой).
+        status:
+          type: string
+          enum: [active, closed, defaulted]
+          description: Статус кредита.
+        issuedAt:
+          type: string
+          format: date-time
+        nextPaymentDueAt:
+          type: string
+          format: date-time
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    RepayCreditResponse:
+      type: object
+      required: [id, status, outstandingAmount]
+      properties:
+        id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [active, closed, defaulted]
+        outstandingAmount:
+          type: string
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreditPaymentResponse:
+      type: object
+      description: Событие/платёж в истории кредита.
+      required:
+        [id, creditId, amount, paymentType, performedBy, performedAt, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        creditId:
+          type: string
+          format: uuid
+        amount:
+          type: string
+        paymentType:
+          type: string
+          enum: [issue, repayment, accrual]
+          description: Тип события.
+        performedBy:
+          type: string
+          description: Кто инициировал (userId или `system:*`).
+        performedAt:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+
+    MoneyString:
+      type: string
+      pattern: "^-?\\d+(\\.\\d{2})$"
+      examples: ["0.00", "10.50", "-3.20"]
+
+    Account:
+      type: object
+      description: Банковский счёт (Core).
+      required: [id, clientId, balance, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        balance:
+          $ref: "#/components/schemas/MoneyString"
+        status:
+          type: string
+          enum: [open, closed]
+          description: Статус счёта.
+        createdAt:
+          type: string
+          format: date-time
+
+    CreateAccountRequest:
+      type: object
+      properties:
+        clientId:
+          type: string
+          format: uuid
+
+    DepositWithdrawRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount:
+          type: number
+          minimum: 0.01
+
+    AccountOperation:
+      type: object
+      required: [id, accountId, amount, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        amount:
+          $ref: "#/components/schemas/MoneyString"
+        type:
+          type: string
+          nullable: true
+        correlationId:
+          type: string
+          format: uuid
+          nullable: true
+        idempotencyKey:
+          type: string
+          nullable: true
+        meta:
+          type: object
+          nullable: true
+          additionalProperties: true
+        createdAt:
+          type: string
+          format: date-time
+
+    AccountOperationsPage:
+      type: object
+      description: Пагинированный список операций по счёту.
+      required: [items, total]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountOperation"
+        total:
+          type: integer
+          minimum: 0

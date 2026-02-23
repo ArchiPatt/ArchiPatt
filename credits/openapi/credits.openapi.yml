@@ -2,10 +2,18 @@ openapi: 3.0.3
 info:
   title: Credits Service API
   version: 1.0.0
+  description: |
+    Credits — сервис кредитов и тарифов.
+
+    **Договорённости по форматам данных**
+    - Денежные значения в ответах (`principalAmount`, `outstandingAmount`, `amount`) отдаются строкой (decimal с 2 знаками), чтобы избежать проблем точности `number` на фронте.
+    - `interestRate` в тарифе хранится строкой с 4 знаками (decimal), а в запросе на создание приходит как `number`.
+    - Все даты/время — ISO 8601 в UTC (`date-time`).
 servers:
   - url: http://localhost:4002
 tags:
   - name: Credits
+    description: Публичные методы (Bearer JWT).
 paths:
   /health:
     get:
@@ -22,6 +30,7 @@ paths:
     get:
       tags: [Credits]
       summary: Active tariffs
+      description: Возвращает список активных тарифов (виден всем авторизованным пользователям).
       security:
         - bearerAuth: []
       responses:
@@ -39,9 +48,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
     post:
       tags: [Credits]
       summary: Create tariff (employee/admin)
+      description: Создаёт новый тариф. Доступно только `employee/admin`.
       security:
         - bearerAuth: []
       requestBody:
@@ -63,28 +75,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_input:
+                  value: { error: invalid_input }
+                invalid_billing_period:
+                  value: { error: invalid_billing_period }
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "409":
           description: Tariff exists
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: tariff_exists
   /credits/issue:
     post:
       tags: [Credits]
       summary: Issue credit
+      description: |
+        Выдаёт кредит и зачисляет деньги на `accountId` через интеграцию с Core.
+
+        Доступ:
+        - `client` только для себя (`clientId = token.sub`)
+        - `employee/admin` для любого клиента
       security:
         - bearerAuth: []
       requestBody:
@@ -106,28 +135,41 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_input:
+                  value: { error: invalid_input }
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Tariff not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: tariff_not_found
   /credits/{id}/repay:
     post:
       tags: [Credits]
       summary: Repay credit
+      description: |
+        Погашает кредит (уменьшает `outstandingAmount`).
+
+        Если остаток становится `0`, кредит переводится в `closed`, а `closedAt` заполняется.
       security:
         - bearerAuth: []
       parameters:
@@ -156,28 +198,45 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_amount:
+                  value: { error: invalid_amount }
+                credit_not_active:
+                  value: { error: credit_not_active }
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Credit not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: credit_not_found
   /credits/by-client/{clientId}:
     get:
       tags: [Credits]
       summary: Credits by client
+      description: |
+        Возвращает список кредитов клиента.
+
+        Доступ:
+        - `client` только для себя (`clientId = token.sub`)
+        - `employee/admin` для любого клиента
       security:
         - bearerAuth: []
       parameters:
@@ -202,16 +261,21 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
   /credits/{id}:
     get:
       tags: [Credits]
       summary: Credit details
+      description: Детальная информация по кредиту.
       security:
         - bearerAuth: []
       parameters:
@@ -234,22 +298,29 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Credit not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: credit_not_found
   /credits/{id}/payments:
     get:
       tags: [Credits]
       summary: Credit payment history
+      description: История событий по кредиту (платежи, выдача, начисления).
       security:
         - bearerAuth: []
       parameters:
@@ -274,22 +345,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Credit not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: credit_not_found
   /credits/accrue/run:
     post:
       tags: [Credits]
       summary: Run accrual worker cycle manually (employee/admin)
+      description: |
+        Ручной запуск цикла начислений процентов (для тестов/демо).
+
+        Доступ:
+        - `employee`, `admin`
       security:
         - bearerAuth: []
       responses:
@@ -305,12 +387,16 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
 components:
   securitySchemes:
     bearerAuth:
@@ -320,144 +406,281 @@ components:
   schemas:
     HealthResponse:
       type: object
+      description: Стандартный ответ healthcheck.
       properties:
         ok:
           type: boolean
+          description: Признак, что сервис жив.
+          example: true
       required: [ok]
     ErrorResponse:
       type: object
+      description: |
+        Единый формат ошибки в JSON.
+
+        `error` — машинно-читаемый код.
       properties:
         error:
           type: string
+          example: unauthorized
       required: [error]
     CreateTariffRequest:
       type: object
+      description: |
+        Создание кредитного тарифа (доступно `employee/admin`).
+
+        `interestRate` — **доля** (не проценты) начисления за один расчётный период.
+        Пример: `0.015` = 1.5% за период (`billingPeriodDays` дней).
       properties:
         name:
           type: string
+          description: Уникальное имя тарифа.
+          example: "Стандартный 1.5%/день"
         interestRate:
           type: number
+          minimum: 0
+          description: Ставка начисления за период, доля (например `0.015`).
+          example: 0.015
         billingPeriodDays:
           type: integer
+          description: |
+            Длина расчётного периода в днях.
+
+            Если не передано — берётся значение по умолчанию `1`.
+          minimum: 1
+          default: 1
+          example: 1
       required: [name, interestRate]
     TariffResponse:
       type: object
+      description: Кредитный тариф.
       properties:
         id:
           type: string
           format: uuid
+          description: ID тарифа.
+          example: 7f2d0a0b-0a33-4b52-aaf8-8a94d7c7d2f1
         name:
           type: string
+          description: Уникальное имя тарифа.
+          example: "Стандартный 1.5%/день"
         interestRate:
           type: string
+          description: |
+            Ставка начисления за период в виде строки (decimal, 4 знака).
+
+            Пример: `"0.0150"` означает 1.5% за период (`billingPeriodDays` дней).
+          example: "0.0150"
         billingPeriodDays:
           type: integer
+          description: Длина расчётного периода (в днях).
+          example: 1
         isActive:
           type: boolean
+          description: Активен ли тариф.
+          example: true
         createdAt:
           type: string
           format: date-time
+          description: Дата создания тарифа.
+          example: "2026-02-23T12:34:56.000Z"
       required: [id, name, interestRate, billingPeriodDays, isActive, createdAt]
     IssueCreditRequest:
       type: object
+      description: |
+        Запрос на выдачу кредита.
+
+        Доступ:
+        - `client` может выпускать кредит **только для себя** (`clientId = token.sub`)
+        - `employee/admin` могут выпускать кредит для любого клиента
       properties:
         clientId:
           type: string
           format: uuid
+          description: ID клиента (профиль в Users Service).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
         accountId:
           type: string
           format: uuid
+          description: ID счёта в Core, куда зачислить деньги.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
         tariffId:
           type: string
           format: uuid
+          description: ID активного тарифа.
+          example: 7f2d0a0b-0a33-4b52-aaf8-8a94d7c7d2f1
         amount:
           type: number
+          minimum: 0.01
+          description: Сумма выдачи кредита.
+          example: 10000
       required: [clientId, accountId, tariffId, amount]
     RepayCreditRequest:
       type: object
+      description: |
+        Погашение кредита.
+
+        Деньги списываются с `accountId`, указанного в кредите (интеграция с Core).
       properties:
         amount:
           type: number
+          minimum: 0.01
+          description: Сумма платежа.
+          example: 500
       required: [amount]
     CreditResponse:
       type: object
+      description: |
+        Кредит.
+
+        `principalAmount` — первоначальная сумма кредита.
+        `outstandingAmount` — остаток долга (с учётом начислений и платежей).
       properties:
         id:
           type: string
           format: uuid
+          description: ID кредита.
         clientId:
           type: string
           format: uuid
+          description: ID клиента (владелец кредита).
         accountId:
           type: string
           format: uuid
+          description: ID счёта в Core, через который проходят зачисления/платежи.
         tariffId:
           type: string
           format: uuid
+          description: ID тарифа, по которому был выдан кредит.
         principalAmount:
           type: string
+          description: Первоначальная сумма (decimal строкой).
+          example: "10000.00"
         outstandingAmount:
           type: string
+          description: Остаток долга (decimal строкой).
+          example: "9500.00"
         status:
           type: string
+          description: |
+            Статус кредита:
+            - `active` — активен
+            - `closed` — полностью погашен
+            - `defaulted` — дефолт (зарезервировано на будущее)
+          enum: [active, closed, defaulted]
+          example: active
         issuedAt:
           type: string
           format: date-time
+          description: Дата выдачи кредита.
         nextPaymentDueAt:
           type: string
           format: date-time
+          description: |
+            Следующая дата начисления процентов/платежа.
+
+            Начисление процентов происходит циклически с шагом `billingPeriodDays`.
         closedAt:
           type: string
           format: date-time
           nullable: true
+          description: Дата закрытия (если кредит закрыт).
         createdAt:
           type: string
           format: date-time
-      required: [id, clientId, accountId, tariffId, principalAmount, outstandingAmount, status, issuedAt, nextPaymentDueAt, createdAt]
+          description: Дата создания записи.
+      required:
+        [
+          id,
+          clientId,
+          accountId,
+          tariffId,
+          principalAmount,
+          outstandingAmount,
+          status,
+          issuedAt,
+          nextPaymentDueAt,
+          createdAt,
+        ]
     RepayCreditResponse:
       type: object
+      description: Ответ после платежа по кредиту.
       properties:
         id:
           type: string
           format: uuid
+          description: ID кредита.
         status:
           type: string
+          description: Новый статус кредита.
+          enum: [active, closed, defaulted]
+          example: active
         outstandingAmount:
           type: string
+          description: Новый остаток долга (decimal строкой).
+          example: "9000.00"
         closedAt:
           type: string
           format: date-time
           nullable: true
+          description: Заполняется, если после платежа кредит закрылся.
       required: [id, status, outstandingAmount]
     CreditPaymentResponse:
       type: object
+      description: История событий по кредиту (выдача / платежи / начисления).
       properties:
         id:
           type: string
           format: uuid
+          description: ID записи в истории.
         creditId:
           type: string
           format: uuid
+          description: ID кредита.
         amount:
           type: string
+          description: Сумма события (decimal строкой).
+          example: "150.00"
         paymentType:
           type: string
+          description: |
+            Тип события:
+            - `issue` — выдача кредита
+            - `repayment` — платёж клиента
+            - `accrual` — начисление процентов (системное)
+          enum: [issue, repayment, accrual]
+          example: repayment
         performedBy:
           type: string
+          description: |
+            Кто инициировал:
+            - обычно `userId` (из JWT `sub`)
+            - либо системная строка, например `system:accrual-worker`
+          example: "system:accrual-worker"
         performedAt:
           type: string
           format: date-time
+          description: Дата фактического выполнения (событие).
         createdAt:
           type: string
           format: date-time
-      required: [id, creditId, amount, paymentType, performedBy, performedAt, createdAt]
+          description: Дата создания записи в БД.
+      required:
+        [id, creditId, amount, paymentType, performedBy, performedAt, createdAt]
     AccrualSummaryResponse:
       type: object
+      description: Итог ручного прогона начислений.
       properties:
         processedCredits:
           type: integer
+          description: Сколько кредитов было обновлено (у которых наступил due).
+          example: 3
         accrualsCreated:
           type: integer
+          description: Сколько записей начислений создано в истории платежей.
+          example: 5
         accruedTotal:
           type: string
+          description: Общая начисленная сумма (decimal строкой).
+          example: "125.50"
       required: [processedCredits, accrualsCreated, accruedTotal]
