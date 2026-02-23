@@ -38,11 +38,6 @@ export const env = {
     name: process.env.DB_NAME ?? "auth",
   },
 
-  session: {
-    cookieName: process.env.SESSION_COOKIE_NAME ?? "sid",
-    ttlSeconds: num("SESSION_TTL_SECONDS", 60 * 60 * 24 * 7),
-  },
-
   tokens: {
     accessTtlSeconds: num("ACCESS_TOKEN_TTL_SECONDS", 15 * 60),
     idTtlSeconds: num("ID_TOKEN_TTL_SECONDS", 15 * 60),
@@ -57,6 +52,7 @@ export const env = {
     baseUrl: must("USERS_SERVICE_URL"),
     internalToken: must("USERS_INTERNAL_TOKEN"),
   },
+  internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? process.env.USERS_INTERNAL_TOKEN ?? "",
 
   seed: {
     adminUsername: process.env.SEED_ADMIN_USERNAME ?? "admin",

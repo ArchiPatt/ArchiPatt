@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 
 export function registerDocsRoutes(app: FastifyInstance) {
   app.get("/swagger.yml", async (_req, reply) => {
-    const filePath = path.join(process.cwd(), "openapi", "users.openapi.yml");
+    const filePath = path.join(__dirname, "..", "..", "openapi", "users.openapi.yml");
     const yml = await readFile(filePath, "utf-8");
     reply.type("application/yaml; charset=utf-8");
     return yml;
@@ -33,7 +33,8 @@ export function registerDocsRoutes(app: FastifyInstance) {
       SwaggerUIBundle({
         url: "/swagger.yml",
         dom_id: "#swagger-ui",
-        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset]
+        presets: [SwaggerUIBundle.presets.apis, SwaggerUIStandalonePreset],
+        layout: "BaseLayout"
       });
     </script>
   </body>

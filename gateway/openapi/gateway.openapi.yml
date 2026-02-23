@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: Gateway API
+  version: 1.0.0
+  description: |
+    Единая точка входа в систему.
+    Gateway проксирует запросы в auth/users/credits.
+    Ввод пароля допускается только на страницах auth.
+servers:
+  - url: http://localhost:4004
+tags:
+  - name: Gateway
+  - name: Auth
+  - name: Users
+  - name: Credits
+  - name: Core
+paths:
+  /health:
+    get:
+      tags: [Gateway]
+      summary: Healthcheck
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /swagger:
+    get:
+      tags: [Gateway]
+      summary: Swagger UI for gateway
+      responses:
+        "200":
+          description: HTML page
+  /swagger.yml:
+    get:
+      tags: [Gateway]
+      summary: OpenAPI YAML for gateway
+      responses:
+        "200":
+          description: YAML spec
+
+  /login:
+    get:
+      tags: [Auth]
+      summary: Redirect to auth login page
+      responses:
+        "302":
+          description: Redirect to auth
+    post:
+      tags: [Auth]
+      summary: Disabled on gateway (password only on auth page)
+      responses:
+        "400":
+          description: login_via_auth_only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorWithMessageResponse"
+
+  /setup-password:
+    get:
+      tags: [Auth]
+      summary: Redirect to auth password setup page
+      responses:
+        "302":
+          description: Redirect to auth
+    post:
+      tags: [Auth]
+      summary: Disabled on gateway (password only on auth page)
+      responses:
+        "400":
+          description: password_setup_via_auth_only
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorWithMessageResponse"
+
+  /token:
+    post:
+      tags: [Auth]
+      summary: Proxied to auth /token
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                refresh_token:
+                  type: string
+      responses:
+        "200":
+          description: Proxied response from auth
+          content:
+            application/json:
+              schema:
+                type: object
+  /logout:
+    post:
+      tags: [Auth]
+      summary: Proxied to auth /logout
+      responses:
+        "200":
+          description: Proxied response from auth
+          content:
+            application/json:
+              schema:
+                type: object
+  /jwks:
+    get:
+      tags: [Auth]
+      summary: Proxied to auth /jwks
+      responses:
+        "200":
+          description: Proxied response from auth
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /me:
+    get:
+      tags: [Users]
+      summary: Proxied to users /me
+      responses:
+        "200":
+          description: Proxied response from users
+          content:
+            application/json:
+              schema:
+                type: object
+  /users:
+    get:
+      tags: [Users]
+      summary: Proxied to users /users
+      responses:
+        "200":
+          description: Proxied response from users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      tags: [Users]
+      summary: Proxied to users /users
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                displayName:
+                  type: string
+                  nullable: true
+                roles:
+                  type: array
+                  items:
+                    type: string
+      responses:
+        "201":
+          description: Proxied response from users
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /credits:
+    get:
+      tags: [Credits]
+      summary: Prefix proxied to credits service
+      responses:
+        "200":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: object
+  /tariffs:
+    get:
+      tags: [Credits]
+      summary: Proxied to credits /tariffs
+      responses:
+        "200":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      tags: [Credits]
+      summary: Proxied to credits /tariffs
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                interestRate:
+                  type: number
+                billingPeriodDays:
+                  type: integer
+      responses:
+        "201":
+          description: Proxied response from credits
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /accounts:
+    get:
+      tags: [Core]
+      summary: Proxied to core /accounts
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+    post:
+      tags: [Core]
+      summary: Proxied to core /accounts
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientId:
+                  type: string
+      responses:
+        "201":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+    ErrorWithMessageResponse:
+      type: object
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+      required: [error, message]

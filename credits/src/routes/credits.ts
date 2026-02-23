@@ -1,40 +1,14 @@
-import { FastifyInstance } from "fastify";
-import { CreditTariff } from "../db/entities/CreditTariff";
+import { FastifyInstance, FastifyRequest } from "fastify";
+import { JWTPayload } from "jose";
+import { DataSource, In } from "typeorm";
 import { Credit } from "../db/entities/Credit";
 import { CreditPayment } from "../db/entities/CreditPayment";
-import { hasRole, verifyBearerToken } from "../security/jwt";
+import { CreditTariff } from "../db/entities/CreditTariff";
+import { postAccountOperation } from "../integrations/core-service";
+import { verifyBearerToken } from "../security/jwt";
 
-type CreateTariffBody = {
-  name?: string;
-  interestRate?: number;
-  billingPeriodDays?: number;
-};
-
-type IssueCreditBody = {
-  clientId?: string;
-  accountId?: string;
-  tariffId?: string;
-  amount?: number;
-};
-
-type RepayBody = {
-  amount?: number;
-};
-
-async function authPayloadOrNull(req: any): Promise<any | null> {
-  try {
-    return await verifyBearerToken(req.headers.authorization);
-  } catch {
-    return null;
-  }
-}
-
-function isEmployee(payload: any): boolean {
-  return hasRole(payload, "employee") || hasRole(payload, "admin");
-}
-
-function canManageAll(payload: any): boolean {
-  return isEmployee(payload);
+function toMoneyString(v: number): string {
+  return v.toFixed(2);
 }
 
 function nowPlusDays(days: number): Date {
@@ -43,26 +17,121 @@ function nowPlusDays(days: number): Date {
   return d;
 }
 
-function toMoneyString(v: number): string {
-  return v.toFixed(2);
+function addDays(base: Date, days: number): Date {
+  const d = new Date(base);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d;
+}
+
+function hasRole(payload: JWTPayload | null, role: string): boolean {
+  const roles = payload?.roles;
+  return Array.isArray(roles) && roles.includes(role);
+}
+
+function isEmployee(payload: JWTPayload): boolean {
+  return hasRole(payload, "employee") || hasRole(payload, "admin");
+}
+
+function requireAuth(payload: JWTPayload | null) {
+  if (!payload) return { ok: false as const, code: 401 as const };
+  return { ok: true as const, payload };
+}
+
+async function safeVerify(req: FastifyRequest) {
+  try {
+    return await verifyBearerToken(req.headers.authorization);
+  } catch {
+    return null;
+  }
+}
+
+export async function accrueDueCredits(ds: DataSource, now: Date = new Date()) {
+  const creditsRepo = ds.getRepository(Credit);
+  const dueCredits = await creditsRepo.find({
+    where: { status: "active" as const },
+    order: { nextPaymentDueAt: "ASC" }
+  });
+
+  const effectiveDueCredits = dueCredits.filter((c) => c.nextPaymentDueAt.getTime() <= now.getTime());
+  if (!effectiveDueCredits.length) {
+    return { processedCredits: 0, accrualsCreated: 0, accruedTotal: "0.00" };
+  }
+
+  const tariffIds = [...new Set(effectiveDueCredits.map((c) => c.tariffId))];
+  const tariffs = await ds.getRepository(CreditTariff).find({ where: { id: In(tariffIds), isActive: true } });
+  const tariffsById = new Map(tariffs.map((t) => [t.id, t]));
+
+  let processedCredits = 0;
+  let accrualsCreated = 0;
+  let accruedTotal = 0;
+
+  await ds.transaction(async (tx) => {
+    const txCredits = tx.getRepository(Credit);
+    const txPayments = tx.getRepository(CreditPayment);
+
+    for (const credit of effectiveDueCredits) {
+      const tariff = tariffsById.get(credit.tariffId);
+      if (!tariff) continue;
+
+      const rate = Number(tariff.interestRate);
+      if (!Number.isFinite(rate) || rate < 0) continue;
+
+      const periodDays = tariff.billingPeriodDays > 0 ? tariff.billingPeriodDays : 1;
+      const maxCycles = 366;
+      let cycles = 0;
+      let outstanding = Number(credit.outstandingAmount);
+      let dueAt = new Date(credit.nextPaymentDueAt);
+
+      while (dueAt.getTime() <= now.getTime() && cycles < maxCycles) {
+        cycles += 1;
+        const interestAmount = Number((outstanding * rate).toFixed(2));
+        if (interestAmount > 0) {
+          outstanding += interestAmount;
+          accruedTotal += interestAmount;
+          accrualsCreated += 1;
+          await txPayments.save(
+            txPayments.create({
+              creditId: credit.id,
+              amount: toMoneyString(interestAmount),
+              paymentType: "accrual",
+              performedBy: "system:accrual-worker",
+              performedAt: new Date()
+            })
+          );
+        }
+        dueAt = addDays(dueAt, periodDays);
+      }
+
+      if (cycles > 0) {
+        credit.outstandingAmount = toMoneyString(outstanding);
+        credit.nextPaymentDueAt = dueAt;
+        await txCredits.save(credit);
+        processedCredits += 1;
+      }
+    }
+  });
+
+  return { processedCredits, accrualsCreated, accruedTotal: toMoneyString(accruedTotal) };
 }
 
 export function registerCreditsRoutes(app: FastifyInstance) {
   app.get("/tariffs", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    const repo = app.db.getRepository(CreditTariff);
-    return await repo.find({
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+
+    const tariffs = await app.db.getRepository(CreditTariff).find({
       where: { isActive: true },
-      order: { createdAt: "DESC" },
+      order: { createdAt: "DESC" }
     });
+    return reply.code(200).send(tariffs);
   });
 
-  app.post<{ Body: CreateTariffBody }>("/tariffs", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    if (!canManageAll(payload))
-      return reply.code(403).send({ error: "forbidden" });
+  app.post<{ Body: { name?: string; interestRate?: number; billingPeriodDays?: number } }>("/tariffs", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    if (!isEmployee(a.payload)) return reply.code(403).send({ error: "forbidden" });
 
     const name = req.body?.name?.trim();
     const interestRate = req.body?.interestRate;
@@ -84,37 +153,31 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         name,
         interestRate: interestRate.toFixed(4),
         billingPeriodDays,
-        isActive: true,
-      }),
+        isActive: true
+      })
     );
     return reply.code(201).send(tariff);
   });
 
-  app.post<{ Body: IssueCreditBody }>("/credits/issue", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+  app.post<{ Body: { clientId?: string; accountId?: string; tariffId?: string; amount?: number } }>("/credits/issue", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+
     const clientId = req.body?.clientId;
     const accountId = req.body?.accountId;
     const tariffId = req.body?.tariffId;
     const amount = req.body?.amount;
 
-    if (
-      !clientId ||
-      !accountId ||
-      !tariffId ||
-      typeof amount !== "number" ||
-      amount <= 0
-    ) {
+    if (!clientId || !accountId || !tariffId || typeof amount !== "number" || amount <= 0) {
       return reply.code(400).send({ error: "invalid_input" });
     }
-    const isOwner = payload?.sub === clientId;
-    const allowed = isEmployee(payload) || isOwner;
+
+    const isOwner = String(a.payload.sub ?? "") === clientId;
+    const allowed = isEmployee(a.payload) || isOwner;
     if (!allowed) return reply.code(403).send({ error: "forbidden" });
 
-    const tariffRepo = app.db.getRepository(CreditTariff);
-    const tariff = await tariffRepo.findOne({
-      where: { id: tariffId, isActive: true },
-    });
+    const tariff = await app.db.getRepository(CreditTariff).findOne({ where: { id: tariffId, isActive: true } });
     if (!tariff) return reply.code(404).send({ error: "tariff_not_found" });
 
     const creditsRepo = app.db.getRepository(Credit);
@@ -130,117 +193,142 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         status: "active",
         issuedAt: new Date(),
         nextPaymentDueAt: nowPlusDays(tariff.billingPeriodDays),
-        closedAt: null,
-      }),
+        closedAt: null
+      })
     );
 
-    await paymentsRepo.save(
+    const payment = await paymentsRepo.save(
       paymentsRepo.create({
         creditId: credit.id,
         amount: toMoneyString(amount),
         paymentType: "issue",
-        performedBy: String(payload?.sub ?? "unknown"),
-        performedAt: new Date(),
-      }),
+        performedBy: String(a.payload.sub ?? "unknown"),
+        performedAt: new Date()
+      })
     );
+
+    await postAccountOperation({
+      accountId,
+      amount,
+      kind: "credit",
+      idempotencyKey: `credits:issue:${payment.id}`,
+      metadata: { creditId: credit.id, clientId, tariffId }
+    });
 
     return reply.code(201).send(credit);
   });
 
-  app.post<{ Body: RepayBody }>("/credits/:id/repay", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    const creditId = (req.params as { id: string }).id;
-    const amount = req.body?.amount;
+  app.post<{ Params: { id: string }; Body: { amount?: number } }>("/credits/:id/repay", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
 
+    const amount = req.body?.amount;
     if (typeof amount !== "number" || amount <= 0) {
       return reply.code(400).send({ error: "invalid_amount" });
     }
 
     const creditsRepo = app.db.getRepository(Credit);
     const paymentsRepo = app.db.getRepository(CreditPayment);
-    const credit = await creditsRepo.findOne({ where: { id: creditId } });
-    if (!credit) return reply.code(404).send({ error: "credit_not_found" });
-    if (credit.status !== "active")
-      return reply.code(400).send({ error: "credit_not_active" });
+    const existing = await creditsRepo.findOne({ where: { id: req.params.id } });
+    if (!existing) return reply.code(404).send({ error: "credit_not_found" });
 
-    const isOwner = payload?.sub === credit.clientId;
-    const allowed = isEmployee(payload) || isOwner;
+    const isOwner = String(a.payload.sub ?? "") === existing.clientId;
+    const allowed = isEmployee(a.payload) || isOwner;
     if (!allowed) return reply.code(403).send({ error: "forbidden" });
+    if (existing.status !== "active") return reply.code(400).send({ error: "credit_not_active" });
 
-    const current = Number(credit.outstandingAmount);
+    const current = Number(existing.outstandingAmount);
     const next = Math.max(0, current - amount);
-    credit.outstandingAmount = toMoneyString(next);
+    existing.outstandingAmount = toMoneyString(next);
     if (next === 0) {
-      credit.status = "closed";
-      credit.closedAt = new Date();
+      existing.status = "closed";
+      existing.closedAt = new Date();
     }
-    await creditsRepo.save(credit);
+    const savedCredit = await creditsRepo.save(existing);
 
-    await paymentsRepo.save(
+    const payment = await paymentsRepo.save(
       paymentsRepo.create({
-        creditId: credit.id,
+        creditId: savedCredit.id,
         amount: toMoneyString(amount),
         paymentType: "repayment",
-        performedBy: String(payload?.sub ?? "unknown"),
-        performedAt: new Date(),
-      }),
+        performedBy: String(a.payload.sub ?? "unknown"),
+        performedAt: new Date()
+      })
     );
 
-    return {
-      id: credit.id,
-      status: credit.status,
-      outstandingAmount: credit.outstandingAmount,
-      closedAt: credit.closedAt,
-    };
-  });
+    await postAccountOperation({
+      accountId: savedCredit.accountId,
+      amount,
+      kind: "debit",
+      idempotencyKey: `credits:repay:${payment.id}`,
+      metadata: { creditId: savedCredit.id, clientId: savedCredit.clientId }
+    });
 
-  app.get("/credits/by-client/:clientId", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    const clientId = (req.params as { clientId: string }).clientId;
-    const isOwner = payload?.sub === clientId;
-    const allowed = isEmployee(payload) || isOwner;
-    if (!allowed) return reply.code(403).send({ error: "forbidden" });
-
-    const repo = app.db.getRepository(Credit);
-    return await repo.find({
-      where: { clientId },
-      order: { issuedAt: "DESC" },
+    return reply.code(200).send({
+      id: savedCredit.id,
+      status: savedCredit.status,
+      outstandingAmount: savedCredit.outstandingAmount,
+      closedAt: savedCredit.closedAt
     });
   });
 
-  app.get("/credits/:id", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    const id = (req.params as { id: string }).id;
-    const repo = app.db.getRepository(Credit);
-    const credit = await repo.findOne({ where: { id } });
-    if (!credit) return reply.code(404).send({ error: "credit_not_found" });
-
-    const isOwner = payload?.sub === credit.clientId;
-    const allowed = isEmployee(payload) || isOwner;
-    if (!allowed) return reply.code(403).send({ error: "forbidden" });
-
-    return credit;
+  app.post("/credits/accrue/run", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    if (!isEmployee(a.payload)) return reply.code(403).send({ error: "forbidden" });
+    const result = await accrueDueCredits(app.db);
+    return reply.code(200).send(result);
   });
 
-  app.get("/credits/:id/payments", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
-    const id = (req.params as { id: string }).id;
-    const creditsRepo = app.db.getRepository(Credit);
-    const credit = await creditsRepo.findOne({ where: { id } });
-    if (!credit) return reply.code(404).send({ error: "credit_not_found" });
+  app.get<{ Params: { clientId: string } }>("/credits/by-client/:clientId", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
 
-    const isOwner = payload?.sub === credit.clientId;
-    const allowed = isEmployee(payload) || isOwner;
+    const isOwner = String(a.payload.sub ?? "") === req.params.clientId;
+    const allowed = isEmployee(a.payload) || isOwner;
     if (!allowed) return reply.code(403).send({ error: "forbidden" });
 
-    const repo = app.db.getRepository(CreditPayment);
-    return await repo.find({
-      where: { creditId: id },
-      order: { performedAt: "DESC" },
+    const credits = await app.db.getRepository(Credit).find({
+      where: { clientId: req.params.clientId },
+      order: { issuedAt: "DESC" }
     });
+    return reply.code(200).send(credits);
+  });
+
+  app.get<{ Params: { id: string } }>("/credits/:id", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+
+    const credit = await app.db.getRepository(Credit).findOne({ where: { id: req.params.id } });
+    if (!credit) return reply.code(404).send({ error: "credit_not_found" });
+
+    const isOwner = String(a.payload.sub ?? "") === credit.clientId;
+    const allowed = isEmployee(a.payload) || isOwner;
+    if (!allowed) return reply.code(403).send({ error: "forbidden" });
+
+    return reply.code(200).send(credit);
+  });
+
+  app.get<{ Params: { id: string } }>("/credits/:id/payments", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = requireAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+
+    const credit = await app.db.getRepository(Credit).findOne({ where: { id: req.params.id } });
+    if (!credit) return reply.code(404).send({ error: "credit_not_found" });
+
+    const isOwner = String(a.payload.sub ?? "") === credit.clientId;
+    const allowed = isEmployee(a.payload) || isOwner;
+    if (!allowed) return reply.code(403).send({ error: "forbidden" });
+
+    const payments = await app.db.getRepository(CreditPayment).find({
+      where: { creditId: req.params.id },
+      order: { performedAt: "DESC" }
+    });
+    return reply.code(200).send(payments);
   });
 }

@@ -1,12 +1,13 @@
 openapi: 3.0.3
 info:
   title: Auth Service (Simple Flow)
-  version: 1.1.0
+  version: 1.2.0
   description: |
-    Упрощенный flow:
-    1) Фронт редиректит пользователя на /login?return_to=<callback фронта>
-    2) После успешного входа сервис редиректит на callback с ?code=...
-    3) Фронт меняет code на токены через POST /token
+    Redirect flow с authorization code:
+    1) Клиент открывает GET /login?return_to=<callback>
+    2) POST /login проверяет логин/пароль и редиректит на return_to?code=...
+    3) Клиент обменивает code на токены через POST /token
+    4) Для новых пользователей пароль задается только через страницу Auth: /setup-password?token=...
 servers:
   - url: http://localhost:4000
 tags:
@@ -37,11 +38,10 @@ paths:
       parameters:
         - in: query
           name: return_to
-          required: true
+          required: false
           schema:
             type: string
             format: uri
-          description: Callback URL фронтенда, куда вернется пользователь
       responses:
         "200":
           description: HTML login page
@@ -51,7 +51,7 @@ paths:
                 type: string
     post:
       tags: [Auth]
-      summary: Проверка логина/пароля и редирект на callback с code
+      summary: Проверка логина/пароля и redirect на return_to с code
       requestBody:
         required: true
         content:
@@ -69,21 +69,97 @@ paths:
                   format: uri
       responses:
         "302":
-          description: Редирект на return_to?code=...
+          description: Redirect to return_to with code
+        "403":
+          description: Пользователь заблокирован или требуется первичная установка пароля
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PasswordSetupRequiredError"
+                  - $ref: "#/components/schemas/SimpleError"
+              examples:
+                password_setup_required:
+                  value:
+                    error: password_setup_required
+                    message: сначала подтвердите пароль
+                    setupUrl: http://localhost:4000/setup-password?token=abc123
+                blocked_user:
+                  value:
+                    error: user_blocked_or_not_found
         "400":
           description: Невалидный ввод
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+
+  /setup-password:
+    get:
+      tags: [Auth]
+      summary: Страница первичной установки пароля
+      parameters:
+        - in: query
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: HTML page
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Token invalid or expired
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags: [Auth]
+      summary: Установка пароля по одноразовому token
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [token, password, passwordRepeat]
+              properties:
+                token:
+                  type: string
+                password:
+                  type: string
+                  minLength: 6
+                passwordRepeat:
+                  type: string
+      responses:
+        "200":
+          description: Password set
+          content:
+            text/html:
+              schema:
+                type: string
+        "400":
+          description: Validation or token error
+          content:
+            text/html:
+              schema:
+                type: string
 
   /token:
     post:
       tags: [Auth]
-      summary: Обмен кода на токены или refresh
+      summary: Обмен authorization_code на токены или refresh
       requestBody:
         required: true
         content:
           application/x-www-form-urlencoded:
             schema:
               oneOf:
-                - $ref: "#/components/schemas/AuthCodeTokenRequest"
+                - $ref: "#/components/schemas/AuthCodeRequest"
                 - $ref: "#/components/schemas/RefreshTokenRequest"
       responses:
         "200":
@@ -128,6 +204,59 @@ paths:
               schema:
                 type: object
 
+  /internal/users:
+    post:
+      tags: [Technical]
+      summary: Internal create user in auth (without password)
+      parameters:
+        - in: header
+          name: x-internal-token
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [username]
+              properties:
+                username:
+                  type: string
+      responses:
+        "201":
+          description: Auth user created, password setup link issued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                  username:
+                    type: string
+                  setupUrl:
+                    type: string
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+        "401":
+          description: Invalid internal token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+
 components:
   schemas:
     OAuthError:
@@ -137,14 +266,22 @@ components:
           type: string
         error_description:
           type: string
-    AuthCodeTokenRequest:
+    SimpleError:
       type: object
-      required: [grant_type, code]
       properties:
-        grant_type:
+        error:
           type: string
-          enum: [authorization_code]
-        code:
+    PasswordSetupRequiredError:
+      type: object
+      required: [error, message]
+      properties:
+        error:
+          type: string
+          enum: [password_setup_required]
+        message:
+          type: string
+          example: сначала подтвердите пароль
+        setupUrl:
           type: string
     RefreshTokenRequest:
       type: object
@@ -154,6 +291,15 @@ components:
           type: string
           enum: [refresh_token]
         refresh_token:
+          type: string
+    AuthCodeRequest:
+      type: object
+      required: [grant_type, code]
+      properties:
+        grant_type:
+          type: string
+          enum: [authorization_code]
+        code:
           type: string
     TokenResponse:
       type: object

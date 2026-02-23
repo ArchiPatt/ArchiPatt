@@ -15,6 +15,10 @@ paths:
       responses:
         "200":
           description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
   /me:
     get:
       tags: [Users]
@@ -24,8 +28,22 @@ paths:
       responses:
         "200":
           description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
         "401":
           description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /users:
     get:
       tags: [Users]
@@ -35,6 +53,24 @@ paths:
       responses:
         "200":
           description: Users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserListItemResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Users]
       summary: Create user (employee/admin)
@@ -45,19 +81,44 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                displayName:
-                  type: string
-                roles:
-                  type: array
-                  items:
-                    type: string
+              $ref: "#/components/schemas/CreateUserRequest"
       responses:
         "201":
           description: Created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreateUserResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
+          description: Username already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "502":
+          description: Auth service unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /users/{id}:
     get:
       tags: [Users]
@@ -70,9 +131,32 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       responses:
         "200":
           description: User
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserProfileResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /users/{id}/block:
     patch:
       tags: [Users]
@@ -85,18 +169,44 @@ paths:
           required: true
           schema:
             type: string
+            format: uuid
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              type: object
-              properties:
-                isBlocked:
-                  type: boolean
+              $ref: "#/components/schemas/BlockUserRequest"
       responses:
         "200":
           description: Updated
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BlockUserResponse"
+        "400":
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /internal/users/by-username/{username}:
     get:
       tags: [Internal]
@@ -110,11 +220,125 @@ paths:
       responses:
         "200":
           description: User data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/InternalUserResponse"
+        "400":
+          description: Invalid username
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "401":
           description: Unauthorized internal token
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+      required: [ok]
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required: [error]
+    CreateUserRequest:
+      type: object
+      properties:
+        username:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        roles:
+          type: array
+          items:
+            type: string
+      required: [username, roles]
+    UserProfileResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        roles:
+          type: array
+          items:
+            type: string
+        isBlocked:
+          type: boolean
+      required: [id, username, roles, isBlocked]
+    UserListItemResponse:
+      allOf:
+        - $ref: "#/components/schemas/UserProfileResponse"
+        - type: object
+          properties:
+            createdAt:
+              type: string
+              format: date-time
+          required: [createdAt]
+    CreateUserResponse:
+      allOf:
+        - $ref: "#/components/schemas/UserProfileResponse"
+        - type: object
+          properties:
+            setupUrl:
+              type: string
+              nullable: true
+          required: [setupUrl]
+    BlockUserRequest:
+      type: object
+      properties:
+        isBlocked:
+          type: boolean
+      required: [isBlocked]
+    BlockUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        isBlocked:
+          type: boolean
+      required: [id, username, isBlocked]
+    InternalUserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        roles:
+          type: array
+          items:
+            type: string
+        isBlocked:
+          type: boolean
+      required: [id, username, roles, isBlocked]
