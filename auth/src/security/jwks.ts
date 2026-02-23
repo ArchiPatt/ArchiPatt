@@ -1,4 +1,4 @@
-import { exportJWK, importJWK, JWK, CryptoKey, KeyObject } from "jose";
+import { importJWK, JWK, CryptoKey, KeyObject } from "jose";
 import { env } from "../env";
 
 type SigningKey = CryptoKey | KeyObject;
@@ -11,13 +11,30 @@ async function loadKeys(): Promise<{ privateKey: SigningKey; publicJwk: JWK }> {
   const privateJwk = JSON.parse(env.keys.privateJwkJson) as JWK;
   const privateKey = (await importJWK(privateJwk, "RS256")) as SigningKey;
 
-  const publicJwk = await exportJWK(privateKey);
-  delete (publicJwk as any).d;
-  delete (publicJwk as any).p;
-  delete (publicJwk as any).q;
-  delete (publicJwk as any).dp;
-  delete (publicJwk as any).dq;
-  delete (publicJwk as any).qi;
+  const {
+    n,
+    e,
+    kty,
+    kid,
+    use,
+    alg,
+  } = privateJwk as JWK & {
+    n?: string;
+    e?: string;
+    kty?: string;
+    kid?: string;
+    use?: string;
+    alg?: string;
+  };
+
+  if (!kty || !n || !e) {
+    throw new Error("AUTH_PRIVATE_JWK_JSON must contain RSA public fields kty,n,e");
+  }
+
+  const publicJwk: JWK = { kty, n, e };
+  if (kid) publicJwk.kid = kid;
+  if (use) publicJwk.use = use;
+  if (alg) publicJwk.alg = alg;
 
   if (!publicJwk.kid) {
     // If user generated JWK without kid, set a stable kid
