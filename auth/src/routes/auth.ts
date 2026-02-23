@@ -7,8 +7,6 @@ import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
-import { getJwks } from "../security/jwks";
-import { getJwks } from "../security/jwks";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 
 type InternalCreateUserBody = {
