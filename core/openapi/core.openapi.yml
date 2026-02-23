@@ -3,7 +3,7 @@ info:
   title: Core Service API
   version: 1.0.0
 servers:
-  - url: http://localhost:4003
+  - url: http://localhost:4000
 tags:
   - name: Core
   - name: Internal
@@ -37,7 +37,7 @@ paths:
           description: Forbidden
     post:
       tags: [Core]
-      summary: Create AccountCard
+      summary: Create account
       security:
         - bearerAuth: []
       requestBody:
@@ -60,7 +60,7 @@ paths:
   /accounts/{id}:
     get:
       tags: [Core]
-      summary: Get AccountCard
+      summary: Get account
       security:
         - bearerAuth: []
       parameters:
@@ -82,7 +82,7 @@ paths:
   /accounts/{id}/close:
     post:
       tags: [Core]
-      summary: Close AccountCard
+      summary: Close account
       security:
         - bearerAuth: []
       parameters:
@@ -106,7 +106,7 @@ paths:
   /accounts/{id}/deposit:
     post:
       tags: [Core]
-      summary: Deposit to AccountCard
+      summary: Deposit to account
       security:
         - bearerAuth: []
       parameters:
@@ -131,7 +131,7 @@ paths:
         "200":
           description: OK
         "400":
-          description: Invalid amount or AccountCard closed
+          description: Invalid amount or account closed
         "401":
           description: Unauthorized
         "403":
@@ -141,7 +141,7 @@ paths:
   /accounts/{id}/withdraw:
     post:
       tags: [Core]
-      summary: Withdraw from AccountCard
+      summary: Withdraw from account
       security:
         - bearerAuth: []
       parameters:
@@ -166,7 +166,7 @@ paths:
         "200":
           description: OK
         "400":
-          description: Invalid amount, AccountCard closed, or insufficient balance
+          description: Invalid amount, account closed, or insufficient balance
         "401":
           description: Unauthorized
         "403":
@@ -176,7 +176,7 @@ paths:
   /accounts/{id}/operations:
     get:
       tags: [Core]
-      summary: List AccountCard operations
+      summary: List account operations
       security:
         - bearerAuth: []
       parameters:
@@ -235,7 +235,7 @@ paths:
               properties:
                 amount:
                   type: number
-                  description: Positive for CreditCard, negative for debit
+                  description: Positive for credit, negative for debit
                 idempotencyKey:
                   type: string
                 type:
@@ -251,7 +251,7 @@ paths:
         "200":
           description: Idempotent replay, existing operation returned
         "400":
-          description: Invalid amount, idempotency key required, AccountCard closed, or insufficient balance
+          description: Invalid amount, idempotency key required, account closed, or insufficient balance
         "401":
           description: Unauthorized internal token
         "404":

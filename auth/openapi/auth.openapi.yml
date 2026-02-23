@@ -12,7 +12,9 @@ servers:
   - url: http://localhost:4000
 tags:
   - name: Auth
+    description: Публичные методы аутентификации (HTML страницы / выдача токенов).
   - name: Technical
+    description: Технические/интеграционные методы (JWKS, internal API).
 paths:
   /health:
     get:
@@ -193,18 +195,22 @@ paths:
           content:
             application/json:
               schema:
-                type: object
+                $ref: "#/components/schemas/JwksResponse"
+              example:
+                keys:
+                  - kty: RSA
+                    kid: auth-default
+                    use: sig
+                    alg: RS256
+                    n: "<base64url>"
+                    e: AQAB
 
   /internal/users:
     post:
       tags: [Technical]
       summary: Internal create user in auth (without password)
-      parameters:
-        - in: header
-          name: x-internal-token
-          required: true
-          schema:
-            type: string
+      security:
+        - internalToken: []
       requestBody:
         required: true
         content:
@@ -249,62 +255,123 @@ paths:
                 $ref: "#/components/schemas/SimpleError"
 
 components:
+  securitySchemes:
+    internalToken:
+      type: apiKey
+      in: header
+      name: x-internal-token
+      description: |
+        Внутренний токен для интеграций (например, Users -> Auth при создании пользователя).
   schemas:
     OAuthError:
       type: object
+      description: Ошибка в OAuth-like формате (используется в `/token`).
       required: [error]
       properties:
         error:
           type: string
+          description: |
+            Код ошибки. Обычно:
+            - `invalid_request` — не хватает обязательных полей
+            - `invalid_grant` — неверный/просроченный code или refresh token
+            - `unsupported_grant_type` — неизвестный grant_type
+          example: invalid_grant
         error_description:
           type: string
+          description: Человекочитаемое пояснение (может отсутствовать).
+          example: code обязателен
     SimpleError:
       type: object
+      description: |
+        Простой JSON-формат ошибки: `{ "error": "..." }`.
+      required: [error]
       properties:
         error:
           type: string
+          example: unauthorized
     PasswordSetupRequiredError:
       type: object
+      description: |
+        Ошибка логина, когда у пользователя ещё не установлен пароль.
+
+        Фронту нужно показать пользователю ссылку `setupUrl` (если пришла) и предложить установить пароль.
       required: [error, message]
       properties:
         error:
           type: string
           enum: [password_setup_required]
+          description: Машинный код ошибки.
         message:
           type: string
           example: сначала подтвердите пароль
+          description: Пояснение для пользователя.
         setupUrl:
           type: string
+          nullable: true
+          description: URL страницы установки пароля (может отсутствовать).
+          example: "http://localhost:4000/setup-password?token=..."
     RefreshTokenRequest:
       type: object
+      description: Запрос обновления токенов по refresh token.
       required: [grant_type, refresh_token]
       properties:
         grant_type:
           type: string
           enum: [refresh_token]
+          description: Тип гранта.
         refresh_token:
           type: string
+          description: Refresh token (opaque строка).
+          example: "c9Vv4F... (48 chars)"
     AuthCodeRequest:
       type: object
+      description: Запрос обмена authorization code на токены.
       required: [grant_type, code]
       properties:
         grant_type:
           type: string
           enum: [authorization_code]
+          description: Тип гранта.
         code:
           type: string
+          description: Authorization code, полученный из редиректа `/login`.
+          example: "SOME_AUTH_CODE"
     TokenResponse:
       type: object
+      description: |
+        Ответ с access/refresh токенами.
+
+        `access_token` — JWT (RS256). Внутри:
+        - `sub` = `user.id` (из Users Service)
+        - `roles` = роли пользователя
+        - `iss` = `ISSUER`
       required: [token_type, access_token, refresh_token, expires_in, scope]
       properties:
         token_type:
           type: string
           example: Bearer
+          description: Тип токена для заголовка Authorization.
         access_token:
           type: string
+          description: JWT access token.
         refresh_token:
           type: string
+          description: Refresh token (хранить безопасно, не логировать).
         expires_in:
           type: integer
+          description: Время жизни access token в секундах.
+          example: 900
         scope:
           type: string
+          description: Scope строкой (через пробел).
+          example: "profile roles"
+    JwksResponse:
+      type: object
+      description: Public JWKS (набор публичных ключей) для проверки JWT другими сервисами.
+      required: [keys]
+      properties:
+        keys:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
