@@ -21,6 +21,11 @@ type LoginBody = {
   return_to?: string;
 };
 
+type DevLoginBody = {
+  username?: string;
+  password?: string;
+};
+
 type TokenBody =
   | {
       grant_type: "authorization_code";
@@ -247,6 +252,38 @@ export function registerAuthRoutes(app: FastifyInstance) {
     redirect.searchParams.set("code", code);
     return reply.redirect(redirect.toString());
   });
+
+  if (env.serverType === "DEV") {
+    app.post<{ Body: DevLoginBody }>("/dev/login", async (req, reply) => {
+      const username = req.body?.username?.trim();
+      const password = req.body?.password ?? "";
+      if (!username || !password) {
+        return reply.code(400).send({ error: "username_and_password_required" });
+      }
+
+      const userRepo = app.db.getRepository(User);
+      const user = await userRepo.findOne({ where: { username } });
+      if (!user || !user.passwordHash) {
+        return reply.code(401).send({ error: "invalid_credentials" });
+      }
+
+      const ok = await bcrypt.compare(password, user.passwordHash);
+      if (!ok) {
+        return reply.code(401).send({ error: "invalid_credentials" });
+      }
+
+      const profile = await fetchUserProfileByUsername(user.username);
+      if (!profile || profile.isBlocked) {
+        return reply.code(403).send({ error: "user_blocked_or_not_found" });
+      }
+
+      const tokens = await issueTokensForProfile(app, user.username, {
+        id: profile.id,
+        roles: profile.roles,
+      });
+      return reply.send(tokens);
+    });
+  }
 
   // Token endpoint (refresh only)
   app.post<{ Body: TokenBody }>("/token", async (req, reply) => {
