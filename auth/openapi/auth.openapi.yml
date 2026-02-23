@@ -3,8 +3,11 @@ info:
   title: Auth Service (Simple Flow)
   version: 1.2.0
   description: |
-    Упрощенный auth без OAuth/OIDC:
-    1) Для новых пользователей пароль задается через страницу Auth: /setup-password?token=...
+    Redirect flow с authorization code:
+    1) Клиент открывает GET /login?return_to=<callback>
+    2) POST /login проверяет логин/пароль и редиректит на return_to?code=...
+    3) Клиент обменивает code на токены через POST /token
+    4) Для новых пользователей пароль задается через /setup-password?token=...
 servers:
   - url: http://localhost:4000
 tags:
@@ -27,6 +30,86 @@ paths:
                     type: boolean
               example:
                 ok: true
+
+  /login:
+    get:
+      tags: [Auth]
+      summary: Страница входа (HTML)
+      parameters:
+        - in: query
+          name: return_to
+          required: false
+          schema:
+            type: string
+            format: uri
+      responses:
+        "200":
+          description: HTML login page
+          content:
+            text/html:
+              schema:
+                type: string
+    post:
+      tags: [Auth]
+      summary: Проверка логина/пароля и redirect на return_to с code
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required: [username, password, return_to]
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                return_to:
+                  type: string
+                  format: uri
+      responses:
+        "302":
+          description: Redirect to return_to with code
+        "403":
+          description: Пользователь заблокирован или требуется первичная установка пароля
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/PasswordSetupRequiredError"
+                  - $ref: "#/components/schemas/SimpleError"
+        "400":
+          description: Невалидный ввод
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SimpleError"
+
+  /token:
+    post:
+      tags: [Auth]
+      summary: Обмен authorization_code на токены или refresh
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/AuthCodeRequest"
+                - $ref: "#/components/schemas/RefreshTokenRequest"
+      responses:
+        "200":
+          description: Tokens issued
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+        "400":
+          description: OAuth-like error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OAuthError"
 
   /setup-password:
     get:
@@ -167,6 +250,14 @@ paths:
 
 components:
   schemas:
+    OAuthError:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        error_description:
+          type: string
     SimpleError:
       type: object
       properties:
@@ -183,4 +274,37 @@ components:
           type: string
           example: сначала подтвердите пароль
         setupUrl:
+          type: string
+    RefreshTokenRequest:
+      type: object
+      required: [grant_type, refresh_token]
+      properties:
+        grant_type:
+          type: string
+          enum: [refresh_token]
+        refresh_token:
+          type: string
+    AuthCodeRequest:
+      type: object
+      required: [grant_type, code]
+      properties:
+        grant_type:
+          type: string
+          enum: [authorization_code]
+        code:
+          type: string
+    TokenResponse:
+      type: object
+      required: [token_type, access_token, refresh_token, expires_in, scope]
+      properties:
+        token_type:
+          type: string
+          example: Bearer
+        access_token:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          type: integer
+        scope:
           type: string
