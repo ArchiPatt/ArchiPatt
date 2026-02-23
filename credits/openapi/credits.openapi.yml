@@ -47,7 +47,7 @@ paths:
   /credits/issue:
     post:
       tags: [Credits]
-      summary: Issue credit
+      summary: Issue CreditCard
       security:
         - bearerAuth: []
       requestBody:
@@ -71,7 +71,7 @@ paths:
   /credits/{id}/repay:
     post:
       tags: [Credits]
-      summary: Repay credit
+      summary: Repay CreditCard
       security:
         - bearerAuth: []
       parameters:

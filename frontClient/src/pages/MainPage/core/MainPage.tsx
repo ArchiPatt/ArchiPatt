@@ -1,6 +1,5 @@
-import { AccountCard } from "../../../widgets/AccountCard";
-import { CreditCard } from "../../../widgets/CreditCard";
-
+import { AccountCard } from "@/components/AccountCard";
+import { CreditCard } from "@/components/CreditCard";
 import {
     Container,
     Title,
@@ -15,7 +14,7 @@ import {
 
 import { IconPlus } from "@tabler/icons-react";
 import {Link} from "react-router-dom";
-import {LINK_PATHS} from "../../../shared/static/LINK_PATHS.ts";
+import {LINK_PATHS} from "@/constants/LINK_PATHS.ts";
 
 const MainPage = () => {
     const accounts = [1, 2, 3];
@@ -75,8 +74,8 @@ const MainPage = () => {
                         </Paper>
                     ) : (
                         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                            {accounts.map((_, index) => (
-                                <AccountCard />
+                            {accounts.map((_, i) => (
+                                <AccountCard key={i} />
                             ))}
                         </SimpleGrid>
                     )}
@@ -125,20 +124,20 @@ const MainPage = () => {
                                     Оформите кредит на выгодных условиях
                                 </Text>
 
-                                <Button
-                                    // component={Link}
-                                    to="/take-credit"
-                                    color="orange"
-                                    leftSection={<IconPlus size={16} />}
-                                >
-                                    Оформить кредит
-                                </Button>
+                                <Link to={LINK_PATHS.OPEN_CREDIT}>
+                                    <Button
+                                        color="orange"
+                                        leftSection={<IconPlus size={16} />}
+                                    >
+                                        Оформить кредит
+                                    </Button>
+                                </Link>
                             </Stack>
                         </Paper>
                     ) : (
                         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                            {allCredits.map((_, index) => (
-                                <CreditCard/>
+                            {allCredits.map((_, i) => (
+                                <CreditCard key={i} />
                             ))}
                         </SimpleGrid>
                     )}

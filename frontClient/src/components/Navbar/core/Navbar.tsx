@@ -1,19 +1,22 @@
 import {
     Group,
     Text,
-    Button, Menu, Avatar, UnstyledButton,
-
-} from '@mantine/core';
-
+    Button,
+    Menu,
+    Avatar,
+    UnstyledButton,
+} from "@mantine/core";
 import {
     IconPlus,
-    IconCreditCard, IconUser, IconLogout
-} from '@tabler/icons-react';
-import Divider = Menu.Divider;
+    IconCreditCard,
+    IconUser,
+    IconLogout,
+} from "@tabler/icons-react";
 
 import { Link } from "react-router-dom"
+import {LINK_PATHS} from "@/constants/LINK_PATHS.ts";
 
-import {LINK_PATHS} from "../../../shared/static/LINK_PATHS.ts";
+
 
 const Navbar = () => {
 
@@ -65,7 +68,7 @@ const Navbar = () => {
                         </Text>
                     </div>
 
-                    <Divider my="xs" />
+                    <Menu.Divider my="xs" />
 
                     <Link to={LINK_PATHS.PROFILE}>
                         <Menu.Item
@@ -75,7 +78,7 @@ const Navbar = () => {
                         </Menu.Item>
                     </Link>
 
-                    <Divider my="xs" />
+                    <Menu.Divider my="xs" />
 
                     <Menu.Item
                         color="red"

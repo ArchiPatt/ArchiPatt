@@ -67,46 +67,45 @@ const ProfilePage = () => {
                     <Divider my="sm" />
 
                     <Grid>
-                        <Col span={6}>
+                        <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <IconUser size={16} />
                                 <Text>{user.firstName}</Text>
                             </Group>
-                        </Col>
-                        <Col span={6}>
+                        </Grid.Col>
+                        <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <IconUser size={16} />
                                 <Text>{user.lastName}</Text>
                             </Group>
-                        </Col>
-                        <Col span={6}>
+                        </Grid.Col>
+                        <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <IconMail size={16} />
                                 <Text>{user.email}</Text>
                             </Group>
-                        </Col>
-                        <Col span={6}>
+                        </Grid.Col>
+                        <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <IconPhone size={16} />
                                 <Text>{user.phone}</Text>
                             </Group>
-                        </Col>
-                        <Col span={6}>
+                        </Grid.Col>
+                        <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <IconCalendar size={16} />
                                 <Text>{formatDate(user.birthDate)}</Text>
                             </Group>
-                        </Col>
-                        <Col span={12}>
+                        </Grid.Col>
+                        <Grid.Col span={12}>
                             <Group spacing={5} align="center">
                                 <IconMapPin size={16} />
                                 <Text>{user.address}</Text>
                             </Group>
-                        </Col>
+                        </Grid.Col>
                     </Grid>
                 </Card>
 
-                {/* Безопасность */}
                 <Card shadow="sm" padding="lg" radius="md">
                     <Group position="apart" mb="sm">
                         <Group spacing={5} align="center">
@@ -163,7 +162,6 @@ const ProfilePage = () => {
                     </Stack>
                 </Card>
 
-                {/* Опасная зона */}
                 <Card shadow="sm" padding="lg" radius="md" style={{ backgroundColor: '#fff5f5', borderColor: '#f87171' }}>
                     <Title order={4} color="red" mb="xs">
                         Опасная зона

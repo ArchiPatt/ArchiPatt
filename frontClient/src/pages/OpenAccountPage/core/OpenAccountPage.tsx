@@ -13,22 +13,11 @@ import {
     Paper,
     Alert,
     Divider,
-    Badge,
 } from '@mantine/core';
 import { IconCheck, IconArrowLeft } from '@tabler/icons-react';
 import { Link } from "react-router-dom";
-import {LINK_PATHS} from "../../../shared/static/LINK_PATHS.ts";
-
-type AccountType = 'checking' | 'savings';
-
-interface Account {
-    id: string;
-    accountNumber: string;
-    balance: number;
-    currency: string;
-    type: AccountType;
-    openDate: string;
-}
+import type { Account, AccountType } from "@/components/AccountCard";
+import {LINK_PATHS} from "@/constants/LINK_PATHS.ts";
 
 const OpenAccountPage = () => {
     const [accountType, setAccountType] = useState<AccountType>('checking');

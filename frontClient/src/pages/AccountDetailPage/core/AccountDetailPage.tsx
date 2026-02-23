@@ -210,7 +210,7 @@ const AccountDetailPage = () => {
                                     <Group justify="space-between">
                                         <Text size="sm">Остаток</Text>
                                         <Badge
-                                            // color={credit.status === 'active' ? 'blue' : 'gray'}
+                                            // color={CreditCard.status === 'active' ? 'blue' : 'gray'}
                                         >
                                             {credit.status === 'active'
                                                 ? 'Активен'
@@ -287,7 +287,6 @@ const AccountDetailPage = () => {
                 </Table>
             </Card>
 
-            {/* Deposit Modal */}
             <Modal
                 opened={depositOpened}
                 onClose={() => setDepositOpened(false)}
@@ -303,7 +302,6 @@ const AccountDetailPage = () => {
                 </Stack>
             </Modal>
 
-            {/* Withdraw Modal */}
             <Modal
                 opened={withdrawOpened}
                 onClose={() => setWithdrawOpened(false)}
@@ -319,7 +317,6 @@ const AccountDetailPage = () => {
                 </Stack>
             </Modal>
 
-            {/* Credit Payment Modal */}
             <Modal
                 opened={paymentOpened}
                 onClose={() => setPaymentOpened(false)}

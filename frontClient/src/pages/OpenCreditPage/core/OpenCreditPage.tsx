@@ -44,7 +44,6 @@ const OpenCreditPage = () => {
                 </Group>
 
                 <Group spacing="lg" align="flex-start">
-                    {/* Форма кредита */}
                     <Card shadow="sm" padding="lg" radius="md" style={{ flex: 2 }}>
                         <Title order={3}>Оформление кредита</Title>
                         <Text color="dimmed" size="sm" mb="md">Заполните форму для получения кредита</Text>
@@ -110,7 +109,6 @@ const OpenCreditPage = () => {
                         </Stack>
                     </Card>
 
-                    {/* Расчет платежа */}
                     <Card shadow="sm" padding="lg" radius="md" style={{ flex: 1 }}>
                         <Group mb="md">
                             <IconCalculator size={20} />
