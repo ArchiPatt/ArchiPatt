@@ -2,11 +2,21 @@ openapi: 3.0.3
 info:
   title: Users Service API
   version: 1.0.0
+  description: |
+    Users — сервис профилей пользователей и ролей.
+
+    **Ключевые понятия**
+    - `User` = профиль в системе (id/username/roles/displayName/isBlocked)
+    - `username` — логин (уникальный)
+    - `roles` — массив ролей (используется для авторизации в других сервисах)
+    - `isBlocked` — если `true`, пользователь не должен иметь доступа к операциям банка
 servers:
   - url: http://localhost:4001
 tags:
   - name: Users
+    description: Публичные методы (Bearer JWT).
   - name: Internal
+    description: Методы интеграций между сервисами (защищены `x-internal-token`).
 paths:
   /health:
     get:
@@ -23,6 +33,10 @@ paths:
     get:
       tags: [Users]
       summary: Current user profile
+      description: |
+        Возвращает профиль текущего пользователя по `token.sub`.
+
+        Обычно вызывается фронтом сразу после получения access token.
       security:
         - bearerAuth: []
       responses:
@@ -38,16 +52,25 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "404":
           description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: not_found
   /users:
     get:
       tags: [Users]
       summary: List users (employee/admin)
+      description: |
+        Список всех пользователей.
+
+        Доступ:
+        - `employee`, `admin`
       security:
         - bearerAuth: []
       responses:
@@ -65,15 +88,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
     post:
       tags: [Users]
       summary: Create user (employee/admin)
+      description: |
+        Создаёт пользователя в Users сервисе и инициирует создание учётных данных в Auth сервисе.
+
+        На успешный ответ (`201`) приходит `setupUrl` — ссылку можно отдать пользователю,
+        чтобы он сам установил пароль.
       security:
         - bearerAuth: []
       requestBody:
@@ -95,34 +127,55 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                username_required:
+                  value: { error: username_required }
+                roles_required:
+                  value: { error: roles_required }
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "409":
           description: Username already exists
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                username_exists:
+                  value: { error: username_exists }
+                username_exists_in_auth:
+                  value: { error: username_exists_in_auth }
         "502":
           description: Auth service unavailable
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: auth_service_unavailable
   /users/{id}:
     get:
       tags: [Users]
       summary: Get user by id (employee/admin)
+      description: |
+        Возвращает профиль пользователя по `id`.
+
+        Доступ:
+        - `employee`, `admin`
       security:
         - bearerAuth: []
       parameters:
@@ -145,22 +198,33 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: not_found
   /users/{id}/block:
     patch:
       tags: [Users]
       summary: Block/unblock user (employee/admin)
+      description: |
+        Блокирует или разблокирует пользователя.
+
+        Доступ:
+        - `employee`, `admin`
       security:
         - bearerAuth: []
       parameters:
@@ -189,28 +253,43 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                isBlocked_boolean_required:
+                  value: { error: isBlocked_boolean_required }
         "401":
           description: Unauthorized
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "403":
           description: Forbidden
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
         "404":
           description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: not_found
   /internal/users/by-username/{username}:
     get:
       tags: [Internal]
       summary: Internal lookup for auth service
+      description: |
+        Поиск пользователя по `username`.
+
+        Используется Auth сервисом при логине/выдаче токенов, чтобы получить `id`, `roles`, `isBlocked`.
+      security:
+        - internalToken: []
       parameters:
         - in: path
           name: username
@@ -230,67 +309,121 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: username_required
         "401":
           description: Unauthorized internal token
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
         "404":
           description: Not found
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: not_found
 components:
   securitySchemes:
     bearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    internalToken:
+      type: apiKey
+      in: header
+      name: x-internal-token
+      description: |
+        Внутренний токен для межсервисных интеграций.
+        Используется в `Internal` эндпоинтах.
   schemas:
     HealthResponse:
       type: object
+      description: Стандартный ответ healthcheck.
       properties:
         ok:
           type: boolean
+          description: Признак, что сервис жив.
+          example: true
       required: [ok]
     ErrorResponse:
       type: object
+      description: |
+        Единый формат ошибки в JSON.
+
+        `error` — машинно-читаемый код (удобно маппить на фронте).
       properties:
         error:
           type: string
+          example: unauthorized
       required: [error]
     CreateUserRequest:
       type: object
+      description: |
+        Создание пользователя (доступно только `employee/admin`).
+
+        После создания профиля Users сервис пытается создать учётные данные в Auth сервисе
+        и вернуть `setupUrl` (ссылка на первичную установку пароля).
       properties:
         username:
           type: string
+          description: Логин (уникальный, используется для входа в Auth).
+          example: client1
         displayName:
           type: string
           nullable: true
+          description: Отображаемое имя (может быть `null`).
+          example: "Иван Петров"
         roles:
           type: array
+          description: |
+            Роли пользователя.
+
+            Обычно используются:
+            - `client` — клиент банка
+            - `employee` — сотрудник
+            - `admin` — админ (имеет права сотрудника)
           items:
             type: string
+            example: client
+          minItems: 1
+          uniqueItems: true
       required: [username, roles]
     UserProfileResponse:
       type: object
+      description: Профиль пользователя (без чувствительных данных, паролей тут нет).
       properties:
         id:
           type: string
           format: uuid
+          description: ID пользователя (используется как `sub` в JWT).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
         username:
           type: string
+          description: Логин.
+          example: client1
         displayName:
           type: string
           nullable: true
+          description: Отображаемое имя (может быть `null`).
+          example: "Иван Петров"
         roles:
           type: array
+          description: Список ролей.
           items:
             type: string
+          example: ["client"]
         isBlocked:
           type: boolean
+          description: |
+            Блокировка пользователя.
+
+            Если `true`, Auth сервис не выдаёт токены/не пускает в систему.
+          example: false
       required: [id, username, roles, isBlocked]
     UserListItemResponse:
       allOf:
@@ -300,6 +433,8 @@ components:
             createdAt:
               type: string
               format: date-time
+              description: Дата создания профиля.
+              example: "2026-02-23T12:34:56.000Z"
           required: [createdAt]
     CreateUserResponse:
       allOf:
@@ -309,36 +444,55 @@ components:
             setupUrl:
               type: string
               nullable: true
+              description: |
+                URL для первичной установки пароля в Auth сервисе.
+
+                Может быть `null`, если Auth временно недоступен или не удалось создать учётные данные.
+              example: "http://localhost:4000/setup-password?token=..."
           required: [setupUrl]
     BlockUserRequest:
       type: object
+      description: Запрос на блокировку/разблокировку пользователя.
       properties:
         isBlocked:
           type: boolean
+          description: |
+            `true` — заблокировать
+            `false` — разблокировать
+          example: true
       required: [isBlocked]
     BlockUserResponse:
       type: object
+      description: Короткий ответ после блокировки/разблокировки.
       properties:
         id:
           type: string
           format: uuid
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
         username:
           type: string
+          example: client1
         isBlocked:
           type: boolean
+          example: true
       required: [id, username, isBlocked]
     InternalUserResponse:
       type: object
+      description: Ответ для интеграций (например, Auth ищет профиль по username).
       properties:
         id:
           type: string
           format: uuid
+          description: ID пользователя.
         username:
           type: string
+          description: Логин.
         roles:
           type: array
+          description: Роли пользователя.
           items:
             type: string
         isBlocked:
           type: boolean
+          description: Блокировка пользователя.
       required: [id, username, roles, isBlocked]
