@@ -7,6 +7,7 @@ import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { issueAccessToken } from "../security/tokens";
+import { getJwks } from "../security/jwks";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 
 type InternalCreateUserBody = {
@@ -148,6 +149,11 @@ async function issueTokensForProfile(
 }
 
 export function registerAuthRoutes(app: FastifyInstance) {
+  app.get("/jwks", async (_req, reply) => {
+    const jwks = await getJwks();
+    return reply.send(jwks);
+  });
+
   app.get<{ Querystring: LoginQuery }>("/login", async (req, reply) => {
     const returnTo = req.query.return_to ?? "";
     const err = req.query.error ?? "";
@@ -247,18 +253,14 @@ export function registerAuthRoutes(app: FastifyInstance) {
 
     if (body.grant_type === "authorization_code") {
       if (!body.code) {
-        return reply
-          .code(400)
-          .send(oauthError("invalid_request", "code обязателен"));
+        return reply.code(400).send(oauthError("invalid_request", "code обязателен"));
       }
 
       const codeRepo = app.db.getRepository(AuthorizationCode);
       const row = await codeRepo.findOne({ where: { code: body.code } });
       if (!row) return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.consumedAt)
-        return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.expiresAt.getTime() < Date.now())
-        return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.consumedAt) return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.expiresAt.getTime() < Date.now()) return reply.code(400).send(oauthError("invalid_grant"));
 
       row.consumedAt = new Date();
       await codeRepo.save(row);
@@ -267,8 +269,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
       const user = await userRepo.findOne({ where: { id: row.userId } });
       if (!user) return reply.code(400).send(oauthError("invalid_grant"));
       const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked)
-        return reply.code(400).send(oauthError("invalid_grant"));
+      if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant"));
 
       const tokenPayload = await issueTokensForProfile(app, user.username, {
         id: profile.id,
@@ -289,10 +290,8 @@ export function registerAuthRoutes(app: FastifyInstance) {
         where: { token: body.refresh_token },
       });
       if (!row) return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.revokedAt)
-        return reply.code(400).send(oauthError("invalid_grant"));
-      if (row.expiresAt.getTime() < Date.now())
-        return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.revokedAt) return reply.code(400).send(oauthError("invalid_grant"));
+      if (row.expiresAt.getTime() < Date.now()) return reply.code(400).send(oauthError("invalid_grant"));
 
       row.revokedAt = new Date();
       await refreshRepo.save(row);
@@ -303,8 +302,7 @@ export function registerAuthRoutes(app: FastifyInstance) {
       });
       if (!user) return reply.code(400).send(oauthError("invalid_grant"));
       const profile = await fetchUserProfileByUsername(user.username);
-      if (!profile || profile.isBlocked)
-        return reply.code(400).send(oauthError("invalid_grant"));
+      if (!profile || profile.isBlocked) return reply.code(400).send(oauthError("invalid_grant"));
 
       const tokenPayload = await issueTokensForProfile(
         app,
@@ -318,94 +316,67 @@ export function registerAuthRoutes(app: FastifyInstance) {
     return reply.code(400).send(oauthError("unsupported_grant_type"));
   });
 
-  app.post<{ Body: InternalCreateUserBody }>(
-    "/internal/users",
-    async (req, reply) => {
-      if (
-        !env.internalToken ||
-        req.headers["x-internal-token"] !== env.internalToken
-      ) {
-        return reply.code(401).send({ error: "unauthorized" });
-      }
+  app.post<{ Body: InternalCreateUserBody }>("/internal/users", async (req, reply) => {
+    if (!env.internalToken || req.headers["x-internal-token"] !== env.internalToken) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
 
-      const username = req.body?.username?.trim();
-      if (!username) {
-        return reply.code(400).send({ error: "invalid_input" });
-      }
+    const username = req.body?.username?.trim();
+    if (!username) {
+      return reply.code(400).send({ error: "invalid_input" });
+    }
 
-      const userRepo = app.db.getRepository(User);
-      const exists = await userRepo.findOne({ where: { username } });
-      if (exists) {
-        return reply.code(409).send({ error: "username_exists" });
-      }
+    const userRepo = app.db.getRepository(User);
+    const exists = await userRepo.findOne({ where: { username } });
+    if (exists) {
+      return reply.code(409).send({ error: "username_exists" });
+    }
 
-      const user = await userRepo.save(
-        userRepo.create({
-          username,
-          passwordHash: null,
-        }),
+    const user = await userRepo.save(
+      userRepo.create({
+        username,
+        passwordHash: null
+      })
+    );
+
+    const codeRepo = app.db.getRepository(AuthorizationCode);
+    const setupToken = nanoid(48);
+    await codeRepo.save(
+      codeRepo.create({
+        code: setupToken,
+        clientId: "password-setup",
+        userId: user.id,
+        expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        consumedAt: null
+      })
+    );
+
+    return reply.code(201).send({
+      id: user.id,
+      username: user.username,
+      setupUrl: `${env.issuer}/setup-password?token=${encodeURIComponent(setupToken)}`
+    });
+  });
+
+  app.get<{ Querystring: SetupPasswordQuery }>("/setup-password", async (req, reply) => {
+    const token = req.query?.token?.trim();
+    if (!token) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Токен обязателен</div>`)
       );
+    }
 
-      const codeRepo = app.db.getRepository(AuthorizationCode);
-      const setupToken = nanoid(48);
-      await codeRepo.save(
-        codeRepo.create({
-          code: setupToken,
-          clientId: "password-setup",
-          userId: user.id,
-          expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-          consumedAt: null,
-        }),
+    const row = await app.db.getRepository(AuthorizationCode).findOne({ where: { code: token } });
+    if (!row || row.clientId !== "password-setup" || row.consumedAt || row.expiresAt.getTime() < Date.now()) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Токен недействителен или истёк</div>`)
       );
+    }
 
-      return reply.code(201).send({
-        id: user.id,
-        username: user.username,
-        setupUrl: `${env.issuer}/setup-password?token=${encodeURIComponent(setupToken)}`,
-      });
-    },
-  );
-
-  app.get<{ Querystring: SetupPasswordQuery }>(
-    "/setup-password",
-    async (req, reply) => {
-      const token = req.query?.token?.trim();
-      if (!token) {
-        return reply
-          .code(400)
-          .type("text/html; charset=utf-8")
-          .send(
-            htmlPage(
-              "Установка пароля",
-              `<h2>Установка пароля</h2><div class="error">Токен обязателен</div>`,
-            ),
-          );
-      }
-
-      const row = await app.db
-        .getRepository(AuthorizationCode)
-        .findOne({ where: { code: token } });
-      if (
-        !row ||
-        row.clientId !== "password-setup" ||
-        row.consumedAt ||
-        row.expiresAt.getTime() < Date.now()
-      ) {
-        return reply
-          .code(400)
-          .type("text/html; charset=utf-8")
-          .send(
-            htmlPage(
-              "Установка пароля",
-              `<h2>Установка пароля</h2><div class="error">Токен недействителен или истёк</div>`,
-            ),
-          );
-      }
-
-      return reply.type("text/html; charset=utf-8").send(
-        htmlPage(
-          "Установка пароля",
-          `
+    return reply.type("text/html; charset=utf-8").send(
+      htmlPage(
+        "Установка пароля",
+        `
         <h2>Установка пароля</h2>
         <form method="post" action="/setup-password">
           <input type="hidden" name="token" value="${escapeHtml(token)}" />
@@ -417,79 +388,47 @@ export function registerAuthRoutes(app: FastifyInstance) {
           </label>
           <button type="submit">Сохранить пароль</button>
         </form>
-      `,
-        ),
+      `
+      )
+    );
+  });
+
+  app.post<{ Body: SetupPasswordBody }>("/setup-password", async (req, reply) => {
+    const token = req.body?.token?.trim();
+    const password = req.body?.password ?? "";
+    const passwordRepeat = req.body?.passwordRepeat ?? "";
+
+    if (!token || password.length < 6 || password !== passwordRepeat) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Проверьте токен и пароль (мин. 6 символов)</div>`)
       );
-    },
-  );
+    }
 
-  app.post<{ Body: SetupPasswordBody }>(
-    "/setup-password",
-    async (req, reply) => {
-      const token = req.body?.token?.trim();
-      const password = req.body?.password ?? "";
-      const passwordRepeat = req.body?.passwordRepeat ?? "";
+    const codeRepo = app.db.getRepository(AuthorizationCode);
+    const row = await codeRepo.findOne({ where: { code: token } });
+    if (!row || row.clientId !== "password-setup" || row.consumedAt || row.expiresAt.getTime() < Date.now()) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Токен недействителен или истёк</div>`)
+      );
+    }
 
-      if (!token || password.length < 6 || password !== passwordRepeat) {
-        return reply
-          .code(400)
-          .type("text/html; charset=utf-8")
-          .send(
-            htmlPage(
-              "Установка пароля",
-              `<h2>Установка пароля</h2><div class="error">Проверьте токен и пароль (мин. 6 символов)</div>`,
-            ),
-          );
-      }
+    const userRepo = app.db.getRepository(User);
+    const user = await userRepo.findOne({ where: { id: row.userId } });
+    if (!user) {
+      return reply.code(400).type("text/html; charset=utf-8").send(
+        htmlPage("Установка пароля", `<h2>Установка пароля</h2><div class="error">Пользователь не найден</div>`)
+      );
+    }
 
-      const codeRepo = app.db.getRepository(AuthorizationCode);
-      const row = await codeRepo.findOne({ where: { code: token } });
-      if (
-        !row ||
-        row.clientId !== "password-setup" ||
-        row.consumedAt ||
-        row.expiresAt.getTime() < Date.now()
-      ) {
-        return reply
-          .code(400)
-          .type("text/html; charset=utf-8")
-          .send(
-            htmlPage(
-              "Установка пароля",
-              `<h2>Установка пароля</h2><div class="error">Токен недействителен или истёк</div>`,
-            ),
-          );
-      }
+    user.passwordHash = await bcrypt.hash(password, 10);
+    await userRepo.save(user);
+    row.consumedAt = new Date();
+    await codeRepo.save(row);
 
-      const userRepo = app.db.getRepository(User);
-      const user = await userRepo.findOne({ where: { id: row.userId } });
-      if (!user) {
-        return reply
-          .code(400)
-          .type("text/html; charset=utf-8")
-          .send(
-            htmlPage(
-              "Установка пароля",
-              `<h2>Установка пароля</h2><div class="error">Пользователь не найден</div>`,
-            ),
-          );
-      }
-
-      user.passwordHash = await bcrypt.hash(password, 10);
-      await userRepo.save(user);
-      row.consumedAt = new Date();
-      await codeRepo.save(row);
-
-      return reply
-        .type("text/html; charset=utf-8")
-        .send(
-          htmlPage(
-            "Установка пароля",
-            `<h2>Готово</h2><div class="muted">Пароль установлен. Теперь можно входить в приложение.</div>`,
-          ),
-        );
-    },
-  );
+    return reply.type("text/html; charset=utf-8").send(
+      htmlPage("Установка пароля", `<h2>Готово</h2><div class="muted">Пароль установлен. Теперь можно входить в приложение.</div>`)
+    );
+  });
 
   app.post("/logout", async (_req, reply) => {
     return reply.send({ ok: true });
