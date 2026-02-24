@@ -1,7 +1,7 @@
 import axios from "axios";
 import {tokenStorage} from "../storage/tokenStorage";
 
-const instance = axios.create({ baseURL: 'http://localhost:4004' })
+const instance = axios.create({ baseURL: 'http://localhost:4004/' })
 
 
 instance.interceptors.request.use((config) => {

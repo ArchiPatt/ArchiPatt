@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/accounts/accountsApi.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/auth/authApi.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/index.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/users/usersApi.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/accessTokenRequest.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/account.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/createAccountRequest.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/refreshTokenRequest.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/tokenResponse.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/userProfileResponse.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/app/api/instance.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/app/api/instance.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="TypeScript File" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;Rodion0io&quot;
+  }
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/ArchiPatt/ArchiPatt.git&quot;,
+    &quot;accountId&quot;: &quot;f617b120-ecce-45da-b11d-1067cdb180c9&quot;
+  }
+}</component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
+  <component name="ProjectId" id="3A7LPZfP3SjaxTiy0nAtDsMOPDu" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;disable.download.node.interpreter.editor.notification&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;clientPanel&quot;,
+    &quot;javascript.preferred.runtime.type.id&quot;: &quot;node&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;npm.core.executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:generate (1).executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:generate (2).executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:generate.executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:run (1).executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:run (2).executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:run (3).executor&quot;: &quot;Run&quot;,
+    &quot;npm.migration:run.executor&quot;: &quot;Run&quot;,
+    &quot;npm.startAuth.executor&quot;: &quot;Run&quot;,
+    &quot;npm.startClinentPanel.executor&quot;: &quot;Run&quot;,
+    &quot;npm.startCore.executor&quot;: &quot;Run&quot;,
+    &quot;npm.startCredits.executor&quot;: &quot;Run&quot;,
+    &quot;npm.startGateway.executor&quot;: &quot;Run&quot;,
+    &quot;npm.startUsers.executor&quot;: &quot;Run&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/clientPanel/src/app/providers/RouteProvider" />
+      <recent name="$PROJECT_DIR$" />
+    </key>
+  </component>
+  <component name="RunDashboard">
+    <option name="configurationTypes">
+      <set>
+        <option value="js.build_tools.npm" />
+      </set>
+    </option>
+    <option name="configurationStatuses">
+      <map>
+        <entry key="js.build_tools.npm">
+          <value>
+            <map>
+              <entry key="startAuth" value="STOPPED" />
+              <entry key="startClinentPanel" value="STOPPED" />
+              <entry key="startCore" value="STOPPED" />
+              <entry key="startCredits" value="STOPPED" />
+              <entry key="startGateway" value="STOPPED" />
+              <entry key="startUsers" value="STOPPED" />
+            </map>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="RunManager" selected="npm.migration:run (2)">
+    <configuration name="migration:generate (1)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/credits/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="migration:generate" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="migration:generate (2)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$$PROJECT_DIR$/../../../package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="migration:generate" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="migration:run (1)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$$PROJECT_DIR$/../../../package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="migration:run" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="migration:run (2)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/credits/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="migration:run" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="migration:run (3)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
+      <package-json value="$PROJECT_DIR$/auth/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="migration:run" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="startAuth" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/auth/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="startClinentPanel" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/clientPanel/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="startCore" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/core/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="startCredits" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/credits/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="startGateway" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$/gateway/package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <configuration name="startUsers" type="js.build_tools.npm">
+      <package-json value="$PROJECT_DIR$$PROJECT_DIR$/../../../package.json" />
+      <command value="run" />
+      <scripts>
+        <script value="dev" />
+      </scripts>
+      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
+      <envs />
+      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
+        <browser with-js-debugger="true" />
+      </EXTENSION>
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="npm.migration:run (2)" />
+        <item itemvalue="npm.migration:generate (1)" />
+        <item itemvalue="npm.migration:run (3)" />
+        <item itemvalue="npm.migration:run (1)" />
+        <item itemvalue="npm.migration:generate (2)" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-js-predefined-d6986cc7102b-9b0f141eb926-JavaScript-WS-253.30387.83" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="" />
+      <created>1771938638444</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1771938638444</updated>
+      <workItem from="1771938639457" duration="6459000" />
+      <workItem from="1771945717836" duration="10770000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+</project>
