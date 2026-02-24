@@ -7,8 +7,8 @@ function pickColumnName(existing: string[], candidates: string[]): string {
   return candidates[0];
 }
 
-export class Migration1771762100000 implements MigrationInterface {
-  name = "Migration1771762100000";
+export class Migration1771950500836 implements MigrationInterface {
+  name = "Migration1771950500836";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const tableName = (await queryRunner.hasTable("user_profiles"))
@@ -22,46 +22,49 @@ export class Migration1771762100000 implements MigrationInterface {
     if (!table) return;
     const cols = table.columns.map((c) => c.name);
 
-    const displayNameCol = pickColumnName(cols, ["display_name", "displayName"]);
+    const displayNameCol = pickColumnName(cols, [
+      "display_name",
+      "displayName",
+    ]);
     const isBlockedCol = pickColumnName(cols, ["is_blocked", "isBlocked"]);
 
     await queryRunner.query(
       `INSERT INTO "${tableName}" ("id", "username", "${displayNameCol}", "roles", "${isBlockedCol}")
-       SELECT $1, $2, $3, $4::text[], $5
-       WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
+           SELECT $1, $2, $3, $4::text[], $5
+           WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
       [
         "11111111-1111-4111-8111-111111111111",
         "qa_employee",
         "QA Employee",
         ["employee"],
-        false
-      ]
+        false,
+      ],
     );
 
     await queryRunner.query(
       `INSERT INTO "${tableName}" ("id", "username", "${displayNameCol}", "roles", "${isBlockedCol}")
-       SELECT $1, $2, $3, $4::text[], $5
-       WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
+           SELECT $1, $2, $3, $4::text[], $5
+           WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
       [
         "22222222-2222-4222-8222-222222222222",
         "qa_client",
         "QA Client",
         ["client"],
-        false
-      ]
+        false,
+      ],
     );
 
     await queryRunner.query(
       `INSERT INTO "${tableName}" ("id", "username", "${displayNameCol}", "roles", "${isBlockedCol}")
-       SELECT $1, $2, $3, $4::text[], $5
-       WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
+           SELECT $1, $2, $3, $4::text[], $5
+           WHERE NOT EXISTS (SELECT 1 FROM "${tableName}" WHERE "username" = $2)`,
       [
         "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
         "qa_client2",
         "QA Client 2",
         ["client"],
-        false
-      ]
+        false,
+      ],
     );
   }
 
@@ -75,7 +78,7 @@ export class Migration1771762100000 implements MigrationInterface {
 
     await queryRunner.query(
       `DELETE FROM "${tableName}" WHERE "username" IN ($1, $2, $3)`,
-      ["qa_employee", "qa_client", "qa_client2"]
+      ["qa_employee", "qa_client", "qa_client2"],
     );
   }
 }
