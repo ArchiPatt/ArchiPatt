@@ -1,7 +1,9 @@
 import { FastifyInstance } from "fastify";
+import { JWTPayload } from "jose";
 import { Account } from "../db/entities/Account";
 import { AccountOperation } from "../db/entities/AccountOperation";
 import { verifyBearerToken } from "../security/jwt";
+import { fetchUserProfileByUsername } from "../integrations/users-service";
 import {
   canReadAccount,
   canManageAll,
@@ -12,9 +14,20 @@ import { env } from "../env";
 
 async function authPayloadOrNull(req: { headers: { authorization?: string } }) {
   try {
-    return await verifyBearerToken(req.headers.authorization);
+    const payload = await verifyBearerToken(req.headers.authorization);
+    const username =
+      typeof payload?.username === "string" ? payload.username : null;
+    if (!payload?.sub || !username) {
+      return { ok: false as const, code: 401 as const, error: "unauthorized" };
+    }
+
+    const profile = await fetchUserProfileByUsername(username);
+    if (!profile) return { ok: false as const, code: 401 as const, error: "unauthorized" };
+    if (profile.isBlocked) return { ok: false as const, code: 403 as const, error: "blocked_user" };
+
+    return { ok: true as const, payload };
   } catch {
-    return null;
+    return { ok: false as const, code: 401 as const, error: "unauthorized" };
   }
 }
 
@@ -22,8 +35,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
   app.get<{
     Querystring: { clientId?: string };
   }>("/accounts", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+    const auth = await authPayloadOrNull(req);
+    if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+    const payload: JWTPayload = auth.payload;
 
     const repo = app.db.getRepository(Account);
     const clientId = req.query.clientId;
@@ -44,8 +58,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
   });
 
   app.get<{ Params: { id: string } }>("/accounts/:id", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+    const auth = await authPayloadOrNull(req);
+    if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+    const payload: JWTPayload = auth.payload;
 
     const repo = app.db.getRepository(Account);
     const account = await repo.findOne({ where: { id: req.params.id } });
@@ -62,8 +77,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     Params: { id: string };
     Querystring: { limit?: string; offset?: string; sort?: string };
   }>("/accounts/:id/operations", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+    const auth = await authPayloadOrNull(req);
+    if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+    const payload: JWTPayload = auth.payload;
 
     const account = await app.db
       .getRepository(Account)
@@ -93,8 +109,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
   });
 
   app.post<{ Body: { clientId?: string } }>("/accounts", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+    const auth = await authPayloadOrNull(req);
+    if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+    const payload: JWTPayload = auth.payload;
     if (!payload.sub) return reply.code(403).send({ error: "forbidden" });
 
     const clientId = canManageAll(payload)
@@ -114,8 +131,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
   app.post<{ Params: { id: string } }>(
     "/accounts/:id/close",
     async (req, reply) => {
-      const payload = await authPayloadOrNull(req);
-      if (!payload) return reply.code(401).send({ error: "unauthorized" });
+      const auth = await authPayloadOrNull(req);
+      if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+      const payload: JWTPayload = auth.payload;
 
       const repo = app.db.getRepository(Account);
       const account = await repo.findOne({ where: { id: req.params.id } });
@@ -143,8 +161,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     Params: { id: string };
     Body: { amount?: unknown };
   }>("/accounts/:id/deposit", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+    const auth = await authPayloadOrNull(req);
+    if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+    const payload: JWTPayload = auth.payload;
 
     const amount = parseAmount(req.body?.amount);
     if (amount == null)
@@ -186,8 +205,9 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     Params: { id: string };
     Body: { amount?: unknown };
   }>("/accounts/:id/withdraw", async (req, reply) => {
-    const payload = await authPayloadOrNull(req);
-    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+    const auth = await authPayloadOrNull(req);
+    if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+    const payload: JWTPayload = auth.payload;
 
     const amount = parseAmount(req.body?.amount);
     if (amount == null)

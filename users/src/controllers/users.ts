@@ -9,6 +9,26 @@ function normalizeRoles(roles?: string[]): string[] {
   return [...new Set(roles.map((r) => r.trim()).filter(Boolean))];
 }
 
+async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
+  const auth = requireAuth(payload);
+  if (!auth.ok) {
+    return { ok: false as const, status: auth.code, body: { error: "unauthorized" } };
+  }
+  if (!auth.payload.sub) {
+    return { ok: false as const, status: 401 as const, body: { error: "unauthorized" } };
+  }
+
+  const actor = await findById(ds, String(auth.payload.sub));
+  if (!actor) {
+    return { ok: false as const, status: 401 as const, body: { error: "unauthorized" } };
+  }
+  if (actor.isBlocked) {
+    return { ok: false as const, status: 403 as const, body: { error: "blocked_user" } };
+  }
+
+  return { ok: true as const, payload: auth.payload, actor };
+}
+
 export async function internalByUsernameController(
   ds: DataSource,
   internalOk: boolean,
@@ -28,29 +48,25 @@ export async function internalByUsernameController(
 }
 
 export async function meController(ds: DataSource, payload: JWTPayload | null) {
-  const a = requireAuth(payload);
-  if (!a.ok) return { status: a.code, body: { error: "unauthorized" } };
-  if (!a.payload.sub) return { status: 401 as const, body: { error: "unauthorized" } };
-
-  const user = await findById(ds, String(a.payload.sub));
-  if (!user) return { status: 404 as const, body: { error: "not_found" } };
+  const actor = await requireActiveUser(ds, payload);
+  if (!actor.ok) return { status: actor.status, body: actor.body };
 
   return {
     status: 200 as const,
     body: {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      roles: user.roles,
-      isBlocked: user.isBlocked
+      id: actor.actor.id,
+      username: actor.actor.username,
+      displayName: actor.actor.displayName,
+      roles: actor.actor.roles,
+      isBlocked: actor.actor.isBlocked
     }
   };
 }
 
 export async function listController(ds: DataSource, payload: JWTPayload | null) {
-  const a = requireAuth(payload);
-  if (!a.ok) return { status: a.code, body: { error: "unauthorized" } };
-  if (!canManage(a.payload)) return { status: 403 as const, body: { error: "forbidden" } };
+  const actor = await requireActiveUser(ds, payload);
+  if (!actor.ok) return { status: actor.status, body: actor.body };
+  if (!canManage(actor.payload)) return { status: 403 as const, body: { error: "forbidden" } };
 
   const rows = await listUsers(ds);
   return {
@@ -67,9 +83,9 @@ export async function listController(ds: DataSource, payload: JWTPayload | null)
 }
 
 export async function getController(ds: DataSource, payload: JWTPayload | null, params: { id: string }) {
-  const a = requireAuth(payload);
-  if (!a.ok) return { status: a.code, body: { error: "unauthorized" } };
-  if (!canManage(a.payload)) return { status: 403 as const, body: { error: "forbidden" } };
+  const actor = await requireActiveUser(ds, payload);
+  if (!actor.ok) return { status: actor.status, body: actor.body };
+  if (!canManage(actor.payload)) return { status: 403 as const, body: { error: "forbidden" } };
 
   const user = await findById(ds, params.id);
   if (!user) return { status: 404 as const, body: { error: "not_found" } };
@@ -91,9 +107,9 @@ export async function createController(
   payload: JWTPayload | null,
   body: { username?: string; displayName?: string; roles?: string[] }
 ) {
-  const a = requireAuth(payload);
-  if (!a.ok) return { status: a.code, body: { error: "unauthorized" } };
-  if (!canManage(a.payload)) return { status: 403 as const, body: { error: "forbidden" } };
+  const actor = await requireActiveUser(ds, payload);
+  if (!actor.ok) return { status: actor.status, body: actor.body };
+  if (!canManage(actor.payload)) return { status: 403 as const, body: { error: "forbidden" } };
 
   const username = body.username?.trim();
   if (!username) return { status: 400 as const, body: { error: "username_required" } };
@@ -136,9 +152,9 @@ export async function blockController(
   params: { id: string },
   body: { isBlocked?: boolean }
 ) {
-  const a = requireAuth(payload);
-  if (!a.ok) return { status: a.code, body: { error: "unauthorized" } };
-  if (!canManage(a.payload)) return { status: 403 as const, body: { error: "forbidden" } };
+  const actor = await requireActiveUser(ds, payload);
+  if (!actor.ok) return { status: actor.status, body: actor.body };
+  if (!canManage(actor.payload)) return { status: 403 as const, body: { error: "forbidden" } };
 
   if (typeof body.isBlocked !== "boolean") {
     return { status: 400 as const, body: { error: "isBlocked_boolean_required" } };
