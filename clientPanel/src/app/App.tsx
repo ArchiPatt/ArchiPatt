@@ -1,4 +1,5 @@
-import { RouteProvider } from "./providers/core/RouteProvider.tsx";
+import { RouteProvider } from "./providers/routeProvider/core/RouteProvider.tsx";
+
 
 function App() {
     return (

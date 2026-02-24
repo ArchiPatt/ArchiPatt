@@ -1,5 +1,5 @@
-import { AccountCard } from "@/components/AccountCard";
-import { CreditCard } from "@/components/CreditCard";
+import {AccountCard} from "../../../components/AccountCard";
+import {CreditCard} from "../../../components/CreditCard";
 import {
     Container,
     Title,
@@ -14,7 +14,7 @@ import {
 
 import { IconPlus } from "@tabler/icons-react";
 import {Link} from "react-router-dom";
-import {LINK_PATHS} from "@/constants/LINK_PATHS.ts";
+import {LINK_PATHS} from "../../../constants/LINK_PATHS.ts";
 
 const MainPage = () => {
     const accounts = [1, 2, 3];

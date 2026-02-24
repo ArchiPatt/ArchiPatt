@@ -1,12 +1,13 @@
 import { Route, Routes } from "react-router-dom";
-import { Header } from "@/components/Header";
-import { MainPage } from "@/pages/MainPage";
-import { ProfilePage } from "@/pages/ProfilePage";
-import { OpenAccountPage } from "@/pages/OpenAccountPage";
-import { OpenCreditPage } from "@/pages/OpenCreditPage";
-import { AccountDetailPage } from "@/pages/AccountDetailPage";
-import { NotFoundPage } from "@/pages/NotFoundPage";
-import { LINK_PATHS } from "@/constants/LINK_PATHS.ts";
+import {LINK_PATHS} from "../../../../constants/LINK_PATHS.ts";
+import {Header} from "../../../../components/Header";
+import {MainPage} from "../../../../pages/MainPage";
+import {ProfilePage} from "../../../../pages/ProfilePage";
+import {OpenAccountPage} from "../../../../pages/OpenAccountPage";
+import {OpenCreditPage} from "../../../../pages/OpenCreditPage";
+import {AccountDetailPage} from "../../../../pages/AccountDetailPage";
+import {NotFoundPage} from "../../../../pages/NotFoundPage";
+
 
 const RouteProvider = () => {
     return (
