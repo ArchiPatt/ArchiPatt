@@ -4,5 +4,8 @@ export * from './requests/Technical/getHealth.gen';
 export * from './requests/Auth/getLogin.gen';
 export * from './requests/Auth/postLogin.gen';
 export * from './requests/Auth/postToken.gen';
+export * from './requests/Auth/getSetupPassword.gen';
+export * from './requests/Auth/postSetupPassword.gen';
 export * from './requests/Auth/postLogout.gen';
 export * from './requests/Technical/getJwks.gen';
+export * from './requests/Technical/postInternalUsers.gen';

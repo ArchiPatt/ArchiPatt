@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetMeData } from "..\\..\\types.gen";
+import type { GetMeData, GetMeResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetMeRequestParams = AxiosRequestParams<GetMeData>;
 
-export const getMe = ({ config }: GetMeRequestParams = {}) => instance.request({
+export const getMe = ({ config }: GetMeRequestParams = {}) => instance.request<GetMeResponse>({
     method: "GET",
     url: "/me",
     ...config

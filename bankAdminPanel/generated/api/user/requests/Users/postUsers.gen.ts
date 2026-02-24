@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostUsersData } from "..\\..\\types.gen";
+import type { PostUsersData, PostUsersResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostUsersRequestParams = AxiosRequestParams<PostUsersData>;
 
-export const postUsers = ({ config, body }: PostUsersRequestParams) => instance.request({
+export const postUsers = ({ config, body }: PostUsersRequestParams) => instance.request<PostUsersResponse>({
     method: "POST",
     url: "/users",
     data: body,

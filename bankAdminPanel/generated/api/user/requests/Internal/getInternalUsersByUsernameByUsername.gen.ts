@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetInternalUsersByUsernameByUsernameData } from "..\\..\\types.gen";
+import type { GetInternalUsersByUsernameByUsernameData, GetInternalUsersByUsernameByUsernameResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetInternalUsersByUsernameByUsernameRequestParams = AxiosRequestParams<GetInternalUsersByUsernameByUsernameData>;
 
-export const getInternalUsersByUsernameByUsername = ({ config, path }: GetInternalUsersByUsernameByUsernameRequestParams) => instance.request({
+export const getInternalUsersByUsernameByUsername = ({ config, path }: GetInternalUsersByUsernameByUsernameRequestParams) => instance.request<GetInternalUsersByUsernameByUsernameResponse>({
     method: "GET",
     url: `/internal/users/by-username/${path.username}`,
     ...config
