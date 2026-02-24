@@ -1,0 +1,1 @@
+export { localStorageFactory } from "./core/localStorageFactory.ts"
