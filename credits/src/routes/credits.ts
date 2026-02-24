@@ -5,6 +5,7 @@ import { Credit } from "../db/entities/Credit";
 import { CreditPayment } from "../db/entities/CreditPayment";
 import { CreditTariff } from "../db/entities/CreditTariff";
 import { postAccountOperation } from "../integrations/core-service";
+import { fetchUserProfileByUsername } from "../integrations/users-service";
 import { verifyBearerToken } from "../security/jwt";
 
 function toMoneyString(v: number): string {
@@ -35,6 +36,25 @@ function isEmployee(payload: JWTPayload): boolean {
 function requireAuth(payload: JWTPayload | null) {
   if (!payload) return { ok: false as const, code: 401 as const };
   return { ok: true as const, payload };
+}
+
+async function requireActiveAuth(payload: JWTPayload | null) {
+  const a = requireAuth(payload);
+  if (!a.ok) return { ok: false as const, code: a.code, error: "unauthorized" as const };
+  const username = typeof a.payload.username === "string" ? a.payload.username : null;
+  if (!a.payload.sub || !username) {
+    return { ok: false as const, code: 401 as const, error: "unauthorized" as const };
+  }
+
+  try {
+    const profile = await fetchUserProfileByUsername(username);
+    if (!profile) return { ok: false as const, code: 401 as const, error: "unauthorized" as const };
+    if (profile.isBlocked) return { ok: false as const, code: 403 as const, error: "blocked_user" as const };
+  } catch {
+    return { ok: false as const, code: 401 as const, error: "unauthorized" as const };
+  }
+
+  return { ok: true as const, payload: a.payload };
 }
 
 async function safeVerify(req: FastifyRequest) {
@@ -117,8 +137,8 @@ export async function accrueDueCredits(ds: DataSource, now: Date = new Date()) {
 export function registerCreditsRoutes(app: FastifyInstance) {
   app.get("/tariffs", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
 
     const tariffs = await app.db.getRepository(CreditTariff).find({
       where: { isActive: true },
@@ -129,8 +149,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.post<{ Body: { name?: string; interestRate?: number; billingPeriodDays?: number } }>("/tariffs", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
     if (!isEmployee(a.payload)) return reply.code(403).send({ error: "forbidden" });
 
     const name = req.body?.name?.trim();
@@ -161,8 +181,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.post<{ Body: { clientId?: string; accountId?: string; tariffId?: string; amount?: number } }>("/credits/issue", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
 
     const clientId = req.body?.clientId;
     const accountId = req.body?.accountId;
@@ -220,8 +240,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.post<{ Params: { id: string }; Body: { amount?: number } }>("/credits/:id/repay", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
 
     const amount = req.body?.amount;
     if (typeof amount !== "number" || amount <= 0) {
@@ -275,8 +295,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.post("/credits/accrue/run", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
     if (!isEmployee(a.payload)) return reply.code(403).send({ error: "forbidden" });
     const result = await accrueDueCredits(app.db);
     return reply.code(200).send(result);
@@ -284,8 +304,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { clientId: string } }>("/credits/by-client/:clientId", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
 
     const isOwner = String(a.payload.sub ?? "") === req.params.clientId;
     const allowed = isEmployee(a.payload) || isOwner;
@@ -300,8 +320,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { id: string } }>("/credits/:id", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
 
     const credit = await app.db.getRepository(Credit).findOne({ where: { id: req.params.id } });
     if (!credit) return reply.code(404).send({ error: "credit_not_found" });
@@ -315,8 +335,8 @@ export function registerCreditsRoutes(app: FastifyInstance) {
 
   app.get<{ Params: { id: string } }>("/credits/:id/payments", async (req, reply) => {
     const payload = await safeVerify(req);
-    const a = requireAuth(payload);
-    if (!a.ok) return reply.code(a.code).send({ error: "unauthorized" });
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
 
     const credit = await app.db.getRepository(Credit).findOne({ where: { id: req.params.id } });
     if (!credit) return reply.code(404).send({ error: "credit_not_found" });

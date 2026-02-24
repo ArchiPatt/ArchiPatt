@@ -6,6 +6,8 @@ import { env } from "../env";
 import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
+import { RevokedAccessToken } from "../db/entities/RevokedAccessToken";
+import { verifyAccessToken } from "../security/bearer";
 import { issueAccessToken } from "../security/tokens";
 import { getJwks } from "../security/jwks";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
@@ -117,6 +119,7 @@ async function issueTokensForProfile(
   const scopeStr = scopes.join(" ");
   const accessToken = await issueAccessToken({
     sub: profile.id,
+    username,
     roles: profile.roles,
     scope: scopeStr,
     aud: "bank-app",
@@ -149,6 +152,19 @@ async function issueTokensForProfile(
 }
 
 export function registerAuthRoutes(app: FastifyInstance) {
+  app.get<{ Params: { jti: string } }>("/internal/tokens/revoked/:jti", async (req, reply) => {
+    if (!env.internalToken || req.headers["x-internal-token"] !== env.internalToken) {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+    const jti = req.params?.jti?.trim();
+    if (!jti) return reply.code(400).send({ error: "invalid_jti" });
+
+    const revoked = await app.db.getRepository(RevokedAccessToken).findOne({
+      where: { jti },
+    });
+    return reply.send({ revoked: Boolean(revoked) });
+  });
+
   app.get("/jwks", async (_req, reply) => {
     const jwks = await getJwks();
     return reply.send(jwks);
@@ -430,7 +446,31 @@ export function registerAuthRoutes(app: FastifyInstance) {
     );
   });
 
-  app.post("/logout", async (_req, reply) => {
+  app.post("/logout", async (req, reply) => {
+    let payload;
+    try {
+      payload = await verifyAccessToken(req.headers.authorization);
+    } catch {
+      return reply.code(401).send({ error: "unauthorized" });
+    }
+    if (!payload) return reply.code(401).send({ error: "unauthorized" });
+
+    const jti = typeof payload.jti === "string" ? payload.jti : null;
+    const exp = typeof payload.exp === "number" ? payload.exp : null;
+    if (!jti || !exp) {
+      return reply.code(400).send({ error: "token_without_jti_or_exp" });
+    }
+
+    const revokedRepo = app.db.getRepository(RevokedAccessToken);
+    const exists = await revokedRepo.findOne({ where: { jti } });
+    if (!exists) {
+      await revokedRepo.save(
+        revokedRepo.create({
+          jti,
+          expiresAt: new Date(exp * 1000),
+        }),
+      );
+    }
     return reply.send({ ok: true });
   });
 }
