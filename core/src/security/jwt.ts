@@ -3,6 +3,19 @@ import { env } from "../env";
 
 const jwks = createRemoteJWKSet(new URL(`${env.authIssuer}/jwks`));
 
+async function isRevoked(jti: string): Promise<boolean> {
+  const url = `${env.authIssuer}/internal/tokens/revoked/${encodeURIComponent(jti)}`;
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "x-internal-token": env.internalToken,
+    },
+  });
+  if (!res.ok) throw new Error("auth revoke check failed");
+  const data = (await res.json()) as { revoked?: boolean };
+  return Boolean(data.revoked);
+}
+
 export async function verifyBearerToken(
   authorization?: string,
 ): Promise<JWTPayload | null> {
@@ -13,6 +26,9 @@ export async function verifyBearerToken(
   const { payload } = await jwtVerify(token, jwks, {
     issuer: env.authIssuer,
   });
+  if (typeof payload.jti === "string" && (await isRevoked(payload.jti))) {
+    return null;
+  }
   return payload;
 }
 

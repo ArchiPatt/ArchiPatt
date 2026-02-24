@@ -1,9 +1,11 @@
 import { SignJWT } from "jose";
+import { randomUUID } from "crypto";
 import { env } from "../env";
 import { getPrivateKey } from "./jwks";
 
 export type AccessTokenClaims = {
   sub: string;
+  username: string;
   roles: string[];
   scope: string;
   aud: string;
@@ -16,6 +18,7 @@ export async function issueAccessToken(
   const privateKey = await getPrivateKey();
 
   return await new SignJWT({
+    username: claims.username,
     roles: claims.roles,
     scope: claims.scope,
   })
@@ -23,6 +26,7 @@ export async function issueAccessToken(
     .setIssuer(env.issuer)
     .setAudience(claims.aud)
     .setSubject(claims.sub)
+    .setJti(randomUUID())
     .setIssuedAt(now)
     .setExpirationTime(now + env.tokens.accessTtlSeconds)
     .sign(privateKey);
