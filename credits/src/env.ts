@@ -20,13 +20,22 @@ export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: num("PORT", 4002),
   authIssuer: must("AUTH_ISSUER"),
+  internalToken: must("INTERNAL_TOKEN"),
   authService: {
     baseUrl: process.env.AUTH_SERVICE_URL ?? process.env.AUTH_ISSUER ?? "http://localhost:4000",
-    internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+    internalToken:
+      process.env.AUTH_INTERNAL_TOKEN ??
+      process.env.USERS_INTERNAL_TOKEN ??
+      process.env.INTERNAL_TOKEN ??
+      "",
   },
   usersService: {
     baseUrl: process.env.USERS_SERVICE_URL ?? "http://localhost:4001",
-    internalToken: process.env.USERS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+    internalToken:
+      process.env.USERS_INTERNAL_TOKEN ??
+      process.env.AUTH_INTERNAL_TOKEN ??
+      process.env.INTERNAL_TOKEN ??
+      "",
   },
   coreService: {
     baseUrl: process.env.CORE_SERVICE_URL ?? "http://localhost:4003",

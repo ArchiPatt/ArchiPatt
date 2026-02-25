@@ -805,6 +805,54 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+
+  /dashboard/clients-overview:
+    get:
+      tags: [Core]
+      summary: Proxied to core /dashboard/clients-overview
+      description: Агрегированный обзор клиентов со счетами и кредитами (employee/admin).
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Proxied response from core
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        user:
+                          type: object
+                        accounts:
+                          type: array
+                        credits:
+                          type: array
+                  total:
+                    type: integer
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
 components:
   securitySchemes:
     bearerAuth:

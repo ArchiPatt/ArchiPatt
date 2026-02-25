@@ -7,6 +7,7 @@ import { env } from "./env";
 import { initDataSource } from "./db/data-source";
 import { registerDocsRoutes } from "./routes/docs";
 import { registerAccountsRoutes } from "./routes/accounts";
+import { registerDashboardRoutes } from "./routes/dashboard";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -30,6 +31,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   registerDocsRoutes(app);
   registerAccountsRoutes(app);
+  registerDashboardRoutes(app);
   app.get("/health", async () => ({ ok: true }));
 
   return app;
