@@ -4,20 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/accounts/accountsApi.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/auth/authApi.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/users/usersApi.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/accessTokenRequest.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/account.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/createAccountRequest.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/refreshTokenRequest.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/tokenResponse.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/userProfileResponse.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/app/api/instance.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/app/api/instance.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" afterDir="false" />
-    </list>
+    <list default="true" id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -113,72 +100,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="npm.migration:run (2)">
-    <configuration name="migration:generate (1)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/credits/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migration:generate" />
-      </scripts>
-      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
-      <envs />
-      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
-        <browser with-js-debugger="true" />
-      </EXTENSION>
-      <method v="2" />
-    </configuration>
-    <configuration name="migration:generate (2)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$$PROJECT_DIR$/../../../package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migration:generate" />
-      </scripts>
-      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
-      <envs />
-      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
-        <browser with-js-debugger="true" />
-      </EXTENSION>
-      <method v="2" />
-    </configuration>
-    <configuration name="migration:run (1)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$$PROJECT_DIR$/../../../package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migration:run" />
-      </scripts>
-      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
-      <envs />
-      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
-        <browser with-js-debugger="true" />
-      </EXTENSION>
-      <method v="2" />
-    </configuration>
-    <configuration name="migration:run (2)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/credits/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migration:run" />
-      </scripts>
-      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
-      <envs />
-      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
-        <browser with-js-debugger="true" />
-      </EXTENSION>
-      <method v="2" />
-    </configuration>
-    <configuration name="migration:run (3)" type="js.build_tools.npm" temporary="true" nameIsGenerated="true">
-      <package-json value="$PROJECT_DIR$/auth/package.json" />
-      <command value="run" />
-      <scripts>
-        <script value="migration:run" />
-      </scripts>
-      <node-interpreter value="$USER_HOME$/.nvm/versions/node/v22.13.1/bin/node" />
-      <envs />
-      <EXTENSION ID="com.intellij.javascript.debugger.execution.StartBrowserRunConfigurationExtension">
-        <browser with-js-debugger="true" />
-      </EXTENSION>
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="npm.startAuth">
     <configuration name="startAuth" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/auth/package.json" />
       <command value="run" />
@@ -257,15 +179,6 @@
       </EXTENSION>
       <method v="2" />
     </configuration>
-    <recent_temporary>
-      <list>
-        <item itemvalue="npm.migration:run (2)" />
-        <item itemvalue="npm.migration:generate (1)" />
-        <item itemvalue="npm.migration:run (3)" />
-        <item itemvalue="npm.migration:run (1)" />
-        <item itemvalue="npm.migration:generate (2)" />
-      </list>
-    </recent_temporary>
   </component>
   <component name="SharedIndexes">
     <attachedChunks>
@@ -282,7 +195,7 @@
       <option name="presentableId" value="Default" />
       <updated>1771938638444</updated>
       <workItem from="1771938639457" duration="6459000" />
-      <workItem from="1771945717836" duration="10770000" />
+      <workItem from="1771945717836" duration="10830000" />
     </task>
     <servers />
   </component>
