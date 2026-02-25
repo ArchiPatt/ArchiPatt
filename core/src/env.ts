@@ -23,7 +23,13 @@ export const env = {
   internalToken: must("INTERNAL_TOKEN"),
   usersService: {
     baseUrl: process.env.USERS_SERVICE_URL ?? "http://localhost:4001",
-    internalToken: process.env.USERS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+    internalToken:
+      process.env.USERS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+  },
+  creditsService: {
+    baseUrl: process.env.CREDITS_SERVICE_URL ?? "http://localhost:4002",
+    internalToken:
+      process.env.CREDITS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
   },
   db: {
     host: process.env.DB_HOST ?? "localhost",

@@ -16,6 +16,63 @@ tags:
   - name: Internal
     description: Интеграционные методы между сервисами (защищены `x-internal-token`).
 paths:
+  /dashboard/clients-overview:
+    get:
+      tags: [Core]
+      summary: Clients overview (employee/admin)
+      description: |
+        Агрегированный обзор клиентов со счетами и кредитами.
+        Только для employee/admin.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Количество клиентов на странице
+        - in: query
+          name: offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Смещение для пагинации
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [items, total]
+                properties:
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      required: [user, accounts, credits]
+                      properties:
+                        user:
+                          $ref: "#/components/schemas/UserOverview"
+                        accounts:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/Account"
+                        credits:
+                          type: array
+                          items:
+                            $ref: "#/components/schemas/CreditOverview"
+                  total:
+                    type: integer
+                    description: Общее количество пользователей
+        "401":
+          description: Unauthorized
+        "403":
+          description: Forbidden
   /health:
     get:
       tags: [Core]
@@ -541,6 +598,60 @@ components:
           format: date-time
           description: Дата создания счёта.
           example: "2026-02-23T12:34:56.000Z"
+
+    UserOverview:
+      type: object
+      description: Краткая информация о пользователе (из Users Service).
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        roles:
+          type: array
+          items:
+            type: string
+        isBlocked:
+          type: boolean
+
+    CreditOverview:
+      type: object
+      description: Краткая информация о кредите (из Credits Service).
+      properties:
+        id:
+          type: string
+          format: uuid
+        clientId:
+          type: string
+          format: uuid
+        accountId:
+          type: string
+          format: uuid
+        tariffId:
+          type: string
+          format: uuid
+        principalAmount:
+          $ref: "#/components/schemas/MoneyString"
+        outstandingAmount:
+          $ref: "#/components/schemas/MoneyString"
+        status:
+          type: string
+          enum: [active, closed, defaulted]
+        issuedAt:
+          type: string
+          format: date-time
+        nextPaymentDueAt:
+          type: string
+          format: date-time
+          nullable: true
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
 
     DepositWithdrawRequest:
       type: object
