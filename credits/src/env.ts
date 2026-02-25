@@ -19,8 +19,8 @@ function num(name: string, fallback: number): number {
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: num("PORT", 4002),
-  internalToken: process.env.INTERNAL_TOKEN ?? "",
   authIssuer: must("AUTH_ISSUER"),
+  internalToken: must("INTERNAL_TOKEN"),
   authService: {
     baseUrl: process.env.AUTH_SERVICE_URL ?? process.env.AUTH_ISSUER ?? "http://localhost:4000",
     internalToken:
@@ -39,13 +39,11 @@ export const env = {
   },
   coreService: {
     baseUrl: process.env.CORE_SERVICE_URL ?? "http://localhost:4003",
-    internalToken:
-      process.env.CORE_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+    internalToken: process.env.CORE_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? ""
   },
   accrualWorker: {
-    enabled:
-      (process.env.ACCRUAL_WORKER_ENABLED ?? "true").toLowerCase() !== "false",
-    intervalSeconds: num("ACCRUAL_WORKER_INTERVAL_SECONDS", 60),
+    enabled: (process.env.ACCRUAL_WORKER_ENABLED ?? "true").toLowerCase() !== "false",
+    intervalSeconds: num("ACCRUAL_WORKER_INTERVAL_SECONDS", 60)
   },
   db: {
     host: process.env.DB_HOST ?? "localhost",
