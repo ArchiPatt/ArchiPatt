@@ -4,7 +4,15 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="" />
+    <list default="true" id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/app/storage/refreshStorage/core/refreshToken.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/app/storage/refreshStorage/index.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/api/auth/authApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/api/auth/authApi.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/useMainPage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/useMainPage.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/tsconfig.node.json" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/tsconfig.node.json" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -196,6 +204,7 @@
       <updated>1771938638444</updated>
       <workItem from="1771938639457" duration="6459000" />
       <workItem from="1771945717836" duration="10830000" />
+      <workItem from="1772032121378" duration="1229000" />
     </task>
     <servers />
   </component>

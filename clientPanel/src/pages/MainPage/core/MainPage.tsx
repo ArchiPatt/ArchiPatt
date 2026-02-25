@@ -18,11 +18,14 @@ import {LINK_PATHS} from "../../../constants/LINK_PATHS.ts";
 import {authApi} from "../../../api";
 import {tokenStorage} from "../../../app/storage/tokenStorage";
 import {useEffect} from "react";
+import {useMainPage} from "./useMainPage.ts";
 
 const MainPage = () => {
     const accounts = [1, 2, 3];
     const allCredits = [1, 2];
     const activeCredits = [1];
+
+    const { code, data, isLoading, error } = useMainPage()
 
 
     return (
