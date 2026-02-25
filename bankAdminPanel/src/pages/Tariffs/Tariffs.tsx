@@ -1,10 +1,19 @@
-import { Alert, Badge,  Stack, Table, Title } from '@mantine/core'
+import { Alert, Badge, Button, Group, Stack, Table, Title } from '@mantine/core'
 import { useTariffsQuery } from '../../api/hooks/useTariffsQuery'
+import { modals } from '@mantine/modals'
 
 export const Tariffs = () => {
    const tariffs = useTariffsQuery()
 
-   if (!tariffs.data || tariffs.data.data.length === 0) {
+   const handleOpenCreateTariff = () => {
+      modals.openContextModal({
+         modal: 'createTariff',
+         title: 'Создать тариф',
+         innerProps: {}
+      })
+   }
+
+   if (tariffs.isFetched && (!tariffs.data || tariffs.data.data.length === 0)) {
       return (
          <Alert color="blue" title="Тарифы">
             Тарифы не найдены
@@ -14,7 +23,10 @@ export const Tariffs = () => {
 
    return (
       <Stack gap="md">
-         <Title order={2}>Тарифы</Title>
+         <Group justify="space-between">
+            <Title order={2}>Тарифы</Title>
+            <Button onClick={handleOpenCreateTariff}>Создать тариф</Button>
+         </Group>
          <Table striped highlightOnHover withTableBorder withColumnBorders>
             <Table.Thead>
                <Table.Tr>
@@ -25,7 +37,7 @@ export const Tariffs = () => {
                </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-               {tariffs.data.data.map((tariff) => (
+               {tariffs.data?.data.map((tariff) => (
                   <Table.Tr key={tariff.id}>
                      <Table.Td>{tariff.name}</Table.Td>
                      <Table.Td>{`${(Number(tariff.interestRate) * 100).toFixed(2)}%`}</Table.Td>
