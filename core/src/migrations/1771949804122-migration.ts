@@ -7,8 +7,8 @@ function pickColumnName(existing: string[], candidates: string[]): string {
   return candidates[0];
 }
 
-export class Migration1771762200000 implements MigrationInterface {
-  name = "Migration1771762200000";
+export class Migration1771949804122 implements MigrationInterface {
+  name = "Migration1771949804122";
 
   public async up(queryRunner: QueryRunner): Promise<void> {
     const accountTable = (await queryRunner.hasTable("accounts"))
@@ -35,25 +35,31 @@ export class Migration1771762200000 implements MigrationInterface {
     const statusCol = pickColumnName(accountCols, ["status"]);
 
     const accountIdCol = pickColumnName(opCols, ["account_id", "accountId"]);
-    const correlationIdCol = pickColumnName(opCols, ["correlation_id", "correlationId"]);
-    const idempotencyKeyCol = pickColumnName(opCols, ["idempotency_key", "idempotencyKey"]);
+    const correlationIdCol = pickColumnName(opCols, [
+      "correlation_id",
+      "correlationId",
+    ]);
+    const idempotencyKeyCol = pickColumnName(opCols, [
+      "idempotency_key",
+      "idempotencyKey",
+    ]);
 
     await queryRunner.query(
       `INSERT INTO "${accountTable}" ("id", "${clientIdCol}", "${balanceCol}", "${statusCol}")
-       SELECT $1, $2, $3, $4
-       WHERE NOT EXISTS (SELECT 1 FROM "${accountTable}" WHERE "id" = $1)`,
+           SELECT $1, $2, $3, $4
+           WHERE NOT EXISTS (SELECT 1 FROM "${accountTable}" WHERE "id" = $1)`,
       [
         "33333333-3333-4333-8333-333333333333",
         "22222222-2222-4222-8222-222222222222",
         "15000.00",
-        "open"
-      ]
+        "open",
+      ],
     );
 
     await queryRunner.query(
       `INSERT INTO "${operationTable}" ("id", "${accountIdCol}", "amount", "type", "${correlationIdCol}", "${idempotencyKeyCol}", "meta")
-       SELECT $1, $2, $3, $4, $5, $6, $7::jsonb
-       WHERE NOT EXISTS (SELECT 1 FROM "${operationTable}" WHERE "id" = $1)`,
+           SELECT $1, $2, $3, $4, $5, $6, $7::jsonb
+           WHERE NOT EXISTS (SELECT 1 FROM "${operationTable}" WHERE "id" = $1)`,
       [
         "44444444-4444-4444-8444-444444444444",
         "33333333-3333-4333-8333-333333333333",
@@ -61,8 +67,8 @@ export class Migration1771762200000 implements MigrationInterface {
         "seed_deposit",
         null,
         "seed-core-qa-1",
-        JSON.stringify({ source: "migration" })
-      ]
+        JSON.stringify({ source: "migration" }),
+      ],
     );
   }
 
@@ -79,13 +85,11 @@ export class Migration1771762200000 implements MigrationInterface {
         : null;
     if (!accountTable || !operationTable) return;
 
-    await queryRunner.query(
-      `DELETE FROM "${operationTable}" WHERE "id" = $1`,
-      ["44444444-4444-4444-8444-444444444444"]
-    );
-    await queryRunner.query(
-      `DELETE FROM "${accountTable}" WHERE "id" = $1`,
-      ["33333333-3333-4333-8333-333333333333"]
-    );
+    await queryRunner.query(`DELETE FROM "${operationTable}" WHERE "id" = $1`, [
+      "44444444-4444-4444-8444-444444444444",
+    ]);
+    await queryRunner.query(`DELETE FROM "${accountTable}" WHERE "id" = $1`, [
+      "33333333-3333-4333-8333-333333333333",
+    ]);
   }
 }
