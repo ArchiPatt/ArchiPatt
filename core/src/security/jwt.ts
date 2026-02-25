@@ -4,11 +4,11 @@ import { env } from "../env";
 const jwks = createRemoteJWKSet(new URL(`${env.authIssuer}/jwks`));
 
 async function isRevoked(jti: string): Promise<boolean> {
-  const url = `${env.authIssuer}/internal/tokens/revoked/${encodeURIComponent(jti)}`;
+  const url = `${env.authService.baseUrl}/internal/tokens/revoked/${encodeURIComponent(jti)}`;
   const res = await fetch(url, {
     method: "GET",
     headers: {
-      "x-internal-token": env.internalToken,
+      "x-internal-token": env.authService.internalToken,
     },
   });
   if (!res.ok) throw new Error("auth revoke check failed");

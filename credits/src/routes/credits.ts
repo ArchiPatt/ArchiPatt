@@ -179,6 +179,18 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     return reply.code(201).send(tariff);
   });
 
+  app.get("/credits", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
+    if (!isEmployee(a.payload)) return reply.code(403).send({ error: "forbidden" });
+
+    const credits = await app.db.getRepository(Credit).find({
+      order: { issuedAt: "DESC" }
+    });
+    return reply.code(200).send(credits);
+  });
+
   app.post<{ Body: { clientId?: string; accountId?: string; tariffId?: string; amount?: number } }>("/credits/issue", async (req, reply) => {
     const payload = await safeVerify(req);
     const a = await requireActiveAuth(payload);

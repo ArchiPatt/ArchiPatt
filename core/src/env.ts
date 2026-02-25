@@ -21,9 +21,21 @@ export const env = {
   port: num("PORT", 4000),
   authIssuer: must("AUTH_ISSUER"),
   internalToken: must("INTERNAL_TOKEN"),
+  authService: {
+    baseUrl: process.env.AUTH_SERVICE_URL ?? process.env.AUTH_ISSUER ?? "http://localhost:4000",
+    internalToken:
+      process.env.AUTH_INTERNAL_TOKEN ??
+      process.env.USERS_INTERNAL_TOKEN ??
+      process.env.INTERNAL_TOKEN ??
+      "",
+  },
   usersService: {
     baseUrl: process.env.USERS_SERVICE_URL ?? "http://localhost:4001",
-    internalToken: process.env.USERS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+    internalToken:
+      process.env.USERS_INTERNAL_TOKEN ??
+      process.env.AUTH_INTERNAL_TOKEN ??
+      process.env.INTERNAL_TOKEN ??
+      "",
   },
   db: {
     host: process.env.DB_HOST ?? "localhost",
