@@ -16,5 +16,5 @@ export const env = {
   authServiceUrl: process.env.AUTH_SERVICE_URL ?? "http://localhost:4000",
   usersServiceUrl: process.env.USERS_SERVICE_URL ?? "http://localhost:4001",
   creditsServiceUrl: process.env.CREDITS_SERVICE_URL ?? "http://localhost:4002",
-  coreServiceUrl: process.env.CORE_SERVICE_URL ?? "http://localhost:4003"
+  coreServiceUrl: process.env.CORE_SERVICE_URL ?? "http://localhost:4003",
 };

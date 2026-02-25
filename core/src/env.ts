@@ -37,6 +37,11 @@ export const env = {
       process.env.INTERNAL_TOKEN ??
       "",
   },
+  creditsService: {
+    baseUrl: process.env.CREDITS_SERVICE_URL ?? "http://localhost:4002",
+    internalToken:
+      process.env.CREDITS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
+  },
   db: {
     host: process.env.DB_HOST ?? "localhost",
     port: num("DB_PORT", 5432),
