@@ -13,19 +13,24 @@ function authRedirectUrl(path: string, queryString: string) {
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
     logger: {
-      level: env.nodeEnv === "development" ? "info" : "info"
-    }
+      level: env.nodeEnv === "development" ? "info" : "info",
+    },
   });
 
   await app.register(cors, {
     origin: true,
-    credentials: true
+    credentials: true,
   });
 
   app.get("/health", async () => ({ ok: true }));
 
   app.get("/swagger.yml", async (_req, reply) => {
-    const filePath = path.join(__dirname, "..", "openapi", "gateway.openapi.yml");
+    const filePath = path.join(
+      __dirname,
+      "..",
+      "openapi",
+      "gateway.openapi.yml",
+    );
     const yml = await readFile(filePath, "utf-8");
     reply.type("application/yaml; charset=utf-8");
     return yml;
@@ -64,66 +69,75 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   // Пароль вводится только на auth-страницах, поэтому тут только redirect.
   app.get("/login", async (req, reply) => {
-    return reply.redirect(authRedirectUrl("/login", req.raw.url?.split("?")[1] ?? ""));
+    return reply.redirect(
+      authRedirectUrl("/login", req.raw.url?.split("?")[1] ?? ""),
+    );
   });
   app.get("/setup-password", async (req, reply) => {
-    return reply.redirect(authRedirectUrl("/setup-password", req.raw.url?.split("?")[1] ?? ""));
+    return reply.redirect(
+      authRedirectUrl("/setup-password", req.raw.url?.split("?")[1] ?? ""),
+    );
   });
 
   app.post("/login", async (_req, reply) => {
     return reply.code(400).send({
       error: "login_via_auth_only",
-      message: "Введите пароль только на странице auth (/login)"
+      message: "Введите пароль только на странице auth (/login)",
     });
   });
   app.post("/setup-password", async (_req, reply) => {
     return reply.code(400).send({
       error: "password_setup_via_auth_only",
-      message: "Установите пароль только на странице auth (/setup-password)"
+      message: "Установите пароль только на странице auth (/setup-password)",
     });
   });
 
   await app.register(proxy, {
     upstream: env.authServiceUrl,
     prefix: "/token",
-    rewritePrefix: "/token"
+    rewritePrefix: "/token",
   });
   await app.register(proxy, {
     upstream: env.authServiceUrl,
     prefix: "/logout",
-    rewritePrefix: "/logout"
+    rewritePrefix: "/logout",
   });
   await app.register(proxy, {
     upstream: env.authServiceUrl,
     prefix: "/jwks",
-    rewritePrefix: "/jwks"
+    rewritePrefix: "/jwks",
   });
 
   await app.register(proxy, {
     upstream: env.usersServiceUrl,
     prefix: "/users",
-    rewritePrefix: "/users"
+    rewritePrefix: "/users",
   });
   await app.register(proxy, {
     upstream: env.usersServiceUrl,
     prefix: "/me",
-    rewritePrefix: "/me"
+    rewritePrefix: "/me",
   });
 
   await app.register(proxy, {
     upstream: env.creditsServiceUrl,
     prefix: "/credits",
-    rewritePrefix: "/credits"
+    rewritePrefix: "/credits",
   });
   await app.register(proxy, {
     upstream: env.creditsServiceUrl,
     prefix: "/tariffs",
-    rewritePrefix: "/tariffs"
+    rewritePrefix: "/tariffs",
   });
   await app.register(proxy, {
     upstream: env.coreServiceUrl,
     prefix: "/accounts",
-    rewritePrefix: "/accounts"
+    rewritePrefix: "/accounts",
+  });
+  await app.register(proxy, {
+    upstream: env.coreServiceUrl,
+    prefix: "/dashboard",
+    rewritePrefix: "/dashboard",
   });
 
   return app;

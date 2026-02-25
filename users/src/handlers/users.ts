@@ -5,16 +5,38 @@ import {
   createController,
   getController,
   internalByUsernameController,
+  internalListController,
   listController,
-  meController
+  meController,
 } from "../controllers/users";
 import { env } from "../env";
 
 export function createUsersHandlers(app: FastifyInstance) {
   return {
-    internalByUsername: async (req: FastifyRequest<{ Params: { username: string } }>, reply: FastifyReply) => {
+    internalByUsername: async (
+      req: FastifyRequest<{ Params: { username: string } }>,
+      reply: FastifyReply,
+    ) => {
       const internalOk = req.headers["x-internal-token"] === env.internalToken;
-      const res = await internalByUsernameController(app.db, internalOk, req.params);
+      const res = await internalByUsernameController(
+        app.db,
+        internalOk,
+        req.params,
+      );
+      return reply.code(res.status).send(res.body);
+    },
+
+    internalList: async (
+      req: FastifyRequest<{ Querystring: { limit?: string; offset?: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
+      const limit = parseInt(req.query?.limit ?? "20", 10) || 20;
+      const offset = parseInt(req.query?.offset ?? "0", 10) || 0;
+      const res = await internalListController(app.db, internalOk, {
+        limit,
+        offset,
+      });
       return reply.code(res.status).send(res.body);
     },
 
@@ -30,15 +52,20 @@ export function createUsersHandlers(app: FastifyInstance) {
       return reply.code(res.status).send(res.body);
     },
 
-    get: async (req: FastifyRequest<{ Params: { id: string } }>, reply: FastifyReply) => {
+    get: async (
+      req: FastifyRequest<{ Params: { id: string } }>,
+      reply: FastifyReply,
+    ) => {
       const payload = await safeVerify(req);
       const res = await getController(app.db, payload, req.params);
       return reply.code(res.status).send(res.body);
     },
 
     create: async (
-      req: FastifyRequest<{ Body: { username?: string; displayName?: string; roles?: string[] } }>,
-      reply: FastifyReply
+      req: FastifyRequest<{
+        Body: { username?: string; displayName?: string; roles?: string[] };
+      }>,
+      reply: FastifyReply,
     ) => {
       const payload = await safeVerify(req);
       const res = await createController(app.db, payload, req.body ?? {});
@@ -46,13 +73,21 @@ export function createUsersHandlers(app: FastifyInstance) {
     },
 
     block: async (
-      req: FastifyRequest<{ Params: { id: string }; Body: { isBlocked?: boolean } }>,
-      reply: FastifyReply
+      req: FastifyRequest<{
+        Params: { id: string };
+        Body: { isBlocked?: boolean };
+      }>,
+      reply: FastifyReply,
     ) => {
       const payload = await safeVerify(req);
-      const res = await blockController(app.db, payload, req.params, req.body ?? {});
+      const res = await blockController(
+        app.db,
+        payload,
+        req.params,
+        req.body ?? {},
+      );
       return reply.code(res.status).send(res.body);
-    }
+    },
   };
 }
 
@@ -63,4 +98,3 @@ async function safeVerify(req: FastifyRequest) {
     return null;
   }
 }
-
