@@ -55,6 +55,33 @@ export type Account = {
 };
 
 /**
+ * Краткая информация о пользователе (из Users Service).
+ */
+export type UserOverview = {
+    id?: string;
+    username?: string;
+    displayName?: string | null;
+    roles?: Array<string>;
+    isBlocked?: boolean;
+};
+
+/**
+ * Краткая информация о кредите (из Credits Service).
+ */
+export type CreditOverview = {
+    id?: string;
+    clientId?: string;
+    accountId?: string;
+    tariffId?: string;
+    principalAmount?: MoneyString;
+    outstandingAmount?: MoneyString;
+    status?: 'active' | 'closed' | 'defaulted';
+    issuedAt?: string;
+    nextPaymentDueAt?: string | null;
+    closedAt?: string | null;
+};
+
+/**
  * Тело запроса для пополнения/снятия.
  */
 export type DepositWithdrawRequest = {
@@ -165,6 +192,52 @@ export type InternalCreateAccountOperationRequest = {
         [key: string]: unknown;
     } | null;
 };
+
+export type GetDashboardClientsOverviewData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Количество клиентов на странице
+         */
+        limit?: number;
+        /**
+         * Смещение для пагинации
+         */
+        offset?: number;
+    };
+    url: '/dashboard/clients-overview';
+};
+
+export type GetDashboardClientsOverviewErrors = {
+    /**
+     * Unauthorized
+     */
+    401: unknown;
+    /**
+     * Forbidden
+     */
+    403: unknown;
+};
+
+export type GetDashboardClientsOverviewResponses = {
+    /**
+     * OK
+     */
+    200: {
+        items: Array<{
+            user: UserOverview;
+            accounts: Array<Account>;
+            credits: Array<CreditOverview>;
+        }>;
+        /**
+         * Общее количество пользователей
+         */
+        total: number;
+    };
+};
+
+export type GetDashboardClientsOverviewResponse = GetDashboardClientsOverviewResponses[keyof GetDashboardClientsOverviewResponses];
 
 export type GetHealthData = {
     body?: never;

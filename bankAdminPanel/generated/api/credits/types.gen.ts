@@ -338,6 +338,35 @@ export type PostTariffsResponses = {
 
 export type PostTariffsResponse = PostTariffsResponses[keyof PostTariffsResponses];
 
+export type GetCreditsData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/credits';
+};
+
+export type GetCreditsErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+};
+
+export type GetCreditsError = GetCreditsErrors[keyof GetCreditsErrors];
+
+export type GetCreditsResponses = {
+    /**
+     * Credits list
+     */
+    200: Array<CreditResponse>;
+};
+
+export type GetCreditsResponse = GetCreditsResponses[keyof GetCreditsResponses];
+
 export type PostCreditsIssueData = {
     body: IssueCreditRequest;
     path?: never;

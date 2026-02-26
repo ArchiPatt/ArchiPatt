@@ -3,11 +3,11 @@ import {
    Group,
    Button,
    Text,
-   Box,
    UnstyledButton,
    ActionIcon,
    Tooltip,
-   useMantineColorScheme
+   useMantineColorScheme,
+   Container
 } from '@mantine/core'
 import { Outlet, useLocation, Link, useSearchParams } from 'react-router-dom'
 import { useUserQuery } from '../../api/hooks/useUserQuery'
@@ -96,9 +96,9 @@ export const Layout = () => {
             </Group>
          </AppShell.Header>
          <AppShell.Main>
-            <Box p="md">
+            <Container size="lg" p="md">
                <Outlet />
-            </Box>
+            </Container>
          </AppShell.Main>
       </AppShell>
    )

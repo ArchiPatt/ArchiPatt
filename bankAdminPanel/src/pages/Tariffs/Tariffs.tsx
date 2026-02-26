@@ -1,4 +1,4 @@
-import { Alert, Badge, Button, Group, Stack, Table, Title } from '@mantine/core'
+import { Alert, Badge, Button, Center, Group, Loader, Stack, Table, Title } from '@mantine/core'
 import { useTariffsQuery } from '../../api/hooks/useTariffsQuery'
 import { modals } from '@mantine/modals'
 
@@ -11,6 +11,14 @@ export const Tariffs = () => {
          title: 'Создать тариф',
          innerProps: {}
       })
+   }
+
+   if (tariffs.isLoading) {
+      return (
+         <Center h="100%">
+            <Loader />
+         </Center>
+      )
    }
 
    if (tariffs.isFetched && (!tariffs.data || tariffs.data.data.length === 0)) {
