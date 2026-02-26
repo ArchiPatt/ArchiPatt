@@ -21,24 +21,11 @@ import {
 } from '@tabler/icons-react';
 import type {userProfileResponse} from "../../../types/userProfileResponse.ts";
 import {useProfilePage} from "./useProfilePage.ts";
+import {ROLES} from "../../../constants/ROLES.ts";
 
-const ProfilePage = (props: userProfileResponse) => {
-    const user = {
-        firstName: 'Иван',
-        lastName: 'Петров',
-        email: 'ivan.petrov@example.com',
-        phone: '+7 (999) 123-45-67',
-        address: 'г. Москва, ул. Примерная, д. 10, кв. 25',
-        birthDate: '1990-05-15',
-    };
+const ProfilePage = () => {
 
-    const {
-        id,
-        username,
-        displayName,
-        roles,
-        isBlocked
-    } = useProfilePage(props)
+    const { profileData } = useProfilePage()
 
 
     return (
@@ -52,11 +39,11 @@ const ProfilePage = (props: userProfileResponse) => {
                     <Group position="apart" align="flex-start" mb="md">
                         <Group>
                             <Avatar color="blue" size={80} radius="xl">
-                                {displayName[0] + displayName[0]}
+                                {profileData.displayName[0] + profileData.displayName[0]}
                             </Avatar>
                             <div>
                                 <Title order={3}>
-                                    {displayName}
+                                    {profileData.displayName}
                                 </Title>
                             </div>
                         </Group>
@@ -69,8 +56,8 @@ const ProfilePage = (props: userProfileResponse) => {
                         <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <Text>Роли:</Text>
-                                {roles.map((item, index) => (
-                                    <Text key={index}>{item}</Text>
+                                {profileData.roles.map((item, index) => (
+                                    <Text key={index}>{`${ROLES[item]} ${index !== profileData.roles.length ? "," : ""}`}</Text>
                                 ))}
                             </Group>
                         </Grid.Col>
