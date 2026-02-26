@@ -44,6 +44,7 @@ export const Layout = () => {
       if (code) {
          token.mutateAsync({ grant_type: 'authorization_code', code }).then(() => {
             setSearchParams(new URLSearchParams())
+            window.location.reload()
          })
       }
    }, [searchParams])
