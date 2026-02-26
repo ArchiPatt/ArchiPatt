@@ -1,11 +1,5 @@
-import type {AccountType} from "@/components/AccountCard/types/AccountType.ts";
+import type {account} from "../../../types/account.ts";
 
-interface AccountProps {
-    id: string
-    clientId: string
-    balance: string
-    status: AccountType
-    createdAt: Date
-}
+type AccountProps = Pick<account, 'createdAt'>
 
 export type { AccountProps }

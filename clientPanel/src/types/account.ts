@@ -1,4 +1,4 @@
-type accountStatus = 'open' | 'closed'
+import type {accountStatus} from "./accountStatus.ts";
 
 interface account {
     id: string

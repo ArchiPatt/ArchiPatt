@@ -21,12 +21,8 @@ import {useEffect} from "react";
 import {useMainPage} from "./useMainPage.ts";
 
 const MainPage = () => {
-    const accounts = [1, 2, 3];
-    const allCredits = [1, 2];
-    const activeCredits = [1];
 
-    const { code, data, isLoading, error } = useMainPage()
-
+    const { accounts, credits } = useMainPage();
 
     return (
         <>
@@ -81,8 +77,10 @@ const MainPage = () => {
                         </Paper>
                     ) : (
                         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                            {accounts.map((_, i) => (
-                                <AccountCard />
+                            {accounts.map((item) => (
+                                <AccountCard
+                                    {...item}
+                                />
                             ))}
                         </SimpleGrid>
                     )}
@@ -93,10 +91,10 @@ const MainPage = () => {
                         <div>
                             <Title order={2}>Мои кредиты</Title>
                             <Text c="dimmed">
-                                {activeCredits.length === 0
+                                {credits.length === 0
                                     ? "У вас нет активных кредитов"
-                                    : `У вас ${activeCredits.length} ${
-                                        activeCredits.length === 1
+                                    : `У вас ${credits.length} ${
+                                        credits.length === 1
                                             ? "активный кредит"
                                             : "активных кредита"
                                     }`}
@@ -113,7 +111,7 @@ const MainPage = () => {
                         </Link>
                     </Group>
 
-                    {allCredits.length === 0 ? (
+                    {credits.length === 0 ? (
                         <Paper
                             withBorder
                             radius="md"
@@ -143,8 +141,8 @@ const MainPage = () => {
                         </Paper>
                     ) : (
                         <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                            {allCredits.map((_, i) => (
-                                <CreditCard />
+                            {credits.map((item, index) => (
+                                <CreditCard {...item}/>
                             ))}
                         </SimpleGrid>
                     )}

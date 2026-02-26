@@ -1,10 +1,20 @@
 import { Badge, Button, Card, Group, Stack, Text, ThemeIcon } from "@mantine/core";
 import { IconArrowRight, IconWallet } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import {LINK_PATHS} from "@/constants/LINK_PATHS.ts";
+import {LINK_PATHS} from "../../../constants/LINK_PATHS.ts";
+import type {AccountProps} from "../types/AccountProps.ts";
+import {useAccountCard} from "./useAccountCard.ts";
 
 
-const AccountCard = () => {
+const AccountCard = (props: AccountProps) => {
+
+    const {
+        id,
+        clientId,
+        balance,
+        status,
+    } = useAccountCard(props)
+
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 420 }}>
             <Group justify="space-between" mb="md">
@@ -15,31 +25,28 @@ const AccountCard = () => {
 
                     <div>
                         <Text size="sm" c="dimmed">
-                            тип
+                            Текущий счет
                         </Text>
                         <Text fw={500} ff="monospace">
-                            123
+                            {id}
                         </Text>
                     </div>
                 </Group>
 
-                {/*<Badge variant={account.type === "savings" ? "light" : "filled"}>*/}
-                {/*    123*/}
-                {/*</Badge>*/}
-                <Badge>
-                    123
+                <Badge variant={"light"}>
+                    RUB
                 </Badge>
             </Group>
 
             <Stack gap={4} mb="lg">
                 <Text size="sm" c="dimmed">
-                    Доступный баланс
+                    Баланс
                 </Text>
                 <Text size="xl" fw={700}>
-                    123
+                    {balance}
                 </Text>
                 <Text size="xs" c="dimmed">
-                    Открыт
+                    {status}
                 </Text>
             </Stack>
 

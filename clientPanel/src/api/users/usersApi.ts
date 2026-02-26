@@ -2,8 +2,8 @@ import {instance} from "../../app/api/instance.ts";
 
 const userApi = {
     me: async () => {
-        const result = await instance.get("me")
-        return result
+        const { data } = await instance.get("me")
+        return data
     }
 }
 

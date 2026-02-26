@@ -1,6 +1,5 @@
 import {
     Badge,
-    Button,
     Card,
     Divider,
     Grid,
@@ -16,9 +15,25 @@ import {
     IconPercentage,
     IconTrendingUp,
 } from "@tabler/icons-react";
+import type {creditCardProps} from "../types/CreditCardProps.ts";
+import {useCreditCard} from "./useCreditCard.ts";
 
 
-const CreditCard = () => {
+const CreditCard = (props: creditCardProps) => {
+
+    const {
+        tariffId,
+        principalAmount,
+        outstandingAmount,
+        status,
+        issuedAt,
+        nextPaymentDueAt,
+        createdAt,
+        remainsPercantage
+    } = useCreditCard(props);
+
+    //createdAt - дата оформления
+
 
     return (
         <Card
@@ -26,7 +41,7 @@ const CreditCard = () => {
             padding="lg"
             radius="md"
             withBorder
-            // style={{ maxWidth: 520, opacity: credit.status === "closed" ? 0.7 : 1 }}
+            style={{ maxWidth: 520, opacity: status === "closed" ? 0.7 : 1 }}
         >
             <Group justify="space-between" mb="md">
                 <Group gap="md">
@@ -34,7 +49,7 @@ const CreditCard = () => {
                         size={48}
                         radius="xl"
                         variant="light"
-                        // color={credit.status === "active" ? "orange" : "gray"}
+                        color={status === "active" ? "orange" : "gray"}
                     >
                         <IconCreditCard size={24} />
                     </ThemeIcon>
@@ -44,13 +59,13 @@ const CreditCard = () => {
                             Кредит
                         </Text>
                         <Text size="lg" fw={600}>
-                            123
+                            {`${principalAmount}₽`}
                         </Text>
                     </div>
                 </Group>
 
                 <Badge variant="light">
-                    123
+                    {status === 'active' ? 'Активный' : 'Закрыт'}
                 </Badge>
             </Group>
 
@@ -60,15 +75,14 @@ const CreditCard = () => {
                         Остаток к погашению
                     </Text>
                     <Text size="sm" fw={500}>
-                        10% погашено
+                        {`${remainsPercantage}% погашено`}
                     </Text>
                 </Group>
 
-                {/*<Progress value={progress} radius="xl" />*/}
-                <Progress radius="xl" />
+                <Progress value={remainsPercantage} radius="xl" />
 
                 <Text size="xl" fw={700}>
-                    123
+                    {`${outstandingAmount}₽`}
                 </Text>
             </Stack>
 
@@ -82,7 +96,7 @@ const CreditCard = () => {
                             <Text size="xs" c="dimmed">
                                 Ежемесячный платеж
                             </Text>
-                            <Text fw={600}>123</Text>
+                            <Text fw={600}>123₽</Text>
                         </Stack>
                     </Group>
                 </Grid.Col>
