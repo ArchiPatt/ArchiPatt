@@ -177,6 +177,18 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     return reply.code(200).send(tariffs);
   });
 
+  app.get<{ Params: { id: string } }>("/tariffs/:id", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
+
+    const tariff = await app.db
+      .getRepository(CreditTariff)
+      .findOne({ where: { id: req.params.id } });
+    if (!tariff) return reply.code(404).send({ error: "tariff_not_found" });
+    return reply.code(200).send(tariff);
+  });
+
   app.post<{
     Body: { name?: string; interestRate?: number; billingPeriodDays?: number };
   }>("/tariffs", async (req, reply) => {
