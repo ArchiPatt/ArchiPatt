@@ -1,4 +1,5 @@
 import { Badge, Card, Group, Stack, Text } from '@mantine/core'
+import { useNavigate } from 'react-router-dom'
 import type { Account } from '../../../generated/api/core/types.gen'
 import { formatMoney } from '../../utils/formatMoney'
 import { formatDate } from '../../utils/formatDate'
@@ -8,8 +9,20 @@ type AccountCardProps = {
 }
 
 export const AccountCard = ({ account }: AccountCardProps) => {
+   const navigate = useNavigate()
+
+   const handleClick = () => {
+      navigate(`/accounts/${account.id}`)
+   }
+
    return (
-      <Card withBorder radius="md" padding="sm">
+      <Card
+         withBorder
+         radius="md"
+         padding="sm"
+         style={{ cursor: 'pointer' }}
+         onClick={handleClick}
+      >
          <Group justify="space-between" align="flex-start">
             <Stack gap={2}>
                <Text size="sm" fw={500}>
