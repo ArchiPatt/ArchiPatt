@@ -1,4 +1,18 @@
-import { Alert, Badge, Button, Card, Center, Flex, Group, Loader, Stack, Text, Title, useMatches } from '@mantine/core'
+import {
+   Alert,
+   Badge,
+   Button,
+   Card,
+   Center,
+   Flex,
+   Group,
+   Loader,
+   Stack,
+   Text,
+   Title,
+   useMatches
+} from '@mantine/core'
+import { modals } from '@mantine/modals'
 import { useUsersQuery } from '../../api/hooks/useUsersQuery'
 import { useBlockUserMutation } from '../../api/hooks/useBlockUserMutation'
 import { formatDate } from '../../utils/formatDate'
@@ -21,10 +35,14 @@ export const Users = () => {
 
    const buttonSize = useMatches({
       base: '100%',
-      sm: 'auto',
-    });
+      sm: 'auto'
+   })
 
    const currentUserId = meQuery.data?.data?.id
+
+   const handleOpenCreateUserModal = () => {
+      modals.openContextModal({ modal: 'createUser', title: 'Создать пользователя', innerProps: {} })
+   }
 
    if (usersQuery.isLoading) {
       return (
@@ -56,9 +74,12 @@ export const Users = () => {
       <Stack gap="lg">
          <Group justify="space-between">
             <Title order={2}>Пользователи</Title>
-            <Text c="dimmed" size="sm">
-               Всего пользователей: {users.length}
-            </Text>
+            <Group>
+               <Text c="dimmed" size="sm">
+                  Всего пользователей: {users.length}
+               </Text>
+               <Button onClick={handleOpenCreateUserModal}>Создать пользователя</Button>
+            </Group>
          </Group>
 
          <Stack gap="md">
@@ -76,9 +97,7 @@ export const Users = () => {
                      >
                         <Stack gap={4} style={{ flex: 1, minWidth: 0 }}>
                            <Group gap="xs" wrap="wrap">
-                              <Title order={3}>
-                                 {user.displayName || user.username || 'Без имени'}
-                              </Title>
+                              <Title order={3}>{user.displayName || user.username || 'Без имени'}</Title>
                               <Badge color="blue" variant="light">
                                  {getUserRoleLabel(user.roles)}
                               </Badge>
@@ -88,11 +107,7 @@ export const Users = () => {
                                  </Badge>
                               )}
                            </Group>
-                           <Flex
-                              direction={{ base: 'column', sm: 'row' }}
-                              gap="sm"
-                              wrap="wrap"
-                           >
+                           <Flex direction={{ base: 'column', sm: 'row' }} gap="sm" wrap="wrap">
                               <Text size="xs" c="dimmed">
                                  Логин: {user.username}
                               </Text>
@@ -116,9 +131,9 @@ export const Users = () => {
                                  isBlocked: !isBlocked
                               })
                            }
-                           style={(theme) => ({
-                              width: buttonSize,
-                           })}
+                           style={{
+                              width: buttonSize
+                           }}
                         >
                            {isBlocked ? 'Разблокировать' : 'Заблокировать'}
                         </Button>
@@ -130,4 +145,3 @@ export const Users = () => {
       </Stack>
    )
 }
-
