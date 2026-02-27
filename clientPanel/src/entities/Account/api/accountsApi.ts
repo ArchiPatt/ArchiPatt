@@ -1,7 +1,7 @@
 import type {Account} from "../types/Account.ts";
-import {instance} from "../../../app/api/instance.ts";
 import type {CreateAccountRequest} from "../types/CreateAccountRequest.ts";
 import type {DepositWithdrawRequest} from "../types/DepositWithdrawRequest.ts";
+import {instance} from "../../../app/api/instance.ts";
 
 const accountsApi = {
     getAccountsList: async () => {
