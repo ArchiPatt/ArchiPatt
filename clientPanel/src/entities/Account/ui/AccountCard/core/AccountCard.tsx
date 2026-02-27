@@ -1,10 +1,7 @@
-import { Badge, Button, Card, Group, Stack, Text, ThemeIcon } from "@mantine/core";
-import { IconArrowRight, IconWallet } from "@tabler/icons-react";
-import { Link } from "react-router-dom";
-import {LINK_PATHS} from "../../../constants/LINK_PATHS.ts";
+import {Badge, Button, Card, Group, Stack, Text, ThemeIcon} from "@mantine/core";
+import {IconArrowRight, IconWallet} from "@tabler/icons-react";
 import type {AccountProps} from "../types/AccountProps.ts";
 import {useAccountCard} from "./useAccountCard.ts";
-
 
 const AccountCard = (props: AccountProps) => {
 
@@ -55,7 +52,7 @@ const AccountCard = (props: AccountProps) => {
                 Подробнее
             </Button>
         </Card>
-    );
-};
+    )
+}
 
-export { AccountCard };
+export { AccountCard }
