@@ -5,7 +5,7 @@ import {
     Text
 } from '@mantine/core';
 import { IconBuildingBank } from '@tabler/icons-react';
-import { Navbar } from "@/components/Navbar";
+import {Navbar} from "../../Navbar/core/Navbar.tsx"
 import {Outlet} from "react-router-dom";
 
 const Header = () => {

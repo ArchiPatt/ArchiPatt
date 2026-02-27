@@ -23,7 +23,7 @@ import {useAccountDetailPage} from "./useAccountDetailPage.ts";
 
 const AccountDetailPage = () => {
 
-    const { accountInfo, transactions, closeAccount } = useAccountDetailPage()
+    const { account, transaction, closeAccount } = useAccountDetailPage()
 
     return (
         <Container size="lg" py="xl">
@@ -35,7 +35,7 @@ const AccountDetailPage = () => {
                                 <Text size="sm" c="dimmed">
                                     Текущий счет
                                 </Text>
-                                <Title order={2}>{accountInfo.id}</Title>
+                                <Title order={2}>{account.id}</Title>
                             </div>
 
                             <Divider />
@@ -44,36 +44,37 @@ const AccountDetailPage = () => {
                                 <Text size="sm" c="dimmed">
                                     Баланс
                                 </Text>
-                                <Title order={1}>{accountInfo.balance}</Title>
+                                <Title order={1}>{account.balance}</Title>
                             </div>
+                            {account.status !== 'closed' &&
+                                <Group>
+                                    <Button
+                                        leftSection={<IconArrowUp size={16} />}
+                                        color="green"
+                                        disabled={Boolean(account.status === 'closed')}
+                                        // onClick={() => setDepositOpened(true)}
+                                    >
+                                        Пополнить
+                                    </Button>
 
-                            <Group>
-                                <Button
-                                    leftSection={<IconArrowUp size={16} />}
-                                    color="green"
-                                    disabled={Boolean(accountInfo.status === 'closed')}
-                                    // onClick={() => setDepositOpened(true)}
-                                >
-                                    Пополнить
-                                </Button>
+                                    <Button
+                                        variant="outline"
+                                        leftSection={<IconArrowDown size={16} />}
+                                        // onClick={() => setWithdrawOpened(true)}
+                                    >
+                                        Снять
+                                    </Button>
 
-                                <Button
-                                    variant="outline"
-                                    leftSection={<IconArrowDown size={16} />}
-                                    // onClick={() => setWithdrawOpened(true)}
-                                >
-                                    Снять
-                                </Button>
-
-                                <Button
-                                    color="red"
-                                    leftSection={<IconTrash size={16} />}
-                                    onClick={closeAccount}
-                                    disabled={Boolean(accountInfo.status === 'closed')}
-                                >
-                                    Закрыть счет
-                                </Button>
-                            </Group>
+                                    <Button
+                                        color="red"
+                                        leftSection={<IconTrash size={16} />}
+                                        onClick={closeAccount}
+                                        disabled={Boolean(account.status === 'closed')}
+                                    >
+                                        Закрыть счет
+                                    </Button>
+                                </Group>
+                            }
                         </Stack>
                     </Card>
                 </Grid.Col>
@@ -87,7 +88,7 @@ const AccountDetailPage = () => {
                     История операций
                 </Title>
 
-                {transactions.items.length === 0 ?
+                {transaction.length === 0 ?
                     <Text>Операции не проводились</Text> :
                     <Table>
                         <Table.Thead>
@@ -99,7 +100,7 @@ const AccountDetailPage = () => {
                         </Table.Thead>
 
                         <Table.Tbody>
-                            {transactions.items.map((t) => (
+                            {transaction.map((t) => (
                                 <Table.Tr key={t.id}>
                                     <Table.Td>
                                         {new Date(t.createdAt).toLocaleString('ru-RU')}

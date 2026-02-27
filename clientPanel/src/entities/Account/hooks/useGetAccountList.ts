@@ -1,5 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
-import {accountsApi} from "../../../api";
+import {accountsApi} from "../api/accountsApi.ts";
 import {userStorage} from "../../../app/storage/userStorage";
 
 const useGetAccountList = () => {

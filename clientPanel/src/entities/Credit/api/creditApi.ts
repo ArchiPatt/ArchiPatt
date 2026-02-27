@@ -6,22 +6,22 @@ import {instance} from "../../../app/api/instance.ts";
 
 const creditsApi = {
     createCredit: async (model: IssueCreditRequest) => {
-        const { data } = instance.post<CreditResponse>("credits/issue", model)
+        const { data } = await instance.post<CreditResponse>("credits/issue", model)
 
         return data
     },
     getCreditById: async (id: string) => {
-        const { data } = instance.get<CreditResponse>(`credits/${id}`);
+        const { data } = await instance.get<CreditResponse>(`credits/${id}`);
 
         return data
     },
     creditRepay: async (model: RepayCreditRequest, id: string) => {
-        const { data } = instance.post<RepayCreditResponse>(`credits/${id}/repay`, model)
+        const { data } = await instance.post<RepayCreditResponse>(`credits/${id}/repay`, model)
 
         return data
     },
     getCreditsByClientId: async (id: string) => {
-        const { data } = instance.get<CreditResponse[]>(`credits/by-client/${id}`)
+        const { data } = await instance.get<CreditResponse[]>(`credits/by-client/${id}`)
 
         return data
     },

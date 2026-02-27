@@ -1,10 +1,6 @@
-import {useEffect, useState} from "react";
-import type {account} from "../../../types/account.ts";
-import {useMutation, useQuery} from "@tanstack/react-query";
-import {tokenStorage} from "../../../app/storage/tokenStorage";
-import {accountsApi} from "../../../api";
 import {useNavigate, useParams} from "react-router-dom";
-import type {accountTransaction} from "../../../types/accountTransaction.ts";
+import {useGetAccountById} from "../../../entities/Account";
+import {useGetAccountTransactions} from "../../../entities/Transaction";
 import {LINK_PATHS} from "../../../constants/LINK_PATHS.ts";
 
 const useAccountDetailPage = () => {
@@ -12,35 +8,10 @@ const useAccountDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
 
+    const { data: account } = useGetAccountById(id ?? "")
 
-    const [accountInfo, setAccountInfo] = useState<account>({id: '', clientId: '', status: 'open', balance: '', createdAt: '' })
-    const [transactions, setTransactions] = useState<accountTransaction>({ items: [], total: 0 })
+    const { data: transaction } = useGetAccountTransactions(account.id)
 
-    const { data: account } = useQuery({
-        queryKey: ['accountInfo'],
-        queryFn: () => accountsApi.getAccountById(id ?? ""),
-        enabled: !!tokenStorage.getItem(),
-        retry: false,
-    });
-
-    const { data: transaction } = useQuery({
-        queryKey: ['transaction'],
-        queryFn: () => accountsApi.getAccountTransactions(accountInfo.id),
-        enabled: !!accountInfo.id,
-        retry: false,
-    });
-
-    useEffect(() => {
-        if (account) {
-            setAccountInfo(account)
-        }
-    }, [account]);
-
-    useEffect(() => {
-        if (transaction) {
-            setTransactions(transaction)
-        }
-    }, [transaction])
 
     const { mutate: closerAccount } = useMutation({
         mutationFn: () => accountsApi.closeAccount(id ?? ""),
@@ -54,7 +25,7 @@ const useAccountDetailPage = () => {
         navigate(LINK_PATHS.MAIN)
     }
 
-    return { accountInfo, transactions, closeAccount }
+    return { account, transaction, closeAccount }
 }
 
 export { useAccountDetailPage }

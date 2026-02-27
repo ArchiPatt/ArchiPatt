@@ -6,20 +6,9 @@ import {
     Stack,
     Group,
     Divider,
-    Button,
     Avatar,
     Grid,
-    Paper,
 } from '@mantine/core';
-import {
-    IconUser,
-    IconMail,
-    IconPhone,
-    IconMapPin,
-    IconCalendar,
-    IconShield,
-} from '@tabler/icons-react';
-import type {userProfileResponse} from "../../../types/userProfileResponse.ts";
 import {useProfilePage} from "./useProfilePage.ts";
 import {ROLES} from "../../../constants/ROLES.ts";
 

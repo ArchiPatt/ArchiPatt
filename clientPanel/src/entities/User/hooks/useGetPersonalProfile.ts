@@ -5,7 +5,7 @@ import {userStorage} from "../../../app/storage/userStorage";
 const useGetPersonalProfile = () => {
     return useQuery({
         queryKey: ['user', userStorage.getItem()],
-        queryFn: () => userApi.getPersonalProfile()
+        queryFn: () => userApi.getPersonalProfile(),
     })
 }
 

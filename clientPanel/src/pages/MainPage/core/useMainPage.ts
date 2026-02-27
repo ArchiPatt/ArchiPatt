@@ -1,19 +1,16 @@
 import {useLocation} from "react-router-dom";
-import {accountsApi, authApi, userApi} from "../../../api";
+import {authApi} from "../../../api";
 import {useQuery} from "@tanstack/react-query";
 import {tokenStorage} from "../../../app/storage/tokenStorage";
 import {userStorage} from "../../../app/storage/userStorage";
 import {refreshStorage} from "../../../app/storage/refreshStorage";
-import {useEffect, useState} from "react";
-import type {account} from "../../../types/account.ts";
-import type {creditResponse} from "../../../types/creditResponse.ts";
-import {creditsApi} from "../../../api/credits/creditsApi.ts";
+import {useEffect} from "react";
+import {useGetPersonalProfile} from "../../../entities/User";
+import {useGetAccountList} from "../../../entities/Account";
+import {useGetCreditsByClientId} from "../../../entities/Credit";
 
 
 const useMainPage = () => {
-
-    const [accounts, setAccounts] = useState<account[]>([]);
-    const [credits, setCredits] = useState<creditResponse[]>([])
 
     const location = useLocation();
     const params = new URLSearchParams(location.search);
@@ -21,31 +18,10 @@ const useMainPage = () => {
 
     const { data: tokens } = useQuery({
         queryKey: ['accessToken', code],
-        queryFn: () => authApi.accessToken(code as string),
+        queryFn: async () => await authApi.accessToken(code as string),
         enabled: !!code,
         retry: false,
     });
-
-    const { data: userData } = useQuery({
-        queryKey: ['userProfile', tokenStorage.getItem()],
-        queryFn: async () => userApi.me(),
-        enabled: !!tokenStorage.getItem(),
-        retry: false,
-    });
-
-    const { data: accountData } = useQuery({
-        queryKey: ['accountsData'],
-        queryFn: () => accountsApi.getAccountsList(),
-        enabled: !!userStorage.getItem(),
-        retry: false,
-    })
-
-    const { data: creditData } = useQuery({
-        queryKey: ['creditsData'],
-        queryFn: () => creditsApi.getCreditsListByClientId (userStorage.getItem()),
-        enabled: !!userStorage.getItem(),
-        retry: false,
-    })
 
     // пока эффекты используем
     useEffect(() => {
@@ -58,27 +34,19 @@ const useMainPage = () => {
         }
     }, [tokens]);
 
+    const { data: userProfileData } = useGetPersonalProfile()
+
     useEffect(() => {
-        if (userData) {
+        if(userProfileData) {
             userStorage.removeItem()
-
-            userStorage.setItem(userData.id)
+            userStorage.setItem(userProfileData.id)
         }
-    }, [userData]);
+    }, [userProfileData]);
 
-    useEffect(() => {
-        if (accountData) {
-            setAccounts([...accountData])
-        }
-    }, [accountData])
+    const { data: accounts, isLoading: accountLoading } = useGetAccountList()
+    const { data: credits, isLoading: creditLoading } = useGetCreditsByClientId(userStorage.getItem())
 
-    useEffect(() => {
-        if (creditData) {
-            setCredits([...creditData])
-        }
-    }, [creditData]);
-
-    return { accounts, credits };
+    return { accounts, credits, accountLoading, creditLoading }
 }
 
 export { useMainPage }
