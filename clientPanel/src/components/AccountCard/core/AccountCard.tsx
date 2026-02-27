@@ -10,9 +10,9 @@ const AccountCard = (props: AccountProps) => {
 
     const {
         id,
-        clientId,
         balance,
         status,
+        openDetail
     } = useAccountCard(props)
 
     return (
@@ -50,11 +50,11 @@ const AccountCard = (props: AccountProps) => {
                 </Text>
             </Stack>
 
-            <Link to={LINK_PATHS.ACCOUNT_DETAIL}>
-                <Button variant="light" fullWidth rightSection={<IconArrowRight size={16} />}>
+            {/*<Link to={LINK_PATHS.ACCOUNT_DETAIL}>*/}
+                <Button variant="light" fullWidth rightSection={<IconArrowRight size={16} />} onClick={openDetail}>
                     Подробнее
                 </Button>
-            </Link>
+            {/*</Link>*/}
         </Card>
     );
 };

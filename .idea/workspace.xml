@@ -5,30 +5,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="a6f3347e-8830-4e49-8e39-a40d96e845f1" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/api/credits/creditsApi.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/app/storage/userStorage/core/userStorage.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/app/storage/userStorage/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/core/useCreditCard.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/types/CreditCardProps.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/accountStatus.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/creditResponse.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/creditStatus.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/accountOperations.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/accountTransaction.ts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/clientPanel/src/types/pagination.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientPanel/src/api/accounts/accountsApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/api/accounts/accountsApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/api/users/usersApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/api/users/usersApi.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/app/api/instance.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/app/api/instance.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/api/credits/creditsApi.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/api/credits/creditsApi.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientPanel/src/components/AccountCard/core/AccountCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/components/AccountCard/core/AccountCard.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientPanel/src/components/AccountCard/core/useAccountCard.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/components/AccountCard/core/useAccountCard.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/components/AccountCard/types/AccountProps.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/components/AccountCard/types/AccountProps.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/core/CreditCard.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/core/CreditCard.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/index.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/index.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/types/Credit.ts" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/main.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/main.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/core/useCreditCard.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/components/CreditCard/core/useCreditCard.ts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/AccountDetailPage/core/AccountDetailPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/AccountDetailPage/core/AccountDetailPage.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/AccountDetailPage/core/useAccountDetailPage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/AccountDetailPage/core/useAccountDetailPage.ts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/MainPage.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/useMainPage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/MainPage/core/useMainPage.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/ProfilePage/core/ProfilePage.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/ProfilePage/core/ProfilePage.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/pages/ProfilePage/core/useProfilePage.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/pages/ProfilePage/core/useProfilePage.ts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clientPanel/src/types/account.ts" beforeDir="false" afterPath="$PROJECT_DIR$/clientPanel/src/types/account.ts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -125,7 +115,7 @@
       </map>
     </option>
   </component>
-  <component name="RunManager" selected="npm.startAuth">
+  <component name="RunManager" selected="npm.startClinentPanel">
     <configuration name="startAuth" type="js.build_tools.npm">
       <package-json value="$PROJECT_DIR$/auth/package.json" />
       <command value="run" />
@@ -224,6 +214,7 @@
       <workItem from="1772032121378" duration="9036000" />
       <workItem from="1772098543981" duration="1758000" />
       <workItem from="1772103617431" duration="8899000" />
+      <workItem from="1772185449794" duration="2786000" />
     </task>
     <servers />
   </component>

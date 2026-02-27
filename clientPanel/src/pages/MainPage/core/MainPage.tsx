@@ -38,14 +38,6 @@ const MainPage = () => {
                                     : "активных счета"}
                             </Text>
                         </div>
-
-                        <Link to={LINK_PATHS.OPEN_ACCOUNT}>
-                            <Button
-                                leftSection={<IconPlus size={16} />}
-                            >
-                                Открыть счет
-                            </Button>
-                        </Link>
                     </Group>
 
                     {accounts.length === 0 ? (
@@ -100,15 +92,6 @@ const MainPage = () => {
                                     }`}
                             </Text>
                         </div>
-                        <Link to={LINK_PATHS.OPEN_CREDIT}>
-                            <Button
-
-                                color="orange"
-                                leftSection={<IconPlus size={16} />}
-                            >
-                                Оформить кредит
-                            </Button>
-                        </Link>
                     </Group>
 
                     {credits.length === 0 ? (

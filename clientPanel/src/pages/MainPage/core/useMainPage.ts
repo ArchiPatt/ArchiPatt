@@ -35,7 +35,7 @@ const useMainPage = () => {
 
     const { data: accountData } = useQuery({
         queryKey: ['accountsData'],
-        queryFn: () => accountsApi.accountsList(),
+        queryFn: () => accountsApi.getAccountsList(),
         enabled: !!userStorage.getItem(),
         retry: false,
     })

@@ -22,18 +22,14 @@ import {useCreditCard} from "./useCreditCard.ts";
 const CreditCard = (props: creditCardProps) => {
 
     const {
-        tariffId,
         principalAmount,
         outstandingAmount,
         status,
-        issuedAt,
         nextPaymentDueAt,
         createdAt,
-        remainsPercantage
+        remainsPercantage,
+        tariff
     } = useCreditCard(props);
-
-    //createdAt - дата оформления
-
 
     return (
         <Card
@@ -94,9 +90,9 @@ const CreditCard = (props: creditCardProps) => {
                         <IconTrendingUp size={16} />
                         <Stack gap={0}>
                             <Text size="xs" c="dimmed">
-                                Ежемесячный платеж
+                                Следующий Платеж
                             </Text>
-                            <Text fw={600}>123₽</Text>
+                            <Text fw={600}>{`${nextPaymentDueAt}₽`}</Text>
                         </Stack>
                     </Group>
                 </Grid.Col>
@@ -108,7 +104,7 @@ const CreditCard = (props: creditCardProps) => {
                             <Text size="xs" c="dimmed">
                                 Процентная ставка
                             </Text>
-                            <Text fw={600}>12%</Text>
+                            {/*<Text fw={600}>{`${tariff.interestRate * 100}%`}</Text>*/}
                         </Stack>
                     </Group>
                 </Grid.Col>
@@ -118,10 +114,10 @@ const CreditCard = (props: creditCardProps) => {
                         <IconCalendar size={16} />
                         <Stack gap={0}>
                             <Text size="xs" c="dimmed">
-                                Осталось месяцев
+                                Платеж
                             </Text>
                             <Text fw={600}>
-                                123
+                                {/*{`Каждые ${tariff.billingPeriodDays} дн.`}*/}
                             </Text>
                         </Stack>
                     </Group>
@@ -134,7 +130,7 @@ const CreditCard = (props: creditCardProps) => {
                             <Text size="xs" c="dimmed">
                                 Дата оформления
                             </Text>
-                            <Text fw={600}>123</Text>
+                            <Text fw={600}>{createdAt}</Text>
                         </Stack>
                     </Group>
                 </Grid.Col>

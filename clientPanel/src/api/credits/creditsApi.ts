@@ -5,6 +5,16 @@ const creditsApi = {
         const { data } = await instance.get(`credits/by-client/${userId}`);
 
         return data;
+    },
+    getTariffList: async () => {
+        const { data } = await instance.get('tariffs')
+
+        return data
+    },
+    getTariffById: async (tariffId: string) => {
+        const { data } = await instance.get(`tariffs/${tariffId}`);
+
+        return data
     }
 }
 
