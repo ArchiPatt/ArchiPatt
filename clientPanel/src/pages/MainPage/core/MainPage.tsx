@@ -19,28 +19,36 @@ import {CreditCard} from "../../../entities/Credit";
 
 const MainPage = () => {
 
-    const { accounts, credits, accountLoading, creditLoading } = useMainPage();
+    const {
+        accounts,
+        credits,
+        accountLoading,
+        creditLoading,
+        accountError,
+        creditError
+    } = useMainPage();
+
+    if (accountLoading || creditLoading) return <div>Loading...</div>;
 
     return (
         <>
             <Container size="lg" py="xl">
-                {accountLoading || creditLoading ?
-                    <div>Loading...</div>:
-                    <>
-                        <Stack gap="xl" mb="xl">
+                <Stack gap="xl" mb="xl">
+                    {!accountError ?
+                        <>
                             <Group justify="space-between" align="flex-end">
                                 <div>
                                     <Title order={1}>Мои счета</Title>
                                     <Text c="dimmed">
-                                        У вас {accounts.length}{" "}
-                                        {accounts.length === 1
+                                        У вас {accounts?.length}{" "}
+                                        {accounts?.length === 1
                                             ? "активный счет"
                                             : "активных счета"}
                                     </Text>
                                 </div>
                             </Group>
 
-                            {accounts.length === 0 ? (
+                            {accounts?.length === 0 ? (
                                 <Paper
                                     withBorder
                                     radius="md"
@@ -69,22 +77,27 @@ const MainPage = () => {
                                 </Paper>
                             ) : (
                                 <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                                    {accounts.map((item) => (
-                                        <AccountCard {...item}/>
+                                    {accounts?.map((item) => (
+                                        <AccountCard {...item} />
                                     ))}
                                 </SimpleGrid>
                             )}
-                        </Stack>
+                        </>:
+                        <div>Не удалось загрузить счета</div>
+                    }
+                </Stack>
 
-                        <Stack gap="xl">
+                <Stack gap="xl">
+                    {!creditError ?
+                        <>
                             <Group justify="space-between" align="flex-end">
                                 <div>
                                     <Title order={2}>Мои кредиты</Title>
                                     <Text c="dimmed">
-                                        {credits.length === 0
+                                        {credits?.length === 0
                                             ? "У вас нет активных кредитов"
-                                            : `У вас ${credits.length} ${
-                                                credits.length === 1
+                                            : `У вас ${credits?.length} ${
+                                                credits?.length === 1
                                                     ? "активный кредит"
                                                     : "активных кредита"
                                             }`}
@@ -92,7 +105,7 @@ const MainPage = () => {
                                 </div>
                             </Group>
 
-                            {credits.length === 0 ? (
+                            {credits?.length === 0 ? (
                                 <Paper
                                     withBorder
                                     radius="md"
@@ -122,14 +135,15 @@ const MainPage = () => {
                                 </Paper>
                             ) : (
                                 <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                                    {credits.map((item, index) => (
+                                    {credits?.map((item, index) => (
                                         <CreditCard {...item}/>
                                     ))}
                                 </SimpleGrid>
                             )}
-                        </Stack>
-                    </>
-                }
+                        </>:
+                        <div>Не удалось загрузить список кредитов</div>
+                    }
+                </Stack>
 
             </Container>
         </>

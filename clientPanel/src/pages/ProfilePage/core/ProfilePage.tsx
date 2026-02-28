@@ -14,8 +14,10 @@ import {ROLES} from "../../../constants/ROLES.ts";
 
 const ProfilePage = () => {
 
-    const { profileData } = useProfilePage()
+    const { userData, isLoading } = useProfilePage()
 
+    if (isLoading) return <div>Loading...</div>
+    if (!userData) return null
 
     return (
         <Container size="lg" py="xl">
@@ -28,11 +30,11 @@ const ProfilePage = () => {
                     <Group position="apart" align="flex-start" mb="md">
                         <Group>
                             <Avatar color="blue" size={80} radius="xl">
-                                {profileData.displayName[0] + profileData.displayName[0]}
+                                {userData.displayName[0] + userData.displayName[0]}
                             </Avatar>
                             <div>
                                 <Title order={3}>
-                                    {profileData.displayName}
+                                    {userData.displayName}
                                 </Title>
                             </div>
                         </Group>
@@ -45,8 +47,8 @@ const ProfilePage = () => {
                         <Grid.Col span={6}>
                             <Group spacing={5} align="center">
                                 <Text>Роли:</Text>
-                                {profileData.roles.map((item, index) => (
-                                    <Text key={index}>{`${ROLES[item]} ${index !== profileData.roles.length ? "," : ""}`}</Text>
+                                {userData.roles.map((item, index) => (
+                                    <Text key={index}>{`${ROLES[item]} ${index !== userData.roles.length - 1 ? "," : ""}`}</Text>
                                 ))}
                             </Group>
                         </Grid.Col>

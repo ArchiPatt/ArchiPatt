@@ -1,4 +1,4 @@
-import type {creditStatus} from "../../../types/creditStatus.ts";
+import type {CreditStatus} from "./CreditStatus.ts";
 
 interface CreditResponse {
     id: string
@@ -7,7 +7,7 @@ interface CreditResponse {
     tariffId: string
     principalAmount: string
     outstandingAmount: string
-    status: creditStatus
+    status: CreditStatus
     issuedAt: string
     nextPaymentDueAt: string
     closedAt?: string

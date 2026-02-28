@@ -1,11 +1,12 @@
 import {Card, Table, Text, Title} from "@mantine/core";
 import type {AccountOperationsPage} from "../../../types/AccountOperationsPage.ts";
 import {useTransaction} from "./useTransaction.ts";
+import {useEffect} from "react";
 
 const Transaction = (props: AccountOperationsPage) => {
 
     const {
-        items,
+        slicedArray,
     } = useTransaction(props)
 
     return (
@@ -14,7 +15,7 @@ const Transaction = (props: AccountOperationsPage) => {
                 История операций
             </Title>
 
-            {items.length === 0 ?
+            {slicedArray.length === 0 ?
                 <Text>Операции не проводились</Text> :
                 <Table>
                     <Table.Thead>
@@ -26,7 +27,7 @@ const Transaction = (props: AccountOperationsPage) => {
                     </Table.Thead>
 
                     <Table.Tbody>
-                        {items.map((t) => (
+                        {slicedArray.map((t) => (
                             <Table.Tr key={t.id}>
                                 <Table.Td>
                                     {new Date(t.createdAt).toLocaleString('ru-RU')}

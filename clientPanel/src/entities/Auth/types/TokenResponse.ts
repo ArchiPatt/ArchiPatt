@@ -1,4 +1,4 @@
-interface tokenResponse {
+interface TokenResponse {
     token_type: string
     access_token: string
     refresh_token: string
@@ -6,4 +6,4 @@ interface tokenResponse {
     scope: string
 }
 
-export type { tokenResponse }
+export type { TokenResponse }

@@ -4,7 +4,7 @@ import type {AccountTransactionRequest} from "../types/accountTransactionRequest
 
 const accountTransactionApi = {
     getAccountTransactions: async (params: AccountTransactionRequest) => {
-        const { data } = instance.get<AccountOperationsPage>(
+        const { data } = await instance.get<AccountOperationsPage>(
             `accounts/${params.id}/operations${params.limit !== undefined || params.offset !== undefined || params.sort !== undefined ? "?" : ''}`)
 
         return data

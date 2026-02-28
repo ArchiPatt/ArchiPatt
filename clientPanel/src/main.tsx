@@ -7,7 +7,6 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./app";
 import {QueryCache, QueryClient, QueryClientProvider} from "@tanstack/react-query";
 
-// const queryClient = new QueryClient({queryCache: new QueryCache({onSuccess: })});
 const queryClient = new QueryClient();
 
 createRoot(document.getElementById("root")!).render(

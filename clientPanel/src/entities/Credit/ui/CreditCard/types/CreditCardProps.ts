@@ -1,5 +1,5 @@
-import type {creditResponse} from "../../../../../types/creditResponse.ts";
+import type {CreditResponse} from "../../../types/CreditResponse.ts";
 
-type CreditCardProps = Omit<creditResponse, 'clientId' | 'accountId' | 'id' | 'closedAt'>
+type CreditCardProps = Omit<CreditResponse, 'clientId' | 'accountId' | 'id' | 'closedAt'>
 
 export type { CreditCardProps }

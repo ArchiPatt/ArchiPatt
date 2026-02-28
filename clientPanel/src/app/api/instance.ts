@@ -2,7 +2,7 @@ import axios from "axios";
 import type {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
 import {tokenStorage} from "../storage/tokenStorage";
 import {refreshStorage} from "../storage/refreshStorage";
-import {authApi} from "../../api";
+import {authApi} from "../../entities/Auth/api/authApi.ts";
 
 const instance = axios.create({ baseURL: 'http://localhost:4004/' })
 

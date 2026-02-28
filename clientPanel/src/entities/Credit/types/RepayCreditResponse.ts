@@ -1,8 +1,8 @@
-import type {creditStatus} from "../../../types/creditStatus.ts";
+import type {CreditStatus} from "./CreditStatus.ts";
 
 interface RepayCreditResponse {
     id: string
-    status: creditStatus
+    status: CreditStatus
     outstandingAmount: string
     closedAt: string
 }

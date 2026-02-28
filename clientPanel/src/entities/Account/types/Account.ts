@@ -1,10 +1,10 @@
-import type {accountStatus} from "../../../types/accountStatus.ts";
+import type {AccountStatus} from "./AccountStatus.ts";
 
 interface Account {
     id: string
     clientId: string
     balance: string
-    status: accountStatus
+    status: AccountStatus
     createdAt: string
 }
 
