@@ -9,14 +9,14 @@ import {
    Loader,
    Stack,
    Text,
-   Title,
-   useMatches
+   Title
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
 import { useUsersQuery } from '../../api/hooks/useUsersQuery'
 import { useBlockUserMutation } from '../../api/hooks/useBlockUserMutation'
 import { formatDate } from '../../utils/formatDate'
 import { useUserQuery } from '../../api/hooks/useUserQuery'
+import classes from './Users.module.css'
 
 const getUserRoleLabel = (roles?: string[]) => {
    if (!roles || roles.length === 0) return 'Клиент'
@@ -32,11 +32,6 @@ export const Users = () => {
    const usersQuery = useUsersQuery()
    const blockUser = useBlockUserMutation()
    const meQuery = useUserQuery()
-
-   const buttonSize = useMatches({
-      base: '100%',
-      sm: 'auto'
-   })
 
    const currentUserId = meQuery.data?.data?.id
 
@@ -131,9 +126,7 @@ export const Users = () => {
                                  isBlocked: !isBlocked
                               })
                            }
-                           style={{
-                              width: buttonSize
-                           }}
+                           className={classes.blockButton}
                         >
                            {isBlocked ? 'Разблокировать' : 'Заблокировать'}
                         </Button>

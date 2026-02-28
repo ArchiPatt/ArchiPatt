@@ -7,14 +7,15 @@ import {
    ActionIcon,
    Tooltip,
    useMantineColorScheme,
-   Container
+   Container,
+   Loader,
+   Flex,
+   Alert
 } from '@mantine/core'
-import { Outlet, useLocation, Link, useSearchParams } from 'react-router-dom'
-import { useUserQuery } from '../../api/hooks/useUserQuery'
-import { useLogoutMutation } from '../../api/hooks/useLogoutMutation'
+import { Outlet, useLocation, Link } from 'react-router-dom'
 import classes from './Layout.module.css'
-import { useEffect } from 'react'
-import { useTokenMutation } from '../../api/hooks/useTokenMutation'
+import { useAuth } from './useAuth'
+import { use } from 'react'
 
 const PROJECT_NAME = 'АРМ'
 
@@ -25,29 +26,20 @@ const NAV_ITEMS = [
 ] as const
 
 export const Layout = () => {
-   const [searchParams, setSearchParams] = useSearchParams()
    const { pathname } = useLocation()
-   const user = useUserQuery()
-   const logout = useLogoutMutation()
-   const token = useTokenMutation()
+   const { logout, user } = useAuth()
+
    const { colorScheme, toggleColorScheme } = useMantineColorScheme()
-   const code = searchParams.get('code')
 
    const displayName = user.data?.data?.displayName ?? user.data?.data?.username ?? 'Пользователь'
-   useEffect(() => {
-      if (user.isError && !code) {
-         window.location.replace('http://localhost:4000/login?return_to=http://localhost:5173/')
-      }
-   }, [user.isError])
 
-   useEffect(() => {
-      if (code) {
-         token.mutateAsync({ grant_type: 'authorization_code', code }).then(() => {
-            setSearchParams(new URLSearchParams())
-            window.location.reload()
-         })
-      }
-   }, [searchParams])
+   if (user.isLoading) {
+      return (
+         <Flex justify="center" align="center">
+            <Loader />
+         </Flex>
+      )
+   }
 
    return (
       <AppShell header={{ height: 64 }} padding="md">
@@ -97,9 +89,18 @@ export const Layout = () => {
             </Group>
          </AppShell.Header>
          <AppShell.Main>
-            <Container size="lg" p="md">
-               <Outlet />
-            </Container>
+            {!user.isLoading &&
+            (user.data?.data.roles.includes('employee') || user.data?.data.roles.includes('admin')) ? (
+               <Container size="lg" p="md">
+                  <Outlet />
+               </Container>
+            ) : (
+               <Container size="lg" p="md">
+                  <Alert>
+                     <Text ta="center">Недостаточно прав</Text>
+                  </Alert>
+               </Container>
+            )}
          </AppShell.Main>
       </AppShell>
    )
