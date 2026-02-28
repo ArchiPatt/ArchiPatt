@@ -5,8 +5,7 @@ import {
   Index,
   PrimaryGeneratedColumn,
 } from "typeorm";
-
-export type CreditStatus = "active" | "closed" | "defaulted";
+import { CreditStatus } from "../enums/CreditStatus";
 
 @Entity()
 export class Credit {
@@ -29,7 +28,7 @@ export class Credit {
   @Column({ type: "numeric", precision: 18, scale: 2 })
   outstandingAmount!: string;
 
-  @Column({ type: "text", default: "active" })
+  @Column({ type: "text", default: CreditStatus.Active })
   status!: CreditStatus;
 
   @Column({ type: "timestamptz" })

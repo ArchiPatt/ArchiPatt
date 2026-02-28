@@ -3,6 +3,7 @@ import { JWTPayload } from "jose";
 import { DataSource, In } from "typeorm";
 import { Credit } from "../db/entities/Credit";
 import { CreditPayment } from "../db/entities/CreditPayment";
+import { CreditStatus } from "../db/enums/CreditStatus";
 import { CreditTariff } from "../db/entities/CreditTariff";
 import { postAccountOperation } from "../integrations/core-service";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
@@ -89,7 +90,7 @@ async function safeVerify(req: FastifyRequest) {
 export async function accrueDueCredits(ds: DataSource, now: Date = new Date()) {
   const creditsRepo = ds.getRepository(Credit);
   const dueCredits = await creditsRepo.find({
-    where: { status: "active" as const },
+    where: { status: CreditStatus.Active },
     order: { nextPaymentDueAt: "ASC" },
   });
 
@@ -177,6 +178,18 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     return reply.code(200).send(tariffs);
   });
 
+  app.get<{ Params: { id: string } }>("/tariffs/:id", async (req, reply) => {
+    const payload = await safeVerify(req);
+    const a = await requireActiveAuth(payload);
+    if (!a.ok) return reply.code(a.code).send({ error: a.error });
+
+    const tariff = await app.db
+      .getRepository(CreditTariff)
+      .findOne({ where: { id: req.params.id } });
+    if (!tariff) return reply.code(404).send({ error: "tariff_not_found" });
+    return reply.code(200).send(tariff);
+  });
+
   app.post<{
     Body: { name?: string; interestRate?: number; billingPeriodDays?: number };
   }>("/tariffs", async (req, reply) => {
@@ -216,15 +229,23 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     const payload = await safeVerify(req);
     const a = await requireActiveAuth(payload);
     if (!a.ok) return reply.code(a.code).send({ error: a.error });
-    if (!isEmployee(a.payload)) return reply.code(403).send({ error: "forbidden" });
+    if (!isEmployee(a.payload))
+      return reply.code(403).send({ error: "forbidden" });
 
     const credits = await app.db.getRepository(Credit).find({
-      order: { issuedAt: "DESC" }
+      order: { issuedAt: "DESC" },
     });
     return reply.code(200).send(credits);
   });
 
-  app.post<{ Body: { clientId?: string; accountId?: string; tariffId?: string; amount?: number } }>("/credits/issue", async (req, reply) => {
+  app.post<{
+    Body: {
+      clientId?: string;
+      accountId?: string;
+      tariffId?: string;
+      amount?: number;
+    };
+  }>("/credits/issue", async (req, reply) => {
     const payload = await safeVerify(req);
     const a = await requireActiveAuth(payload);
     if (!a.ok) return reply.code(a.code).send({ error: a.error });
@@ -263,7 +284,7 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         tariffId,
         principalAmount: toMoneyString(amount),
         outstandingAmount: toMoneyString(amount),
-        status: "active",
+        status: CreditStatus.Active,
         issuedAt: new Date(),
         nextPaymentDueAt: nowPlusDays(tariff.billingPeriodDays),
         closedAt: null,
@@ -313,14 +334,14 @@ export function registerCreditsRoutes(app: FastifyInstance) {
       const isOwner = String(a.payload.sub ?? "") === existing.clientId;
       const allowed = isEmployee(a.payload) || isOwner;
       if (!allowed) return reply.code(403).send({ error: "forbidden" });
-      if (existing.status !== "active")
+      if (existing.status !== CreditStatus.Active)
         return reply.code(400).send({ error: "credit_not_active" });
 
       const current = Number(existing.outstandingAmount);
       const next = Math.max(0, current - amount);
       existing.outstandingAmount = toMoneyString(next);
       if (next === 0) {
-        existing.status = "closed";
+        existing.status = CreditStatus.Closed;
         existing.closedAt = new Date();
       }
       const savedCredit = await creditsRepo.save(existing);

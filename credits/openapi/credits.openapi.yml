@@ -104,6 +104,43 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: tariff_exists
+  /tariffs/{id}:
+    get:
+      tags: [Credits]
+      summary: Tariff by ID
+      description: Возвращает тариф по ID. Доступно всем авторизованным пользователям.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Tariff
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TariffResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
+        "404":
+          description: Tariff not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: tariff_not_found
   /credits:
     get:
       tags: [Credits]
