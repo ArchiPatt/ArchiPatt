@@ -1,5 +1,10 @@
 import type {CreditResponse} from "../../../types/CreditResponse.ts";
 
-type CreditCardProps = Omit<CreditResponse, 'clientId' | 'accountId' | 'id' | 'closedAt'>
+type CreditCardInforamation = Omit<CreditResponse, 'clientId' | 'accountId' | 'closedAt' | 'tariffId'>
+
+interface CreditCardProps {
+    creditInformation: CreditCardInforamation
+    percent: string
+}
 
 export type { CreditCardProps }

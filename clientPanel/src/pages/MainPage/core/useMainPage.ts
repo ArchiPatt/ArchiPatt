@@ -6,6 +6,7 @@ import {useCreateAccount, useGetAccountList} from "../../../entities/Account";
 import {useGetCreditsByClientId} from "../../../entities/Credit";
 import {useAccessToken} from "../../../entities/Auth";
 import type {CreateAccountRequest} from "../../../entities/Account/types/CreateAccountRequest.ts";
+import {useGetTariffList} from "../../../entities/Tariff";
 
 
 const useMainPage = () => {
@@ -15,11 +16,12 @@ const useMainPage = () => {
     const code = params.get('code');
 
     const { mutate: getAccessToken } = useAccessToken();
-    const { mutate: newAccount } = useCreateAccount()
+    const { mutate: newAccount } = useCreateAccount();
 
     const { data: userProfileData } = useGetPersonalProfile()
     const { data: accounts, isLoading: accountLoading, error: accountError } = useGetAccountList()
     const { data: credits, isLoading: creditLoading, error: creditError } = useGetCreditsByClientId(userStorage.getItem())
+    const { data: tariffs, isLoading: tariffsLoading, error: tariffError } = useGetTariffList()
 
     const createAccount = () => {
         const model: CreateAccountRequest = {
@@ -41,12 +43,15 @@ const useMainPage = () => {
 
     return {
         accounts,
-        credits,
         accountLoading,
-        creditLoading,
         accountError,
+        credits,
+        creditLoading,
         creditError,
-        createAccount
+        tariffs,
+        tariffsLoading,
+        tariffError,
+        createAccount,
     }
 }
 

@@ -1,18 +1,16 @@
-import {Badge, Card, Divider, Grid, Group, Progress, Stack, Text, ThemeIcon} from "@mantine/core";
-import {IconCalendar, IconCreditCard, IconPercentage, IconTrendingUp} from "@tabler/icons-react";
+import {Badge, Button, Card, Divider, Grid, Group, Progress, Stack, Text, ThemeIcon} from "@mantine/core";
+import {IconArrowRight, IconCalendar, IconCreditCard, IconPercentage, IconTrendingUp} from "@tabler/icons-react";
 import type {CreditCardProps} from "../types/CreditCardProps.ts";
 import {useCreditCard} from "./useCreditCard.ts";
+import {formatDate} from "../../../../../utils/formatDate.ts";
 
 const CreditCard = (props: CreditCardProps) => {
 
     const {
-        principalAmount,
-        outstandingAmount,
-        status,
-        nextPaymentDueAt,
-        createdAt,
-        remainsPercantage,
-        // tariff
+        creditInformation,
+        percantage,
+        interestRate,
+        openDetail
     } = useCreditCard(props);
 
     return (
@@ -21,7 +19,7 @@ const CreditCard = (props: CreditCardProps) => {
             padding="lg"
             radius="md"
             withBorder
-            style={{ maxWidth: 520, opacity: status === "closed" ? 0.7 : 1 }}
+            style={{ maxWidth: 520, opacity: creditInformation.status === "closed" ? 0.7 : 1 }}
         >
             <Group justify="space-between" mb="md">
                 <Group gap="md">
@@ -29,7 +27,7 @@ const CreditCard = (props: CreditCardProps) => {
                         size={48}
                         radius="xl"
                         variant="light"
-                        color={status === "active" ? "orange" : "gray"}
+                        color={creditInformation.status === "active" ? "orange" : "gray"}
                     >
                         <IconCreditCard size={24} />
                     </ThemeIcon>
@@ -39,13 +37,13 @@ const CreditCard = (props: CreditCardProps) => {
                             Кредит
                         </Text>
                         <Text size="lg" fw={600}>
-                            {`${principalAmount}₽`}
+                            {`${creditInformation.principalAmount}₽`}
                         </Text>
                     </div>
                 </Group>
 
                 <Badge variant="light">
-                    {status === 'active' ? 'Активный' : 'Закрыт'}
+                    {creditInformation.status === 'active' ? 'Активный' : 'Закрыт'}
                 </Badge>
             </Group>
 
@@ -55,14 +53,14 @@ const CreditCard = (props: CreditCardProps) => {
                         Остаток к погашению
                     </Text>
                     <Text size="sm" fw={500}>
-                        {`${remainsPercantage}% погашено`}
+                        {`${percantage}% погашено`}
                     </Text>
                 </Group>
 
-                <Progress value={remainsPercantage} radius="xl" />
+                <Progress value={percantage} radius="xl" />
 
                 <Text size="xl" fw={700}>
-                    {`${outstandingAmount}₽`}
+                    {`${creditInformation.outstandingAmount}₽`}
                 </Text>
             </Stack>
 
@@ -76,7 +74,7 @@ const CreditCard = (props: CreditCardProps) => {
                             <Text size="xs" c="dimmed">
                                 Следующий Платеж
                             </Text>
-                            <Text fw={600}>{`${nextPaymentDueAt}₽`}</Text>
+                            <Text fw={600}>{`${formatDate(creditInformation.nextPaymentDueAt)}`}</Text>
                         </Stack>
                     </Group>
                 </Grid.Col>
@@ -88,21 +86,7 @@ const CreditCard = (props: CreditCardProps) => {
                             <Text size="xs" c="dimmed">
                                 Процентная ставка
                             </Text>
-                            {/*<Text fw={600}>{`${tariff.interestRate * 100}%`}</Text>*/}
-                        </Stack>
-                    </Group>
-                </Grid.Col>
-
-                <Grid.Col span={6}>
-                    <Group align="flex-start" gap="xs">
-                        <IconCalendar size={16} />
-                        <Stack gap={0}>
-                            <Text size="xs" c="dimmed">
-                                Платеж
-                            </Text>
-                            <Text fw={600}>
-                                {/*{`Каждые ${tariff.billingPeriodDays} дн.`}*/}
-                            </Text>
+                            <Text fw={600}>{`${interestRate}%`}</Text>
                         </Stack>
                     </Group>
                 </Grid.Col>
@@ -114,25 +98,15 @@ const CreditCard = (props: CreditCardProps) => {
                             <Text size="xs" c="dimmed">
                                 Дата оформления
                             </Text>
-                            <Text fw={600}>{createdAt}</Text>
+                            <Text fw={600}>{formatDate(creditInformation.createdAt)}</Text>
                         </Stack>
                     </Group>
                 </Grid.Col>
             </Grid>
 
-            {/*{credit.status === "active" && (*/}
-            {/*    <>*/}
-            {/*        <Divider my="md" />*/}
-            {/*        <Button*/}
-            {/*            fullWidth*/}
-            {/*            variant="light"*/}
-            {/*            color="orange"*/}
-            {/*            onClick={() => alert("Функция погашения кредита в разработке")}*/}
-            {/*        >*/}
-            {/*            Погасить кредит*/}
-            {/*        </Button>*/}
-            {/*    </>*/}
-            {/*)}*/}
+            <Button variant="light" fullWidth rightSection={<IconArrowRight size={16}/>} onClick={openDetail}>
+                Подробнее
+            </Button>
         </Card>
     )
 }

@@ -1,43 +1,28 @@
 import type {CreditCardProps} from "../types/CreditCardProps.ts";
-import {useEffect} from "react";
+import {LINK_PATHS} from "../../../../../constants/LINK_PATHS.ts";
+import {useNavigate} from "react-router-dom";
+import {remainsPercantage} from "../../../../../utils/remainsPercantage.ts";
 
 const useCreditCard = (props: CreditCardProps) => {
     const {
-        tariffId,
-        principalAmount, // Сумма кредита
-        outstandingAmount, // Остаток
-        status,
-        issuedAt,
-        nextPaymentDueAt,
-        createdAt
+        creditInformation,
+        percent,
     } = props
 
-    const remainsPercantage = (outstandingAmount / principalAmount) * 100;
+    const navigate = useNavigate();
 
-    // const [tariff, setTariff] = useState()
-    //
-    // const { data: tariffInfo } = useQuery({
-    //     queryKey: ['tariffInfo'],
-    //     queryFn: () => creditsApi.getTariffById(tariffId),
-    //     enabled: !!tokenStorage.getItem(),
-    //     retry: false,
-    // });
+    const percantage = remainsPercantage(Number(creditInformation.principalAmount), Number(creditInformation.outstandingAmount))
+    const interestRate = percent * 100
 
-    // useEffect(() => {
-    //     if (tariffInfo) {
-    //         setTariff(tariffInfo)
-    //     }
-    // }, [tariffInfo]);
+    const openDetail = () => {
+        navigate(LINK_PATHS.CREDIT_DETAIL.replace(':id', String(creditInformation.id)))
+    }
 
     return {
-        principalAmount,
-        outstandingAmount,
-        status,
-        issuedAt,
-        nextPaymentDueAt,
-        createdAt,
-        remainsPercantage,
-        // tariff
+        creditInformation,
+        percantage,
+        interestRate,
+        openDetail
     }
 }
 

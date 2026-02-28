@@ -6,6 +6,7 @@ import {ProfilePage} from "../../../pages/ProfilePage";
 import {OpenCreditPage} from "../../../pages/OpenCreditPage";
 import {AccountDetailPage} from "../../../pages/AccountDetailPage";
 import {NotFoundPage} from "../../../pages/NotFoundPage";
+import {CreditDetailPage} from "../../../pages/CreditDetailPage";
 
 
 const RouteProvider = () => {
@@ -16,7 +17,7 @@ const RouteProvider = () => {
                 <Route path={LINK_PATHS.PROFILE} element={<ProfilePage />} />
                 <Route path={LINK_PATHS.OPEN_CREDIT} element={<OpenCreditPage />} />
                 <Route path={LINK_PATHS.ACCOUNT_DETAIL} element={<AccountDetailPage />} />
-                <Route path={LINK_PATHS.CREDIT_DETAIL} element={<AccountDetailPage />} />
+                <Route path={LINK_PATHS.CREDIT_DETAIL} element={<CreditDetailPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
         </Routes>

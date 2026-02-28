@@ -11,16 +11,16 @@ const useAccountDetailPage = () => {
     const navigate = useNavigate()
     const [depositModalOpened, setDepositModalOpened] = useState(false);
     const [withdrawModalOpened, setWithdrawModalOpened] = useState(false);
-    const [amount, setAmount] = useState<number | undefined>(undefined)
-    const [withdrawAmount, setWithdrawAmount] = useState<number | undefined>(undefined)
-    const [errorText, setErrorText] = useState<string | undefined>(undefined)
+    const [amount, setAmount] = useState<number | undefined>()
+    const [withdrawAmount, setWithdrawAmount] = useState<number | undefined>()
+    const [errorText, setErrorText] = useState<string | undefined>()
 
     const { mutate: close } = useCloseAccount()
     const { mutate: deposit } = useDepositAccount()
     const { mutate: withdraw } = useWithdrawAccount()
 
     const { data: account, isLoading: accountLoading, error: accountError } = useGetAccountById(id ?? "")
-    const { data: transaction, isLoading: transactionLoading, error: transactionError } = useGetAccountTransactions({ id: account?.id })
+    const { data: transaction, isLoading: transactionLoading, error: transactionError } = useGetAccountTransactions({ id: account?.id ?? '' })
 
     const closeAccount = () => {
         close(id);
@@ -38,28 +38,28 @@ const useAccountDetailPage = () => {
     const depositAccount = () => {
         const model: DepositArgs = { model: { amount: amount ?? 0 }, id: id ?? "" }
         if (!amount) {
-            setErrorText("Сумма должна быть больше 0")
+            setErrorText("Введите сумму")
             return
         }
         else if (amount <= 0) {
-            setErrorText("Введите сумму")
+            setErrorText("Сумма должна быть больше 0")
             return
         }
         setErrorText(undefined)
         deposit(model)
         setDepositModalOpened(false)
-        setAmount(0)
+        setAmount(undefined)
         navigate(LINK_PATHS.MAIN)
     }
 
     const withdrawAccount = () => {
         const model: DepositArgs = { model: { amount: withdrawAmount ?? 0 }, id: id ?? "" }
         if (!withdrawAmount) {
-            setErrorText("Сумма должна быть больше 0")
+            setErrorText("Введите сумму")
             return
         }
         else if (withdrawAmount <= 0) {
-            setErrorText("Введите сумму")
+            setErrorText("Сумма должна быть больше 0")
             return
         }
         else if (withdrawAmount > account?.balance) {
@@ -69,7 +69,7 @@ const useAccountDetailPage = () => {
         setErrorText(undefined)
         withdraw(model)
         setWithdrawModalOpened(false)
-        setWithdrawAmount(0)
+        setWithdrawAmount(undefined)
         navigate(LINK_PATHS.MAIN)
     }
 

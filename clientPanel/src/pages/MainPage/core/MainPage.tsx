@@ -21,15 +21,18 @@ const MainPage = () => {
 
     const {
         accounts,
-        credits,
         accountLoading,
-        creditLoading,
         accountError,
+        credits,
+        creditLoading,
         creditError,
-        createAccount
+        tariffs,
+        tariffsLoading,
+        tariffError,
+        createAccount,
     } = useMainPage();
 
-    if (accountLoading || creditLoading) return <div>Loading...</div>;
+    if (accountLoading || creditLoading || tariffsLoading) return <div>Loading...</div>;
 
     return (
         <>
@@ -88,7 +91,7 @@ const MainPage = () => {
                 </Stack>
 
                 <Stack gap="xl">
-                    {!creditError ?
+                    {!creditError || !tariffError ?
                         <>
                             <Group justify="space-between" align="flex-end">
                                 <div>
@@ -136,12 +139,23 @@ const MainPage = () => {
                             ) : (
                                 <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
                                     {credits?.map((item, index) => (
-                                        <CreditCard {...item}/>
+                                        <CreditCard
+                                            creditInformation={{
+                                                id: item.id,
+                                                principalAmount: item.principalAmount,
+                                                outstandingAmount: item.outstandingAmount,
+                                                status: item.status,
+                                                issuedAt: item.issuedAt,
+                                                nextPaymentDueAt: item.nextPaymentDueAt,
+                                                createdAt: item.createdAt,
+                                            }}
+                                            percent={tariffs?.find(tariff => tariff.id === item.tariffId).interestRate}
+                                        />
                                     ))}
                                 </SimpleGrid>
                             )}
                         </>:
-                        <div>Не удалось загрузить список кредитов</div>
+                        <div>Не удалось загрузить список кредитов или тарифов</div>
                     }
                 </Stack>
 
