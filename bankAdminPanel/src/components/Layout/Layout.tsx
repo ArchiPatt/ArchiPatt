@@ -15,7 +15,6 @@ import {
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import classes from './Layout.module.css'
 import { useAuth } from './useAuth'
-import { use } from 'react'
 
 const PROJECT_NAME = 'АРМ'
 

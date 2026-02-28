@@ -338,6 +338,37 @@ export type PostTariffsResponses = {
 
 export type PostTariffsResponse = PostTariffsResponses[keyof PostTariffsResponses];
 
+export type GetTariffsByIdData = {
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/tariffs/{id}';
+};
+
+export type GetTariffsByIdErrors = {
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Tariff not found
+     */
+    404: ErrorResponse;
+};
+
+export type GetTariffsByIdError = GetTariffsByIdErrors[keyof GetTariffsByIdErrors];
+
+export type GetTariffsByIdResponses = {
+    /**
+     * Tariff
+     */
+    200: TariffResponse;
+};
+
+export type GetTariffsByIdResponse = GetTariffsByIdResponses[keyof GetTariffsByIdResponses];
+
 export type GetCreditsData = {
     body?: never;
     path?: never;
