@@ -12,13 +12,15 @@ import {
     IconUser,
     IconLogout,
 } from "@tabler/icons-react";
-
 import { Link } from "react-router-dom"
-import {LINK_PATHS} from "@/constants/LINK_PATHS.ts";
+import {LINK_PATHS} from "../../../constants/LINK_PATHS.ts";
+import {useNavbar} from "./useNavbar.ts";
 
 
 
 const Navbar = () => {
+
+    const { createAccount } = useNavbar()
 
     return (
         <Group gap="md">
@@ -30,14 +32,13 @@ const Navbar = () => {
                 </Button>
             </Link>
 
-            <Link to={LINK_PATHS.OPEN_ACCOUNT}>
-                <Button
-                    variant="outline"
-                    leftSection={<IconPlus size={16} />}
-                >
-                    Открыть счет
-                </Button>
-            </Link>
+            <Button
+                variant="outline"
+                leftSection={<IconPlus size={16} />}
+                onClick={createAccount}
+            >
+                Открыть счет
+            </Button>
 
             <Link
                 to={LINK_PATHS.OPEN_CREDIT}

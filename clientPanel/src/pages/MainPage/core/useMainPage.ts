@@ -2,9 +2,10 @@ import {useLocation} from "react-router-dom";
 import {userStorage} from "../../../app/storage/userStorage";
 import {useEffect} from "react";
 import {useGetPersonalProfile} from "../../../entities/User";
-import {useGetAccountList} from "../../../entities/Account";
+import {useCreateAccount, useGetAccountList} from "../../../entities/Account";
 import {useGetCreditsByClientId} from "../../../entities/Credit";
 import {useAccessToken} from "../../../entities/Auth";
+import type {CreateAccountRequest} from "../../../entities/Account/types/CreateAccountRequest.ts";
 
 
 const useMainPage = () => {
@@ -14,10 +15,18 @@ const useMainPage = () => {
     const code = params.get('code');
 
     const { mutate: getAccessToken } = useAccessToken();
+    const { mutate: newAccount } = useCreateAccount()
 
     const { data: userProfileData } = useGetPersonalProfile()
     const { data: accounts, isLoading: accountLoading, error: accountError } = useGetAccountList()
     const { data: credits, isLoading: creditLoading, error: creditError } = useGetCreditsByClientId(userStorage.getItem())
+
+    const createAccount = () => {
+        const model: CreateAccountRequest = {
+            clientId: userStorage.getItem()
+        }
+        newAccount(model)
+    }
 
     useEffect(() => {
         getAccessToken(code ?? "")
@@ -36,7 +45,8 @@ const useMainPage = () => {
         accountLoading,
         creditLoading,
         accountError,
-        creditError
+        creditError,
+        createAccount
     }
 }
 

@@ -25,7 +25,8 @@ const MainPage = () => {
         accountLoading,
         creditLoading,
         accountError,
-        creditError
+        creditError,
+        createAccount
     } = useMainPage();
 
     if (accountLoading || creditLoading) return <div>Loading...</div>;
@@ -66,13 +67,12 @@ const MainPage = () => {
                                             Откройте свой первый счет, чтобы начать работу с банком
                                         </Text>
 
-                                        <Link to={LINK_PATHS.OPEN_ACCOUNT}>
-                                            <Button
-                                                leftSection={<IconPlus size={16} />}
-                                            >
-                                                Открыть счет
-                                            </Button>
-                                        </Link>
+                                        <Button
+                                            leftSection={<IconPlus size={16} />}
+                                            onClick={createAccount}
+                                        >
+                                            Открыть счет
+                                        </Button>
                                     </Stack>
                                 </Paper>
                             ) : (

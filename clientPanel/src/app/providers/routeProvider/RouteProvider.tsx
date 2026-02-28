@@ -14,7 +14,6 @@ const RouteProvider = () => {
             <Route path={LINK_PATHS.MAIN} element={<Header />}>
                 <Route index element={<MainPage />} />
                 <Route path={LINK_PATHS.PROFILE} element={<ProfilePage />} />
-                {/*<Route path={LINK_PATHS.OPEN_ACCOUNT} element={<OpenAccountPage />} />*/}
                 <Route path={LINK_PATHS.OPEN_CREDIT} element={<OpenCreditPage />} />
                 <Route path={LINK_PATHS.ACCOUNT_DETAIL} element={<AccountDetailPage />} />
                 <Route path={LINK_PATHS.CREDIT_DETAIL} element={<AccountDetailPage />} />
