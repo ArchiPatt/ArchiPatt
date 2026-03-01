@@ -4,7 +4,7 @@ import { Account } from "../db/entities/Account";
 import { verifyBearerToken } from "../security/jwt";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 import { fetchUsersInternal } from "../integrations/users-service";
-import { fetchCreditsByClientIds } from "../integrations/credits-service";
+import { fetchAllCredits } from "../integrations/credits-service";
 import { canManageAll } from "../security/access";
 
 async function authPayloadOrNull(req: { headers: { authorization?: string } }) {
@@ -50,13 +50,16 @@ export function registerDashboardRoutes(app: FastifyInstance) {
       return reply.send({ items: [], total });
     }
 
-    const [accounts, credits] = await Promise.all([
+    const [accounts, allCredits] = await Promise.all([
       app.db.getRepository(Account).find({
         where: { clientId: In(clientIds) },
         order: { createdAt: "DESC" },
       }),
-      fetchCreditsByClientIds(clientIds),
+      fetchAllCredits(),
     ]);
+
+    const clientIdsSet = new Set(clientIds);
+    const credits = allCredits.filter((cr) => clientIdsSet.has(cr.clientId));
 
     const accountsByClient = new Map<string, typeof accounts>();
     for (const acc of accounts) {
@@ -83,12 +86,10 @@ export function registerDashboardRoutes(app: FastifyInstance) {
       accounts: accountsByClient.get(user.id) ?? [],
       credits: creditsByClient.get(user.id) ?? [],
     }));
-    console.log("[clients-overview] before filter:", beforeFilter.length, beforeFilter);
 
     const items = beforeFilter.filter(
       (row) => row.accounts.length > 0 || row.credits.length > 0,
     );
-    console.log("[clients-overview] after filter:", items.length, items);
 
     return reply.send({ items, total });
   });

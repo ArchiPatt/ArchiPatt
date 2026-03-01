@@ -391,14 +391,14 @@ export function registerCreditsRoutes(app: FastifyInstance) {
         return reply.code(401).send({ error: "unauthorized" });
       }
       const clientIdsRaw = req.query?.clientIds?.trim();
-      if (!clientIdsRaw) return reply.code(200).send([]);
       const clientIds = clientIdsRaw
-        .split(/[,\s]+/)
-        .map((s) => s.trim())
-        .filter(Boolean);
-      if (!clientIds.length) return reply.code(200).send([]);
+        ? clientIdsRaw
+            .split(/[,\s]+/)
+            .map((s) => s.trim())
+            .filter(Boolean)
+        : [];
       const credits = await app.db.getRepository(Credit).find({
-        where: { clientId: In(clientIds) },
+        ...(clientIds.length > 0 ? { where: { clientId: In(clientIds) } } : {}),
         order: { issuedAt: "DESC" },
       });
       return reply.code(200).send(credits);

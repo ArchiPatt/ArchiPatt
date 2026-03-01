@@ -13,12 +13,8 @@ export type CreditItem = {
   closedAt: string | null;
 };
 
-export async function fetchCreditsByClientIds(
-  clientIds: string[],
-): Promise<CreditItem[]> {
-  if (clientIds.length === 0) return [];
-
-  const url = `${env.creditsService.baseUrl}/internal/credits/by-clients?clientIds=${clientIds.join(",")}`;
+export async function fetchAllCredits(): Promise<CreditItem[]> {
+  const url = `${env.creditsService.baseUrl}/internal/credits/by-clients`;
   const res = await fetch(url, {
     method: "GET",
     headers: {
