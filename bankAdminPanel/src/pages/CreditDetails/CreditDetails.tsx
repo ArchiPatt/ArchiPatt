@@ -157,7 +157,7 @@ export const CreditDetails = () => {
             </Grid.Col>
 
             <Grid.Col span={{ base: 12, md: 4 }}>
-               <Card withBorder shadow="sm" radius="md" p="lg" h="100%" bg="gray.0">
+               <Card withBorder shadow="sm" radius="md" p="lg" h="100%">
                   <Title order={4} mb="md">
                      Тариф
                   </Title>
