@@ -29,7 +29,7 @@ export async function postAccountOperation(input: {
     body: JSON.stringify({
       idempotencyKey: input.idempotencyKey,
       amount,
-      kind: input.kind,
+      type: input.kind,
       meta: input.metadata ?? null,
     }),
   });
