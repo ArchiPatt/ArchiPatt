@@ -43,6 +43,10 @@ const useCreditDetailPage = () => {
             setErrorText("Недостаточно средств на счете")
             return
         }
+        else if (repayAmount > credit?.outstandingAmount) {
+            setErrorText("Сумма погашения не может превышать сумму долга")
+            return
+        }
         setErrorText(undefined)
         repay(model)
         setModalState(false)
