@@ -7,7 +7,8 @@ const useCloseAccount = () => {
     return useMutation({
         mutationFn: (id: string) => accountsApi.closeAccount(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['accountList', 'account'] })
+            queryClient.invalidateQueries({ queryKey: ['accountList'] })
+            queryClient.invalidateQueries({ queryKey: ['account'] })
         }
     })
 }

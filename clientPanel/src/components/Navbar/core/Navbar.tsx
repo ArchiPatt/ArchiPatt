@@ -20,7 +20,7 @@ import {useNavbar} from "./useNavbar.ts";
 
 const Navbar = () => {
 
-    const { createAccount } = useNavbar()
+    const { createAccount, logout } = useNavbar()
 
     return (
         <Group gap="md">
@@ -84,6 +84,7 @@ const Navbar = () => {
                     <Menu.Item
                         color="red"
                         leftSection={<IconLogout size={14} />}
+                        onClick={logout}
                     >
                         Выйти
                     </Menu.Item>

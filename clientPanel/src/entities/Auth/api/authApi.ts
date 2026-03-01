@@ -22,6 +22,9 @@ const authApi = {
         const { data } = await instance.post<TokenResponse>("token", model);
 
         return data
+    },
+    logout: async () => {
+        await instance.post("logout");
     }
 }
 

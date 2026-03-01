@@ -5,9 +5,11 @@ import type {Account} from "../types/Account.ts";
 
 const useGetAccountList = () => {
 
+    const userId = userStorage.getItem();
     return useQuery<Account[], Error, Account[], ['accountList', string | null]>({
-        queryKey: ['accountList', userStorage.getItem()],
-        queryFn: () => accountsApi.getAccountsList()
+        queryKey: ['accountList', userId],
+        queryFn: () => accountsApi.getAccountsList(),
+        enabled: !!userId,
     })
 }
 

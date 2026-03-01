@@ -1,13 +1,12 @@
 import {useQuery} from "@tanstack/react-query";
 import {creditsApi} from "../api/creditApi.ts";
-import type {AccountOperationsPage} from "../../Transaction/types/AccountOperationsPage.ts";
-import type {AccountTransactionRequest} from "../../Transaction/types/accountTransactionRequest.ts";
 import type {CreditResponse} from "../types/CreditResponse.ts";
 
-const useGetCreditById = (id: string) => {
-    return useQuery<CreditResponse, Error, CreditResponse, ['credit']>({
-        queryKey: ['credit'],
-        queryFn: () => creditsApi.getCreditById(id)
+const useGetCreditById = (id: string | undefined) => {
+    return useQuery<CreditResponse, Error, CreditResponse, ['credit', string | undefined]>({
+        queryKey: ['credit', id],
+        queryFn: () => creditsApi.getCreditById(id!),
+        enabled: !!id,
     })
 }
 

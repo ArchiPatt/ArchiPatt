@@ -7,7 +7,8 @@ import type {Account} from "../../Account/types/Account.ts";
 const useGetAccountTransactions = (model: AccountTransactionRequest) => {
     return useQuery<AccountOperationsPage, Error, AccountOperationsPage, ['accountTransactions', AccountTransactionRequest | null]>({
         queryKey: ['accountTransactions', model],
-        queryFn: () => accountTransactionApi.getAccountTransactions(model)
+        queryFn: () => accountTransactionApi.getAccountTransactions(model),
+        enabled: !!model.id,
     })
 }
 

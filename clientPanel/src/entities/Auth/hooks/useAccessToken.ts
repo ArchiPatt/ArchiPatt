@@ -16,7 +16,7 @@ const useAccessToken = () => {
             tokenStorage.setItem(data.access_token)
             refreshStorage.setItem(data.refresh_token)
 
-            queryClient.invalidateQueries(['user']);
+            queryClient.invalidateQueries({ queryKey: ['user'] });
         },
         onError: (error) => {
             console.error("Не удалось получить access token", error);

@@ -8,7 +8,8 @@ const useWithdrawAccount = () => {
     return useMutation({
         mutationFn: ({ model, id }: DepositArgs) => accountsApi.withdrawAccount(model, id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['accountList', 'account'] })
+            queryClient.invalidateQueries({ queryKey: ['accountList'] })
+            queryClient.invalidateQueries({ queryKey: ['account'] })
         }
     })
 }

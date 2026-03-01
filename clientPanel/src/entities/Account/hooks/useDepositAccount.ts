@@ -8,7 +8,8 @@ const useDepositAccount = () => {
     return useMutation({
         mutationFn: ({ model, id }: DepositArgs) => accountsApi.depositAccount(model, id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['accountList', 'account'] })
+            queryClient.invalidateQueries({ queryKey: ['accountList'] })
+            queryClient.invalidateQueries({ queryKey: ['account'] })
         }
     })
 }

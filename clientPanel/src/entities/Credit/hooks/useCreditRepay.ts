@@ -8,7 +8,8 @@ const useCreditRepay = () => {
     return useMutation({
         mutationFn: ({ model, id }: RepayArgs) => creditsApi.creditRepay(model, id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['creditList', 'credit'] })
+            queryClient.invalidateQueries({ queryKey: ['creditList'] })
+            queryClient.invalidateQueries({ queryKey: ['credit'] })
         }
     })
 }
