@@ -1,0 +1,17 @@
+$radius-4: 4px;
+$radius-8: 8px;
+$radius-10: 10px;
+$radius-12: 12px;
+$radius-16: 16px;
+$radius-20: 20px;
+$radius-full: 100px;
+
+%border-radiuses {
+  --radius-4: #{$radius-4};
+  --radius-8: #{$radius-8};
+  --radius-10: #{$radius-10};
+  --radius-12: #{$radius-12};
+  --radius-16: #{$radius-16};
+  --radius-20: #{$radius-20};
+  --radius-full: #{$radius-full};
+}
