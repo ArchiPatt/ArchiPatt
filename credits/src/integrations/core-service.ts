@@ -13,19 +13,23 @@ export async function postAccountOperation(input: {
     throw new Error("CORE_INTERNAL_TOKEN (or INTERNAL_TOKEN) is not configured");
   }
 
+  const amountValue = Number(input.amount.toFixed(2));
+  const amount =
+    input.kind === "debit" ? -amountValue : amountValue;
+
   const url = `${env.coreService.baseUrl}/internal/accounts/${encodeURIComponent(input.accountId)}/operations`;
   const res = await fetch(url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-internal-token": env.coreService.internalToken,
-      "x-idempotency-key": input.idempotencyKey
     },
     body: JSON.stringify({
+      idempotencyKey: input.idempotencyKey,
+      amount,
       kind: input.kind,
-      amount: Number(input.amount.toFixed(2)),
-      metadata: input.metadata ?? null
-    })
+      meta: input.metadata ?? null,
+    }),
   });
 
   if (!res.ok) {
