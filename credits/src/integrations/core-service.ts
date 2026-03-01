@@ -19,6 +19,9 @@ export async function postAccountOperation(input: {
   const amount =
     input.kind === "debit" ? -amountValue : amountValue;
 
+  const operationType =
+    input.kind === "credit" ? "credit_issue" : "credit_repayment";
+
   const url = `${env.coreService.baseUrl}/internal/accounts/${encodeURIComponent(input.accountId)}/operations`;
   const res = await fetch(url, {
     method: "POST",
@@ -29,7 +32,7 @@ export async function postAccountOperation(input: {
     body: JSON.stringify({
       idempotencyKey: input.idempotencyKey,
       amount,
-      type: input.kind,
+      type: operationType,
       meta: input.metadata ?? null,
     }),
   });
