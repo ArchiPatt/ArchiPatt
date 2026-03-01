@@ -3,7 +3,7 @@ import { useTariffsQuery } from '../../api/hooks/useTariffsQuery'
 import { modals } from '@mantine/modals'
 
 export const Tariffs = () => {
-   const tariffs = useTariffsQuery()
+   const tariffsQuery = useTariffsQuery()
 
    const handleOpenCreateTariff = () => {
       modals.openContextModal({
@@ -13,7 +13,7 @@ export const Tariffs = () => {
       })
    }
 
-   if (tariffs.isLoading) {
+   if (tariffsQuery.isLoading) {
       return (
          <Center h="100%">
             <Loader />
@@ -21,7 +21,7 @@ export const Tariffs = () => {
       )
    }
 
-   if (tariffs.isFetched && (!tariffs.data || tariffs.data.data.length === 0)) {
+   if (tariffsQuery.isFetched && (!tariffsQuery.data || tariffsQuery.data.data.length === 0)) {
       return (
          <Alert color="blue" title="Тарифы">
             Тарифы не найдены
@@ -45,7 +45,7 @@ export const Tariffs = () => {
                </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-               {tariffs.data?.data.map((tariff) => (
+               {tariffsQuery.data?.data.map((tariff) => (
                   <Table.Tr key={tariff.id}>
                      <Table.Td>{tariff.name}</Table.Td>
                      <Table.Td>{`${(Number(tariff.interestRate) * 100).toFixed(2)}%`}</Table.Td>
