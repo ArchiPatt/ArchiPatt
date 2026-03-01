@@ -22,7 +22,7 @@ export async function listUsersPaginated(
 ) {
   const [rows, total] = await ds.getRepository(UserProfile).findAndCount({
     order: { createdAt: "DESC" },
-    take: Math.min(Math.max(1, limit), 100),
+    take: Math.max(1, limit),
     skip: Math.max(0, offset),
   });
   return { rows, total };

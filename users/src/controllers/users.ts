@@ -60,7 +60,7 @@ export async function internalListController(
 ) {
   if (!internalOk)
     return { status: 401 as const, body: { error: "unauthorized" } };
-  const limit = Math.min(Math.max(1, params.limit ?? 20), 100);
+  const limit = Math.max(1, params.limit ?? 20);
   const offset = Math.max(0, params.offset ?? 0);
   const { rows, total } = await listUsersPaginated(ds, limit, offset);
   return {

@@ -38,13 +38,13 @@ export function registerDashboardRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: "forbidden" });
     }
 
-    const limit = Math.min(
+    const pageLimit = Math.min(
       Math.max(1, parseInt(req.query?.limit ?? "20", 10) || 20),
       100,
     );
-    const offset = Math.max(0, parseInt(req.query?.offset ?? "0", 10) || 0);
+    const pageOffset = Math.max(0, parseInt(req.query?.offset ?? "0", 10) || 0);
 
-    const { items: users, total } = await fetchUsersInternal(limit, offset);
+    const { items: users, total } = await fetchUsersInternal(1000, 0);
     const clientIds = users.map((u) => u.id);
     if (clientIds.length === 0) {
       return reply.send({ items: [], total });
@@ -87,10 +87,11 @@ export function registerDashboardRoutes(app: FastifyInstance) {
       credits: creditsByClient.get(user.id) ?? [],
     }));
 
-    const items = beforeFilter.filter(
+    const filtered = beforeFilter.filter(
       (row) => row.accounts.length > 0 || row.credits.length > 0,
     );
+    const items = filtered.slice(pageOffset, pageOffset + pageLimit);
 
-    return reply.send({ items, total });
+    return reply.send({ items, total: filtered.length });
   });
 }
