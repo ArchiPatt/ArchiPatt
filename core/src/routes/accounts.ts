@@ -2,6 +2,7 @@ import { FastifyInstance } from "fastify";
 import { JWTPayload } from "jose";
 import { Account } from "../db/entities/Account";
 import { AccountOperation } from "../db/entities/AccountOperation";
+import { AccountStatus } from "../db/enums/AccountStatus";
 import { verifyBearerToken } from "../security/jwt";
 import { fetchUserProfileByUsername } from "../integrations/users-service";
 import {
@@ -22,8 +23,10 @@ async function authPayloadOrNull(req: { headers: { authorization?: string } }) {
     }
 
     const profile = await fetchUserProfileByUsername(username);
-    if (!profile) return { ok: false as const, code: 401 as const, error: "unauthorized" };
-    if (profile.isBlocked) return { ok: false as const, code: 403 as const, error: "blocked_user" };
+    if (!profile)
+      return { ok: false as const, code: 401 as const, error: "unauthorized" };
+    if (profile.isBlocked)
+      return { ok: false as const, code: 403 as const, error: "blocked_user" };
 
     return { ok: true as const, payload };
   } catch {
@@ -123,7 +126,7 @@ export function registerAccountsRoutes(app: FastifyInstance) {
 
     const repo = app.db.getRepository(Account);
     const account = await repo.save(
-      repo.create({ clientId, balance: "0", status: "open" }),
+      repo.create({ clientId, balance: "0", status: AccountStatus.Open }),
     );
     return reply.code(201).send(account);
   });
@@ -141,11 +144,11 @@ export function registerAccountsRoutes(app: FastifyInstance) {
       if (!canCloseAccount(payload, account.clientId)) {
         return reply.code(403).send({ error: "forbidden" });
       }
-      if (account.status === "closed") {
+      if (account.status === AccountStatus.Closed) {
         return reply.code(400).send({ error: "account_already_closed" });
       }
 
-      account.status = "closed";
+      account.status = AccountStatus.Closed;
       await repo.save(account);
       return account;
     },
@@ -176,7 +179,7 @@ export function registerAccountsRoutes(app: FastifyInstance) {
       });
       if (!account) return null;
       if (!canReadAccount(payload, account.clientId)) return "forbidden";
-      if (account.status === "closed") return "closed";
+      if (account.status === AccountStatus.Closed) return "closed";
 
       const prev = parseFloat(account.balance);
       const next = (prev + amount).toFixed(2);
@@ -220,7 +223,7 @@ export function registerAccountsRoutes(app: FastifyInstance) {
       });
       if (!account) return null;
       if (!canReadAccount(payload, account.clientId)) return "forbidden";
-      if (account.status === "closed") return "closed";
+      if (account.status === AccountStatus.Closed) return "closed";
 
       const prev = parseFloat(account.balance);
       if (prev < amount) return "insufficient_balance";
@@ -296,7 +299,7 @@ export function registerAccountsRoutes(app: FastifyInstance) {
         lock: { mode: "pessimistic_write" },
       });
       if (!account) return null;
-      if (account.status === "closed") return "closed";
+      if (account.status === AccountStatus.Closed) return "closed";
 
       const prev = parseFloat(account.balance);
       const next = (prev + n).toFixed(2);

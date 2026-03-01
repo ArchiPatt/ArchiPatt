@@ -72,17 +72,19 @@ export function registerDashboardRoutes(app: FastifyInstance) {
       creditsByClient.set(cr.clientId, list);
     }
 
-    const items = users.map((user) => ({
-      user: {
-        id: user.id,
-        username: user.username,
-        displayName: user.displayName,
-        roles: user.roles,
-        isBlocked: user.isBlocked,
-      },
-      accounts: accountsByClient.get(user.id) ?? [],
-      credits: creditsByClient.get(user.id) ?? [],
-    }));
+    const items = users
+      .map((user) => ({
+        user: {
+          id: user.id,
+          username: user.username,
+          displayName: user.displayName,
+          roles: user.roles,
+          isBlocked: user.isBlocked,
+        },
+        accounts: accountsByClient.get(user.id) ?? [],
+        credits: creditsByClient.get(user.id) ?? [],
+      }))
+      .filter((row) => row.accounts.length > 0 || row.credits.length > 0);
 
     return { items, total };
   });
