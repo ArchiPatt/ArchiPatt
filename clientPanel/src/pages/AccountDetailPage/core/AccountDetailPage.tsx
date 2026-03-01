@@ -16,7 +16,6 @@ import {
     IconArrowDown,
     IconTrash,
 } from '@tabler/icons-react';
-import { useState } from 'react';
 import { useAccountDetailPage } from "./useAccountDetailPage.ts";
 import { Transaction } from "../../../entities/Transaction";
 

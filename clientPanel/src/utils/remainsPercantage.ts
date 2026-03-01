@@ -1,5 +1,5 @@
 const remainsPercantage = (amount: number, part: number) => {
-    return (part / amount) * 100
+    return 100 - (part / amount) * 100
 }
 
 export { remainsPercantage }

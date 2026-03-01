@@ -43,6 +43,8 @@ const CreditDetailPage = () => {
         selectFullRepayAmount
     } = useCreditDetailPage()
 
+
+
     if (creditLoading
         || accountLoading
         || tariffLoading

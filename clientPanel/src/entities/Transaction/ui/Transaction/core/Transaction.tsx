@@ -9,6 +9,8 @@ const Transaction = (props: AccountOperationsPage) => {
         slicedArray,
     } = useTransaction(props)
 
+    console.log(slicedArray)
+
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder mt="xl">
             <Title order={4} mb="md">
@@ -35,12 +37,18 @@ const Transaction = (props: AccountOperationsPage) => {
                                 <Table.Td>
                                     {t.type === 'deposit'
                                         ? 'Пополнение'
+                                        : t.type === 'credit'
+                                        ? 'Начисление кредита'
                                         : 'Снятие'}
                                 </Table.Td>
                                 <Table.Td
                                     style={{
                                         color:
-                                            t.type === 'deposit' ? 'green' : 'red',
+                                            t.type === 'deposit'
+                                                ? 'green'
+                                                : t.type === 'credit'
+                                                ? 'orange'
+                                                : 'red',
                                     }}
                                 >
                                     {t.type === 'deposit' ? '+' : ''}
