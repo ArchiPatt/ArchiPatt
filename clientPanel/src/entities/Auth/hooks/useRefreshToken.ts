@@ -1,5 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import type {TokenResponse} from "../../../types/TokenResponse.ts";
+import type {TokenResponse} from "../types/TokenResponse.ts";
 import {authApi} from "../api/authApi.ts";
 import {tokenStorage} from "../../../app/storage/tokenStorage";
 import {refreshStorage} from "../../../app/storage/refreshStorage";

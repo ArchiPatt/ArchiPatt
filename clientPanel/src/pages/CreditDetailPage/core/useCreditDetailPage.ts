@@ -29,6 +29,10 @@ const useCreditDetailPage = () => {
         setRepayAmount(value)
     }
 
+    const selectFullRepayAmount = () => {
+        setRepayAmount(Number(credit?.outstandingAmount))
+    }
+
     const repayCredit = () => {
         const model: RepayArgs = { model: { amount: repayAmount ?? 0 }, id: id ?? "" }
         if (!repayAmount) {
@@ -73,7 +77,8 @@ const useCreditDetailPage = () => {
         repayAmount,
         onChangeRepayAmount,
         errorText,
-        repayCredit
+        repayCredit,
+        selectFullRepayAmount
     }
 }
 

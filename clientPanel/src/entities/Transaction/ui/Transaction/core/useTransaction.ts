@@ -1,7 +1,8 @@
 import type {AccountOperationsPage} from "../../../types/AccountOperationsPage.ts";
+import type {CreditPaymentResponse} from "../../../types/CreditPaymentResponse.ts";
 
 
-const useTransaction = (props: AccountOperationsPage) => {
+const useTransaction = (props: AccountOperationsPage | CreditPaymentResponse) => {
 
     const {
         items,

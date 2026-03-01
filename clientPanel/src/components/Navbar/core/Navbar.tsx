@@ -60,17 +60,6 @@ const Navbar = () => {
                 </Menu.Target>
 
                 <Menu.Dropdown>
-                    <div style={{ padding: '8px 12px' }}>
-                        <Text size="sm" fw={500}>
-                            Иван Петров
-                        </Text>
-                        <Text size="xs" c="dimmed">
-                            ivan.petrov@example.com
-                        </Text>
-                    </div>
-
-                    <Menu.Divider my="xs" />
-
                     <Link to={LINK_PATHS.PROFILE}>
                         <Menu.Item
                             leftSection={<IconUser size={14} />}

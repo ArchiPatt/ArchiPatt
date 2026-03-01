@@ -1,11 +1,12 @@
 import {useQuery} from "@tanstack/react-query";
 import {userApi} from "../api/userApi.ts";
-import {userStorage} from "../../../app/storage/userStorage";
+import {tokenStorage} from "../../../app/storage/tokenStorage";
 
 const useGetPersonalProfile = () => {
     return useQuery({
-        queryKey: ['user', userStorage.getItem()],
+        queryKey: ['user'],
         queryFn: () => userApi.getPersonalProfile(),
+        enabled: !!tokenStorage.getItem(),
     })
 }
 

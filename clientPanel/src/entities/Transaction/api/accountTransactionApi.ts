@@ -4,10 +4,14 @@ import type {AccountTransactionRequest} from "../types/accountTransactionRequest
 
 const accountTransactionApi = {
     getAccountTransactions: async (params: AccountTransactionRequest) => {
-        const { data } = await instance.get<AccountOperationsPage>(
-            `accounts/${params.id}/operations${params.limit !== undefined || params.offset !== undefined || params.sort !== undefined ? "?" : ''}`)
-
-        return data
+        const searchParams = new URLSearchParams();
+        if (params.limit !== undefined) searchParams.set('limit', String(params.limit));
+        if (params.offset !== undefined) searchParams.set('offset', String(params.offset));
+        if (params.sort !== undefined) searchParams.set('sort', params.sort);
+        const query = searchParams.toString();
+        const url = `accounts/${params.id}/operations${query ? `?${query}` : ''}`;
+        const { data } = await instance.get<AccountOperationsPage>(url);
+        return data;
     }
 }
 

@@ -1,10 +1,25 @@
-import { Stack, Grid, Card, Text, Title, Group, Badge, Progress, Button, Divider, NumberInput, Modal } from '@mantine/core';
+import {
+    Stack,
+    Grid,
+    Card,
+    Text,
+    Title,
+    Group,
+    Badge,
+    Progress,
+    Button,
+    Divider,
+    NumberInput,
+    Modal,
+    Flex
+} from '@mantine/core';
 import {
     IconCreditCard,
     IconCalendar,
 } from '@tabler/icons-react';
 import {useCreditDetailPage} from "./useCreditDetailPage.ts";
 import {formatDate} from "../../../utils/formatDate.ts";
+import {Transaction} from "../../../entities/Transaction";
 
 const CreditDetailPage = () => {
 
@@ -12,9 +27,6 @@ const CreditDetailPage = () => {
         credit,
         creditLoading,
         creditError,
-        transaction,
-        transactionLoading,
-        transactionError,
         tariff,
         tariffLoading,
         tariffError,
@@ -27,14 +39,18 @@ const CreditDetailPage = () => {
         repayAmount,
         onChangeRepayAmount,
         errorText,
-        repayCredit
+        repayCredit,
+        selectFullRepayAmount
     } = useCreditDetailPage()
 
-    if (creditLoading) return <div>Loading...</div>
+    if (creditLoading
+        || accountLoading
+        || tariffLoading
+    ) return <div>Loading...</div>
 
     return (
         <Stack spacing="xl" p="xl">
-            {!creditError ?
+            {!creditError && !accountError && !tariffError ?
                 <Grid>
                     <Grid.Col span={8}>
                         <Card shadow="sm" padding="lg">
@@ -80,32 +96,17 @@ const CreditDetailPage = () => {
 
                                 <Grid>
                                     <Grid.Col span={6} md={3}>
-                                        {/*<Stack spacing={2}>*/}
-                                        {/*    <Group spacing={4}><IconTrendingUp size={16} /><Text size="xs">Ежемесячный платеж</Text></Group>*/}
-                                        {/*    <Text weight={600}>{tariff.}</Text>*/}
-                                        {/*</Stack>*/}
-                                    </Grid.Col>
-                                    <Grid.Col span={6} md={3}>
-                                        <Stack spacing={2}>
+                                        <Flex align="center" gap="xs">
                                             <Text size="xs">Процентная ставка</Text>
-                                            <Text weight={600}>{tariff?.interestRate * 100}%</Text>
-                                        </Stack>
-                                    </Grid.Col>
-                                    <Grid.Col span={6} md={3}>
-                                        <Stack spacing={2}>
-                                            <Group spacing={4}><IconCalendar size={16} /><Text size="xs">Срок кредита</Text></Group>
-                                            {/*<Text weight={600}>{credit?.term} мес.</Text>*/}
-                                        </Stack>
-                                    </Grid.Col>
-                                    <Grid.Col span={6} md={3}>
-                                        <Stack spacing={2}>
+                                            <Text fw={600}>{tariff?.interestRate * 100}%</Text>
+                                        </Flex>
+                                        <Flex align="center" gap="xs">
                                             <Group spacing={4}><IconCalendar size={16} /><Text size="xs">Следующий платеж</Text></Group>
                                             <Text weight={600}>{credit?.status === 'active' ? formatDate(credit.nextPaymentDueAt) : '-'}</Text>
-                                        </Stack>
+                                        </Flex>
                                     </Grid.Col>
                                 </Grid>
 
-                                 Модалка погашения
                                 <Modal
                                     opened={modalState}
                                     onClose={() => setModalState(false)}
@@ -116,18 +117,16 @@ const CreditDetailPage = () => {
                                             label="Сумма"
                                             placeholder="0"
                                             min={0}
-                                            // max={credit.remainingAmount}
                                             value={repayAmount}
                                             onChange={onChangeRepayAmount}
                                         />
-                                        {/*<Group position="apart">*/}
-                                        {/*    <Button variant="outline" onClick={() => setPaymentAmount(credit.monthlyPayment)}>Ежемесячный платеж</Button>*/}
-                                        {/*    <Button variant="outline" onClick={() => setPaymentAmount(credit.remainingAmount)}>Погасить полностью</Button>*/}
-                                        {/*</Group>*/}
+                                        <Group position="apart">
+                                            <Button variant="outline" onClick={selectFullRepayAmount}>Погасить полностью</Button>
+                                            <Button fullWidth color="green" onClick={repayCredit}>
+                                                Погасить
+                                            </Button>
+                                        </Group>
                                         <Text color='red'>{errorText}</Text>
-                                        <Button fullWidth color="green" onClick={repayCredit}>
-                                            Погасить
-                                        </Button>
                                     </Stack>
                                 </Modal>
 
@@ -140,7 +139,6 @@ const CreditDetailPage = () => {
                         </Card>
                     </Grid.Col>
 
-                    {/* Боковая панель */}
                     <Grid.Col span={4}>
                         <Stack spacing="md">
                             <Card shadow="sm" padding="md">
@@ -167,9 +165,6 @@ const CreditDetailPage = () => {
                                     <Text weight={600}>{credit?.principalAmount}</Text>
                                     <Text size="xs" color="dimmed">Общая сумма процентов</Text>
                                     <Text weight={600} color="orange">{tariff?.interestRate * 100}</Text>
-                                    <Divider />
-                                    {/*<Text size="xs" weight={500}>Общая сумма к выплате</Text>*/}
-                                    {/*<Text weight={600}>{formatCurrency(credit.monthlyPayment * credit.term)}</Text>*/}
                                 </Stack>
                             </Card>
                         </Stack>
@@ -177,13 +172,6 @@ const CreditDetailPage = () => {
                 </Grid>:
                 <div>Не получилось загрузить данные</div>
             }
-            {/*{!transactionError ?*/}
-            {/*    transaction ?*/}
-            {/*        <Transaction items={transaction} /> :*/}
-            {/*        <div>Операций нет</div>*/}
-            {/*    :*/}
-            {/*    <div>Не удалось загрузить список операций</div>*/}
-            {/*}*/}
         </Stack>
     );
 }
