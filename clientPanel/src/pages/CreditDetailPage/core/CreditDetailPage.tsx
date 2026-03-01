@@ -27,6 +27,9 @@ const CreditDetailPage = () => {
         credit,
         creditLoading,
         creditError,
+        transaction,
+        transactionLoading,
+        transactionError,
         tariff,
         tariffLoading,
         tariffError,
@@ -45,10 +48,14 @@ const CreditDetailPage = () => {
 
 
 
-    if (creditLoading
+    if (
+        creditLoading
         || accountLoading
         || tariffLoading
-    ) return <div>Loading...</div>
+        || transactionLoading
+    ) {
+        return <div>Loading...</div>
+    }
 
     return (
         <Stack spacing="xl" p="xl">
@@ -173,6 +180,13 @@ const CreditDetailPage = () => {
                     </Grid.Col>
                 </Grid>:
                 <div>Не получилось загрузить данные</div>
+            }
+            {!transactionError ?
+                transaction ?
+                    <Transaction items={transaction} total={0} /> :
+                    <div>Операций нет</div>
+                :
+                <div>Не удалось загрузить список операций</div>
             }
         </Stack>
     );

@@ -1,4 +1,4 @@
-type PaymentType = 'issue' | 'repayment' | 'accrual'
+import type {PaymentType} from "../../Credit/types/PaymentType.ts";
 
 interface CreditPaymentResponse {
     id: string

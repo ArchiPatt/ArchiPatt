@@ -9,7 +9,6 @@ const Transaction = (props: AccountOperationsPage) => {
         slicedArray,
     } = useTransaction(props)
 
-    console.log(slicedArray)
 
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder mt="xl">
