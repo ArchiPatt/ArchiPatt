@@ -20,9 +20,6 @@ export async function postAccountOperation(input: {
     input.kind === "debit" ? -amountValue : amountValue;
 
   const url = `${env.coreService.baseUrl}/internal/accounts/${encodeURIComponent(input.accountId)}/operations`;
-  const rawAmount = Number(input.amount.toFixed(2));
-  const amount = input.kind === "debit" ? -rawAmount : rawAmount;
-
   const res = await fetch(url, {
     method: "POST",
     headers: {
