@@ -38,42 +38,42 @@ export function registerDashboardRoutes(app: FastifyInstance) {
       return reply.code(403).send({ error: "forbidden" });
     }
 
-    const limit = Math.min(
-      Math.max(1, parseInt(req.query?.limit ?? "20", 10) || 20),
-      100,
-    );
-    const offset = Math.max(0, parseInt(req.query?.offset ?? "0", 10) || 0);
+    try {
+      const limit = Math.min(
+        Math.max(1, parseInt(req.query?.limit ?? "20", 10) || 20),
+        100,
+      );
+      const offset = Math.max(0, parseInt(req.query?.offset ?? "0", 10) || 0);
 
-    const { items: users, total } = await fetchUsersInternal(limit, offset);
-    const clientIds = users.map((u) => u.id);
-    if (clientIds.length === 0) {
-      return { items: [], total };
-    }
+      const { items: users, total } = await fetchUsersInternal(limit, offset);
+      const clientIds = users.map((u) => u.id);
+      if (clientIds.length === 0) {
+        return reply.send({ items: [], total });
+      }
 
-    const [accounts, credits] = await Promise.all([
-      app.db.getRepository(Account).find({
-        where: { clientId: In(clientIds) },
-        order: { createdAt: "DESC" },
-      }),
-      fetchCreditsByClientIds(clientIds),
-    ]);
+      const [accounts, credits] = await Promise.all([
+        app.db.getRepository(Account).find({
+          where: { clientId: In(clientIds) },
+          order: { createdAt: "DESC" },
+        }),
+        fetchCreditsByClientIds(clientIds),
+      ]);
 
-    const accountsByClient = new Map<string, typeof accounts>();
-    for (const acc of accounts) {
-      const list = accountsByClient.get(acc.clientId) ?? [];
-      list.push(acc);
-      accountsByClient.set(acc.clientId, list);
-    }
+      const accountsByClient = new Map<string, typeof accounts>();
+      for (const acc of accounts) {
+        const list = accountsByClient.get(acc.clientId) ?? [];
+        list.push(acc);
+        accountsByClient.set(acc.clientId, list);
+      }
 
-    const creditsByClient = new Map<string, typeof credits>();
-    for (const cr of credits) {
-      const list = creditsByClient.get(cr.clientId) ?? [];
-      list.push(cr);
-      creditsByClient.set(cr.clientId, list);
-    }
+      const creditsByClient = new Map<string, typeof credits>();
+      for (const cr of credits) {
+        const list = creditsByClient.get(cr.clientId) ?? [];
+        list.push(cr);
+        creditsByClient.set(cr.clientId, list);
+      }
 
-    const items = users
-      .map((user) => ({
+      const items = users.map((user) => ({
         user: {
           id: user.id,
           username: user.username,
@@ -83,9 +83,12 @@ export function registerDashboardRoutes(app: FastifyInstance) {
         },
         accounts: accountsByClient.get(user.id) ?? [],
         credits: creditsByClient.get(user.id) ?? [],
-      }))
-      .filter((row) => row.accounts.length > 0 || row.credits.length > 0);
+      }));
 
-    return { items, total };
+      return reply.send({ items, total });
+    } catch (err) {
+      app.log.error(err, "dashboard/clients-overview failed");
+      return reply.code(200).send({ items: [], total: 0 });
+    }
   });
 }
