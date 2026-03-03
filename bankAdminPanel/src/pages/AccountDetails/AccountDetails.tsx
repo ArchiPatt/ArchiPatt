@@ -32,7 +32,7 @@ const getStatusColor = (status?: string) => {
 }
 
 const getOperationTypeLabel = (type?: string | null) => {
-   if (type === 'deposit') return 'Пополнение'
+   if (type === 'deposit' || type === 'seed_deposit') return 'Пополнение'
    if (type === 'withdraw') return 'Списание'
    if (type === 'credit_issue') return 'Выдача кредита'
    if (type === 'credit_repayment') return 'Погашение кредита'
@@ -174,11 +174,7 @@ export const AccountDetails = () => {
                   <Text size="sm" c="dimmed">
                      Всего операций: {total}
                   </Text>
-                  <Pagination
-                     value={page}
-                     onChange={handlePageChange}
-                     total={totalPages}
-                  />
+                  <Pagination value={page} onChange={handlePageChange} total={totalPages} />
                </Group>
             )}
          </Card>
