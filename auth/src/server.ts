@@ -2,6 +2,7 @@ import Fastify, { FastifyInstance } from "fastify";
 import formbody from "@fastify/formbody";
 import fastifyStatic from "@fastify/static";
 import cors from "@fastify/cors";
+import cookie from "@fastify/cookie";
 import path from "path";
 
 import { env } from "./env";
@@ -22,6 +23,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
+  await app.register(cookie, { secret: env.session.cookieSecret });
   await app.register(formbody);
   await app.register(fastifyStatic, {
     root: path.join(process.cwd(), "node_modules", "swagger-ui-dist"),

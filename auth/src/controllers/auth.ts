@@ -75,6 +75,55 @@ export async function jwksController() {
   return { status: 200 as const, body: jwks };
 }
 
+export async function loginGetController(
+  app: FastifyInstance,
+  params: {
+    sessionId?: string;
+    return_to?: string;
+    error?: string;
+  },
+) {
+  const returnTo = params.return_to ?? "";
+  const normalizedReturnTo = normalizeReturnTo(returnTo);
+
+  if (params.sessionId && normalizedReturnTo) {
+    const session = await authService.findSessionBySessionId(
+      app.db,
+      params.sessionId,
+    );
+    if (
+      session &&
+      session.expiresAt.getTime() >= Date.now()
+    ) {
+      const user = await authService.findUserById(app.db, session.userId);
+      if (user) {
+        const profile = await fetchUserProfileByUsername(session.username);
+        if (profile && !profile.isBlocked) {
+          const code = nanoid(32);
+          await authService.createAuthCode(app.db, {
+            code,
+            clientId: "frontend",
+            userId: session.userId,
+            expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+          });
+          const redirect = new URL(normalizedReturnTo);
+          redirect.searchParams.set("code", code);
+          return {
+            status: 302 as const,
+            redirect: redirect.toString(),
+            sso: true,
+          };
+        }
+      }
+    }
+  }
+
+  return {
+    status: 200 as const,
+    body: { showForm: true as const, returnTo, error: params.error },
+  };
+}
+
 export async function loginPostController(
   app: FastifyInstance,
   params: {
@@ -134,6 +183,17 @@ export async function loginPostController(
     return { status: 403 as const, body: { error: "user_blocked_or_not_found" } };
   }
 
+  const sessionId = nanoid(48);
+  const expiresAt = new Date(
+    Date.now() + env.session.ttlSeconds * 1000,
+  );
+  await authService.createSession(app.db, {
+    sessionId,
+    userId: user.id,
+    username: user.username,
+    expiresAt,
+  });
+
   const code = nanoid(32);
   await authService.createAuthCode(app.db, {
     code,
@@ -144,7 +204,12 @@ export async function loginPostController(
 
   const redirect = new URL(normalizedReturnTo);
   redirect.searchParams.set("code", code);
-  return { status: 302 as const, redirect: redirect.toString() };
+  return {
+    status: 302 as const,
+    redirect: redirect.toString(),
+    sessionId,
+    sessionMaxAge: env.session.ttlSeconds,
+  };
 }
 
 export async function tokenController(
@@ -368,4 +433,19 @@ export async function logoutController(
     await authService.createRevokedToken(app.db, jti, new Date(exp * 1000));
   }
   return { status: 200 as const, body: { ok: true } };
+}
+
+export async function logoutSessionController(
+  app: FastifyInstance,
+  sessionId: string | undefined,
+  returnTo?: string,
+) {
+  if (sessionId) {
+    await authService.deleteSessionBySessionId(app.db, sessionId);
+  }
+  const redirect =
+    returnTo && normalizeReturnTo(returnTo)
+      ? normalizeReturnTo(returnTo)!
+      : `${env.issuer}/login`;
+  return { status: 302 as const, redirect };
 }

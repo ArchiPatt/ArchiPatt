@@ -40,4 +40,9 @@ export function registerAuthRoutes(app: FastifyInstance) {
   }>("/setup-password", h.setupPasswordPost);
 
   app.post("/logout", h.logout);
+
+  app.get<{ Querystring: { return_to?: string } }>(
+    "/logout-session",
+    h.logoutSession,
+  );
 }

@@ -1,16 +1,18 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
-import { env } from "../env";
 import { verifyAccessToken } from "../security/bearer";
 import { htmlPage, escapeHtml } from "../utils/html";
+import { env } from "../env";
 import {
   internalTokensRevokedController,
   jwksController,
+  loginGetController,
   loginPostController,
   tokenController,
   internalUsersController,
   setupPasswordGetController,
   setupPasswordPostController,
   logoutController,
+  logoutSessionController,
 } from "../controllers/auth";
 
 export function createAuthHandlers(app: FastifyInstance) {
@@ -39,8 +41,22 @@ export function createAuthHandlers(app: FastifyInstance) {
       req: FastifyRequest<{ Querystring: { return_to?: string; error?: string } }>,
       reply: FastifyReply,
     ) => {
-      const returnTo = req.query.return_to ?? "";
-      const err = req.query.error ?? "";
+      const sessionId = req.cookies?.[env.session.cookieName] as
+        | string
+        | undefined;
+      const res = await loginGetController(app, {
+        sessionId,
+        return_to: req.query.return_to,
+        error: req.query.error,
+      });
+
+      if (res.status === 302 && "redirect" in res) {
+        return reply.redirect(res.redirect);
+      }
+
+      const body = res.body as { showForm?: boolean; returnTo?: string; error?: string };
+      const returnTo = body?.returnTo ?? "";
+      const err = body?.error ?? "";
       reply.type("text/html; charset=utf-8");
       return reply.send(
         htmlPage(
@@ -75,6 +91,15 @@ export function createAuthHandlers(app: FastifyInstance) {
         return_to: req.body?.return_to,
       });
       if (res.status === 302 && "redirect" in res) {
+        if ("sessionId" in res && res.sessionId) {
+          reply.setCookie(env.session.cookieName, res.sessionId, {
+            path: "/",
+            httpOnly: true,
+            secure: env.nodeEnv === "production",
+            sameSite: "lax",
+            maxAge: res.sessionMaxAge ?? env.session.ttlSeconds,
+          });
+        }
         return reply.redirect(res.redirect);
       }
       return reply.code(res.status).send(res.body);
@@ -187,6 +212,18 @@ export function createAuthHandlers(app: FastifyInstance) {
       }
       const res = await logoutController(app, payload ?? null);
       return reply.code(res.status).send(res.body);
+    },
+
+    logoutSession: async (
+      req: FastifyRequest<{ Querystring: { return_to?: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const sessionId = req.cookies?.[env.session.cookieName] as
+        | string
+        | undefined;
+      const res = await logoutSessionController(app, sessionId, req.query.return_to);
+      reply.clearCookie(env.session.cookieName, { path: "/" });
+      return reply.redirect(res.redirect);
     },
   };
 }

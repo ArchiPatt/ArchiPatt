@@ -6,6 +6,7 @@ import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { RevokedAccessToken } from "../db/entities/RevokedAccessToken";
+import { Session } from "../db/entities/Session";
 
 const AppDataSource = new DataSource({
   type: "postgres",
@@ -14,7 +15,7 @@ const AppDataSource = new DataSource({
   username: env.db.user,
   password: env.db.password,
   database: env.db.name,
-  entities: [User, AuthorizationCode, RefreshToken, RevokedAccessToken],
+  entities: [User, AuthorizationCode, RefreshToken, RevokedAccessToken, Session],
   migrations: [path.join(process.cwd(), "src/migrations/*.{ts,js}")],
   synchronize: false,
   logging: false,

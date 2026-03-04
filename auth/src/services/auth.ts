@@ -4,6 +4,7 @@ import { User } from "../db/entities/User";
 import { AuthorizationCode } from "../db/entities/AuthorizationCode";
 import { RefreshToken } from "../db/entities/RefreshToken";
 import { RevokedAccessToken } from "../db/entities/RevokedAccessToken";
+import { Session } from "../db/entities/Session";
 
 export async function findUserByUsername(ds: DataSource, username: string) {
   return ds.getRepository(User).findOne({ where: { username } });
@@ -109,4 +110,33 @@ export async function createRevokedToken(
 ) {
   const repo = ds.getRepository(RevokedAccessToken);
   return repo.save(repo.create({ jti, expiresAt }));
+}
+
+export async function findSessionBySessionId(
+  ds: DataSource,
+  sessionId: string,
+) {
+  return ds.getRepository(Session).findOne({
+    where: { sessionId },
+  });
+}
+
+export async function createSession(
+  ds: DataSource,
+  params: {
+    sessionId: string;
+    userId: string;
+    username: string;
+    expiresAt: Date;
+  },
+) {
+  const repo = ds.getRepository(Session);
+  return repo.save(repo.create(params));
+}
+
+export async function deleteSessionBySessionId(
+  ds: DataSource,
+  sessionId: string,
+) {
+  await ds.getRepository(Session).delete({ sessionId });
 }

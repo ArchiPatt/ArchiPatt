@@ -45,6 +45,15 @@ export const env = {
     refreshTtlSeconds: num("REFRESH_TOKEN_TTL_SECONDS", 60 * 60 * 24 * 30),
   },
 
+  session: {
+    ttlSeconds: num("SESSION_TTL_SECONDS", 60 * 60 * 24 * 7),
+    cookieName: process.env.SESSION_COOKIE_NAME ?? "auth_session",
+    cookieSecret:
+      process.env.SESSION_COOKIE_SECRET ??
+      process.env.AUTH_INTERNAL_TOKEN ??
+      "auth-session-secret-change-in-production",
+  },
+
   keys: {
     privateJwkJson: must("AUTH_PRIVATE_JWK_JSON"),
   },
