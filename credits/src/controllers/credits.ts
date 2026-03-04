@@ -62,6 +62,39 @@ export async function getCreditsByClientController(
   return { status: 200 as const, body: credits };
 }
 
+export async function getOverdueCreditsController(
+  ds: DataSource,
+  payload: JWTPayload,
+  params: { clientId?: string },
+) {
+  if (params.clientId) {
+    const isOwner = String(payload.sub ?? "") === params.clientId;
+    const allowed = isEmployee(payload) || isOwner;
+    if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  } else {
+    if (!isEmployee(payload))
+      return { status: 403 as const, body: { error: "forbidden" } };
+  }
+
+  const credits = params.clientId
+    ? await creditsService.findOverdueCredits(ds, params.clientId)
+    : await creditsService.findOverdueCredits(ds);
+  return { status: 200 as const, body: credits };
+}
+
+export async function getCreditRatingController(
+  ds: DataSource,
+  payload: JWTPayload,
+  params: { clientId: string },
+) {
+  const isOwner = String(payload.sub ?? "") === params.clientId;
+  const allowed = isEmployee(payload) || isOwner;
+  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+
+  const rating = await creditsService.calculateCreditRating(ds, params.clientId);
+  return { status: 200 as const, body: rating };
+}
+
 export async function issueCreditController(
   ds: DataSource,
   payload: JWTPayload,

@@ -30,4 +30,24 @@ export function registerAccountsRoutes(app: FastifyInstance) {
       meta?: Record<string, unknown>;
     };
   }>("/internal/accounts/:id/operations", h.internalPostOperation);
+
+  app.post<{
+    Body: {
+      toAccountId?: string;
+      amount?: unknown;
+      idempotencyKey?: string;
+      type?: string;
+      meta?: Record<string, unknown>;
+    };
+  }>("/internal/transfers/from-master", h.internalTransferFromMaster);
+
+  app.post<{
+    Body: {
+      fromAccountId?: string;
+      amount?: unknown;
+      idempotencyKey?: string;
+      type?: string;
+      meta?: Record<string, unknown>;
+    };
+  }>("/internal/transfers/to-master", h.internalTransferToMaster);
 }

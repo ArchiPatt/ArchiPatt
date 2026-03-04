@@ -175,3 +175,127 @@ export async function postOperation(
   );
   return { op, created: true };
 }
+
+export async function transferFromMaster(
+  em: EntityManager,
+  params: {
+    masterAccountId: string;
+    toAccountId: string;
+    amount: number;
+    idempotencyKey: string;
+    type?: string | null;
+    meta?: Record<string, unknown> | null;
+  },
+) {
+  const clientKey = `${params.idempotencyKey}:client`;
+  const existing = await em.findOne(AccountOperation, {
+    where: { accountId: params.toAccountId, idempotencyKey: clientKey },
+  });
+  if (existing) return { success: true };
+
+  const master = await em.findOne(Account, {
+    where: { id: params.masterAccountId },
+    lock: { mode: "pessimistic_write" },
+  });
+  const toAccount = await em.findOne(Account, {
+    where: { id: params.toAccountId },
+    lock: { mode: "pessimistic_write" },
+  });
+  if (!master || !toAccount) return null;
+  if (master.status === AccountStatus.Closed || toAccount.status === AccountStatus.Closed)
+    return "closed";
+
+  const masterPrev = parseFloat(master.balance);
+  const masterNext = (masterPrev - params.amount).toFixed(2);
+  if (parseFloat(masterNext) < 0) return "insufficient_balance";
+
+  const toPrev = parseFloat(toAccount.balance);
+  const toNext = (toPrev + params.amount).toFixed(2);
+
+  master.balance = masterNext;
+  toAccount.balance = toNext;
+  await em.save(master);
+  await em.save(toAccount);
+
+  await em.save(
+    em.create(AccountOperation, {
+      accountId: master.id,
+      amount: (-params.amount).toFixed(2),
+      type: params.type ?? "credit_issue_from_master",
+      idempotencyKey: `${params.idempotencyKey}:master`,
+      meta: params.meta ?? null,
+    }),
+  );
+  await em.save(
+    em.create(AccountOperation, {
+      accountId: toAccount.id,
+      amount: params.amount.toFixed(2),
+      type: params.type ?? "credit_issue",
+      idempotencyKey: `${params.idempotencyKey}:client`,
+      meta: params.meta ?? null,
+    }),
+  );
+  return { success: true };
+}
+
+export async function transferToMaster(
+  em: EntityManager,
+  params: {
+    masterAccountId: string;
+    fromAccountId: string;
+    amount: number;
+    idempotencyKey: string;
+    type?: string | null;
+    meta?: Record<string, unknown> | null;
+  },
+) {
+  const clientKey = `${params.idempotencyKey}:client`;
+  const existing = await em.findOne(AccountOperation, {
+    where: { accountId: params.fromAccountId, idempotencyKey: clientKey },
+  });
+  if (existing) return { success: true };
+
+  const master = await em.findOne(Account, {
+    where: { id: params.masterAccountId },
+    lock: { mode: "pessimistic_write" },
+  });
+  const fromAccount = await em.findOne(Account, {
+    where: { id: params.fromAccountId },
+    lock: { mode: "pessimistic_write" },
+  });
+  if (!master || !fromAccount) return null;
+  if (master.status === AccountStatus.Closed || fromAccount.status === AccountStatus.Closed)
+    return "closed";
+
+  const fromPrev = parseFloat(fromAccount.balance);
+  const fromNext = (fromPrev - params.amount).toFixed(2);
+  if (parseFloat(fromNext) < 0) return "insufficient_balance";
+
+  const masterPrev = parseFloat(master.balance);
+  const masterNext = (masterPrev + params.amount).toFixed(2);
+
+  fromAccount.balance = fromNext;
+  master.balance = masterNext;
+  await em.save(fromAccount);
+  await em.save(master);
+
+  await em.save(
+    em.create(AccountOperation, {
+      accountId: fromAccount.id,
+      amount: (-params.amount).toFixed(2),
+      type: params.type ?? "credit_repayment",
+      idempotencyKey: `${params.idempotencyKey}:client`,
+      meta: params.meta ?? null,
+    }),
+  );
+  await em.save(
+    em.create(AccountOperation, {
+      accountId: master.id,
+      amount: params.amount.toFixed(2),
+      type: params.type ?? "credit_repayment_to_master",
+      idempotencyKey: `${params.idempotencyKey}:master`,
+      meta: params.meta ?? null,
+    }),
+  );
+  return { success: true };
+}

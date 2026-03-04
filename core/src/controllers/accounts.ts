@@ -1,4 +1,5 @@
 import { DataSource } from "typeorm";
+import { env } from "../env";
 import { JWTPayload } from "jose";
 import { AccountStatus } from "../db/enums/AccountStatus";
 import {
@@ -221,4 +222,72 @@ export async function internalPostOperationController(
   return result.created
     ? { status: 201 as const, body: result.op }
     : { status: 200 as const, body: result.op };
+}
+
+export async function internalTransferFromMasterController(
+  ds: DataSource,
+  internalOk: boolean,
+  params: {
+    toAccountId: string;
+    amount: number;
+    idempotencyKey: string;
+    type?: string;
+    meta?: Record<string, unknown>;
+  },
+) {
+  if (!internalOk)
+    return { status: 401 as const, body: { error: "unauthorized" } };
+
+  const result = await ds.manager.transaction((em) =>
+    accountsService.transferFromMaster(em, {
+      masterAccountId: env.masterAccountId,
+      toAccountId: params.toAccountId,
+      amount: params.amount,
+      idempotencyKey: params.idempotencyKey,
+      type: params.type ?? null,
+      meta: params.meta ?? null,
+    }),
+  );
+
+  if (result === null)
+    return { status: 404 as const, body: { error: "account_not_found" } };
+  if (result === "closed")
+    return { status: 400 as const, body: { error: "account_closed" } };
+  if (result === "insufficient_balance")
+    return { status: 400 as const, body: { error: "insufficient_balance" } };
+  return { status: 200 as const, body: { ok: true } };
+}
+
+export async function internalTransferToMasterController(
+  ds: DataSource,
+  internalOk: boolean,
+  params: {
+    fromAccountId: string;
+    amount: number;
+    idempotencyKey: string;
+    type?: string;
+    meta?: Record<string, unknown>;
+  },
+) {
+  if (!internalOk)
+    return { status: 401 as const, body: { error: "unauthorized" } };
+
+  const result = await ds.manager.transaction((em) =>
+    accountsService.transferToMaster(em, {
+      masterAccountId: env.masterAccountId,
+      fromAccountId: params.fromAccountId,
+      amount: params.amount,
+      idempotencyKey: params.idempotencyKey,
+      type: params.type ?? null,
+      meta: params.meta ?? null,
+    }),
+  );
+
+  if (result === null)
+    return { status: 404 as const, body: { error: "account_not_found" } };
+  if (result === "closed")
+    return { status: 400 as const, body: { error: "account_closed" } };
+  if (result === "insufficient_balance")
+    return { status: 400 as const, body: { error: "insufficient_balance" } };
+  return { status: 200 as const, body: { ok: true } };
 }

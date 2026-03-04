@@ -42,6 +42,8 @@ export const env = {
     internalToken:
       process.env.CREDITS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
   },
+  masterAccountId:
+    process.env.MASTER_ACCOUNT_ID ?? "00000000-0000-0000-0000-000000000001",
   db: {
     host: process.env.DB_HOST ?? "localhost",
     port: num("DB_PORT", 5432),

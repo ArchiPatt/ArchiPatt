@@ -44,3 +44,73 @@ export async function postAccountOperation(input: {
 
   return await res.json().catch(() => null);
 }
+
+export async function transferFromMaster(input: {
+  toAccountId: string;
+  amount: number;
+  idempotencyKey: string;
+  metadata?: Record<string, unknown>;
+}) {
+  if (!env.coreService.internalToken) {
+    throw new Error(
+      "CORE_INTERNAL_TOKEN (or INTERNAL_TOKEN) is not configured",
+    );
+  }
+
+  const url = `${env.coreService.baseUrl}/internal/transfers/from-master`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-token": env.coreService.internalToken,
+    },
+    body: JSON.stringify({
+      toAccountId: input.toAccountId,
+      amount: input.amount,
+      idempotencyKey: input.idempotencyKey,
+      meta: input.metadata ?? null,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`core transfer failed (${res.status}): ${text}`);
+  }
+
+  return await res.json().catch(() => null);
+}
+
+export async function transferToMaster(input: {
+  fromAccountId: string;
+  amount: number;
+  idempotencyKey: string;
+  metadata?: Record<string, unknown>;
+}) {
+  if (!env.coreService.internalToken) {
+    throw new Error(
+      "CORE_INTERNAL_TOKEN (or INTERNAL_TOKEN) is not configured",
+    );
+  }
+
+  const url = `${env.coreService.baseUrl}/internal/transfers/to-master`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-internal-token": env.coreService.internalToken,
+    },
+    body: JSON.stringify({
+      fromAccountId: input.fromAccountId,
+      amount: input.amount,
+      idempotencyKey: input.idempotencyKey,
+      meta: input.metadata ?? null,
+    }),
+  });
+
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`core transfer failed (${res.status}): ${text}`);
+  }
+
+  return await res.json().catch(() => null);
+}

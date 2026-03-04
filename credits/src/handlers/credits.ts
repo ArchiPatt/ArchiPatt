@@ -11,6 +11,8 @@ import {
   getCreditController,
   getPaymentsController,
   getCreditsByClientController,
+  getOverdueCreditsController,
+  getCreditRatingController,
   issueCreditController,
   repayCreditController,
   accrueRunController,
@@ -97,6 +99,30 @@ export function createCreditsHandlers(app: FastifyInstance) {
         a.payload,
         req.params,
       );
+      return reply.code(res.status).send(res.body);
+    },
+
+    getOverdueCredits: async (
+      req: FastifyRequest<{ Querystring: { clientId?: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const payload = await safeVerify(req);
+      const a = await requireActiveAuth(payload);
+      if (!a.ok) return reply.code(a.code).send({ error: a.error });
+      const res = await getOverdueCreditsController(app.db, a.payload, {
+        clientId: req.query?.clientId,
+      });
+      return reply.code(res.status).send(res.body);
+    },
+
+    getCreditRating: async (
+      req: FastifyRequest<{ Params: { clientId: string } }>,
+      reply: FastifyReply,
+    ) => {
+      const payload = await safeVerify(req);
+      const a = await requireActiveAuth(payload);
+      if (!a.ok) return reply.code(a.code).send({ error: a.error });
+      const res = await getCreditRatingController(app.db, a.payload, req.params);
       return reply.code(res.status).send(res.body);
     },
 

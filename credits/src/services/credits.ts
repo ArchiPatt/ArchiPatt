@@ -3,7 +3,10 @@ import { Credit } from "../db/entities/Credit";
 import { CreditPayment } from "../db/entities/CreditPayment";
 import { CreditTariff } from "../db/entities/CreditTariff";
 import { CreditStatus } from "../db/enums/CreditStatus";
-import { postAccountOperation } from "../integrations/core-service";
+import {
+  transferFromMaster,
+  transferToMaster,
+} from "../integrations/core-service";
 
 function toMoneyString(v: number): string {
   return v.toFixed(2);
@@ -74,6 +77,58 @@ export async function findCreditsByClientIds(
   });
 }
 
+export async function findOverdueCredits(
+  ds: DataSource,
+  clientId?: string,
+  now: Date = new Date(),
+) {
+  const repo = ds.getRepository(Credit);
+  const where: { status: CreditStatus; clientId?: string } = {
+    status: CreditStatus.Active,
+  };
+  if (clientId) where.clientId = clientId;
+
+  const credits = await repo.find({
+    where,
+    order: { nextPaymentDueAt: "ASC" },
+  });
+  return credits.filter((c) => c.nextPaymentDueAt.getTime() <= now.getTime());
+}
+
+export async function calculateCreditRating(
+  ds: DataSource,
+  clientId: string,
+  now: Date = new Date(),
+): Promise<{ score: number; overdueCount: number; totalCredits: number; closedCount: number }> {
+  const credits = await ds.getRepository(Credit).find({
+    where: { clientId },
+    order: { issuedAt: "DESC" },
+  });
+
+  const overdueCredits = credits.filter(
+    (c) =>
+      c.status === CreditStatus.Active &&
+      c.nextPaymentDueAt.getTime() <= now.getTime(),
+  );
+  const closedCredits = credits.filter((c) => c.status === CreditStatus.Closed);
+
+  const overdueCount = overdueCredits.length;
+  const totalCredits = credits.length;
+  const closedCount = closedCredits.length;
+
+  const score = Math.max(
+    0,
+    Math.min(100, 100 - overdueCount * 20 + closedCount * 3),
+  );
+
+  return {
+    score: Math.round(score),
+    overdueCount,
+    totalCredits,
+    closedCount,
+  };
+}
+
 export async function findCreditById(ds: DataSource, id: string) {
   return ds.getRepository(Credit).findOne({ where: { id } });
 }
@@ -125,10 +180,9 @@ export async function issueCredit(
     }),
   );
 
-  await postAccountOperation({
-    accountId: params.accountId,
+  await transferFromMaster({
+    toAccountId: params.accountId,
     amount: params.amount,
-    kind: "credit",
     idempotencyKey: `credits:issue:${payment.id}`,
     metadata: {
       creditId: credit.id,
@@ -172,10 +226,9 @@ export async function repayCredit(
     }),
   );
 
-  await postAccountOperation({
-    accountId: savedCredit.accountId,
+  await transferToMaster({
+    fromAccountId: savedCredit.accountId,
     amount: params.amount,
-    kind: "debit",
     idempotencyKey: `credits:repay:${payment.id}`,
     metadata: {
       creditId: savedCredit.id,

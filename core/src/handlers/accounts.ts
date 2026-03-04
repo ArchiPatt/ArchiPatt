@@ -10,6 +10,8 @@ import {
   depositController,
   withdrawController,
   internalPostOperationController,
+  internalTransferFromMasterController,
+  internalTransferToMasterController,
 } from "../controllers/accounts";
 
 export function createAccountsHandlers(app: FastifyInstance) {
@@ -124,6 +126,72 @@ export function createAccountsHandlers(app: FastifyInstance) {
         internalOk,
         { ...req.params, ...req.body },
       );
+      return reply.code(res.status).send(res.body);
+    },
+
+    internalTransferFromMaster: async (
+      req: FastifyRequest<{
+        Body: {
+          toAccountId?: string;
+          amount?: unknown;
+          idempotencyKey?: string;
+          type?: string;
+          meta?: Record<string, unknown>;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const internalOk =
+        req.headers["x-internal-token"] === env.internalToken;
+      const amount =
+        typeof req.body?.amount === "number"
+          ? req.body.amount
+          : typeof req.body?.amount === "string"
+            ? parseFloat(req.body.amount)
+            : NaN;
+      if (!req.body?.toAccountId || !Number.isFinite(amount) || amount <= 0 || !req.body?.idempotencyKey) {
+        return reply.code(400).send({ error: "invalid_input" });
+      }
+      const res = await internalTransferFromMasterController(app.db, internalOk, {
+        toAccountId: req.body.toAccountId,
+        amount,
+        idempotencyKey: req.body.idempotencyKey,
+        type: req.body.type,
+        meta: req.body.meta,
+      });
+      return reply.code(res.status).send(res.body);
+    },
+
+    internalTransferToMaster: async (
+      req: FastifyRequest<{
+        Body: {
+          fromAccountId?: string;
+          amount?: unknown;
+          idempotencyKey?: string;
+          type?: string;
+          meta?: Record<string, unknown>;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const internalOk =
+        req.headers["x-internal-token"] === env.internalToken;
+      const amount =
+        typeof req.body?.amount === "number"
+          ? req.body.amount
+          : typeof req.body?.amount === "string"
+            ? parseFloat(req.body.amount)
+            : NaN;
+      if (!req.body?.fromAccountId || !Number.isFinite(amount) || amount <= 0 || !req.body?.idempotencyKey) {
+        return reply.code(400).send({ error: "invalid_input" });
+      }
+      const res = await internalTransferToMasterController(app.db, internalOk, {
+        fromAccountId: req.body.fromAccountId,
+        amount,
+        idempotencyKey: req.body.idempotencyKey,
+        type: req.body.type,
+        meta: req.body.meta,
+      });
       return reply.code(res.status).send(res.body);
     },
   };
