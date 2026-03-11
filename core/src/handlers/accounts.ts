@@ -9,6 +9,7 @@ import {
   closeAccountController,
   depositController,
   withdrawController,
+  transferController,
   internalPostOperationController,
   internalTransferFromMasterController,
   internalTransferToMasterController,
@@ -76,12 +77,19 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
-      const res = await closeAccountController(app.db, auth.payload, req.params);
+      const res = await closeAccountController(
+        app.db,
+        auth.payload,
+        req.params,
+      );
       return reply.code(res.status).send(res.body);
     },
 
     deposit: async (
-      req: FastifyRequest<{ Params: { id: string }; Body: { amount?: unknown } }>,
+      req: FastifyRequest<{
+        Params: { id: string };
+        Body: { amount?: unknown };
+      }>,
       reply: FastifyReply,
     ) => {
       const auth = await authPayloadOrNull(req);
@@ -94,7 +102,10 @@ export function createAccountsHandlers(app: FastifyInstance) {
     },
 
     withdraw: async (
-      req: FastifyRequest<{ Params: { id: string }; Body: { amount?: unknown } }>,
+      req: FastifyRequest<{
+        Params: { id: string };
+        Body: { amount?: unknown };
+      }>,
       reply: FastifyReply,
     ) => {
       const auth = await authPayloadOrNull(req);
@@ -102,6 +113,28 @@ export function createAccountsHandlers(app: FastifyInstance) {
       const res = await withdrawController(app.db, auth.payload, {
         ...req.params,
         amount: req.body?.amount,
+      });
+      return reply.code(res.status).send(res.body);
+    },
+
+    transfer: async (
+      req: FastifyRequest<{
+        Body: {
+          fromAccountId?: string;
+          toAccountId?: string;
+          amount?: unknown;
+          idempotencyKey?: string;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await authPayloadOrNull(req);
+      if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+      const res = await transferController(app.db, auth.payload, {
+        fromAccountId: req.body?.fromAccountId,
+        toAccountId: req.body?.toAccountId,
+        amount: req.body?.amount,
+        idempotencyKey: req.body?.idempotencyKey,
       });
       return reply.code(res.status).send(res.body);
     },
@@ -119,13 +152,11 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
-      const res = await internalPostOperationController(
-        app.db,
-        internalOk,
-        { ...req.params, ...req.body },
-      );
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
+      const res = await internalPostOperationController(app.db, internalOk, {
+        ...req.params,
+        ...req.body,
+      });
       return reply.code(res.status).send(res.body);
     },
 
@@ -141,24 +172,32 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
       const amount =
         typeof req.body?.amount === "number"
           ? req.body.amount
           : typeof req.body?.amount === "string"
             ? parseFloat(req.body.amount)
             : NaN;
-      if (!req.body?.toAccountId || !Number.isFinite(amount) || amount <= 0 || !req.body?.idempotencyKey) {
+      if (
+        !req.body?.toAccountId ||
+        !Number.isFinite(amount) ||
+        amount <= 0 ||
+        !req.body?.idempotencyKey
+      ) {
         return reply.code(400).send({ error: "invalid_input" });
       }
-      const res = await internalTransferFromMasterController(app.db, internalOk, {
-        toAccountId: req.body.toAccountId,
-        amount,
-        idempotencyKey: req.body.idempotencyKey,
-        type: req.body.type,
-        meta: req.body.meta,
-      });
+      const res = await internalTransferFromMasterController(
+        app.db,
+        internalOk,
+        {
+          toAccountId: req.body.toAccountId,
+          amount,
+          idempotencyKey: req.body.idempotencyKey,
+          type: req.body.type,
+          meta: req.body.meta,
+        },
+      );
       return reply.code(res.status).send(res.body);
     },
 
@@ -174,15 +213,19 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
       const amount =
         typeof req.body?.amount === "number"
           ? req.body.amount
           : typeof req.body?.amount === "string"
             ? parseFloat(req.body.amount)
             : NaN;
-      if (!req.body?.fromAccountId || !Number.isFinite(amount) || amount <= 0 || !req.body?.idempotencyKey) {
+      if (
+        !req.body?.fromAccountId ||
+        !Number.isFinite(amount) ||
+        amount <= 0 ||
+        !req.body?.idempotencyKey
+      ) {
         return reply.code(400).send({ error: "invalid_input" });
       }
       const res = await internalTransferToMasterController(app.db, internalOk, {

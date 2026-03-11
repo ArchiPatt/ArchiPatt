@@ -21,6 +21,14 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     Body: { amount?: unknown };
   }>("/accounts/:id/withdraw", h.withdraw);
   app.post<{
+    Body: {
+      fromAccountId?: string;
+      toAccountId?: string;
+      amount?: unknown;
+      idempotencyKey?: string;
+    };
+  }>("/accounts/transfer", h.transfer);
+  app.post<{
     Params: { id: string };
     Body: {
       amount?: unknown;

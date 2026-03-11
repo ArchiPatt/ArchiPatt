@@ -8,10 +8,10 @@ export async function listCreditsController(
   payload: JWTPayload,
 ) {
   if (!isEmployee(payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   const credits = await creditsService.findCredits(ds);
-  return { status: 200 as const, body: credits };
+  return { status: 200, body: credits };
 }
 
 export async function getCreditController(
@@ -20,14 +20,13 @@ export async function getCreditController(
   params: { id: string },
 ) {
   const credit = await creditsService.findCreditById(ds, params.id);
-  if (!credit)
-    return { status: 404 as const, body: { error: "credit_not_found" } };
+  if (!credit) return { status: 404, body: { error: "credit_not_found" } };
 
   const isOwner = String(payload.sub ?? "") === credit.clientId;
   const allowed = isEmployee(payload) || isOwner;
-  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  if (!allowed) return { status: 403, body: { error: "forbidden" } };
 
-  return { status: 200 as const, body: credit };
+  return { status: 200, body: credit };
 }
 
 export async function getPaymentsController(
@@ -36,15 +35,14 @@ export async function getPaymentsController(
   params: { id: string },
 ) {
   const credit = await creditsService.findCreditById(ds, params.id);
-  if (!credit)
-    return { status: 404 as const, body: { error: "credit_not_found" } };
+  if (!credit) return { status: 404, body: { error: "credit_not_found" } };
 
   const isOwner = String(payload.sub ?? "") === credit.clientId;
   const allowed = isEmployee(payload) || isOwner;
-  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  if (!allowed) return { status: 403, body: { error: "forbidden" } };
 
   const payments = await creditsService.findPaymentsByCreditId(ds, params.id);
-  return { status: 200 as const, body: payments };
+  return { status: 200, body: payments };
 }
 
 export async function getCreditsByClientController(
@@ -54,12 +52,12 @@ export async function getCreditsByClientController(
 ) {
   const isOwner = String(payload.sub ?? "") === params.clientId;
   const allowed = isEmployee(payload) || isOwner;
-  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  if (!allowed) return { status: 403, body: { error: "forbidden" } };
 
   const credits = await creditsService.findCreditsByClientIds(ds, [
     params.clientId,
   ]);
-  return { status: 200 as const, body: credits };
+  return { status: 200, body: credits };
 }
 
 export async function getOverdueCreditsController(
@@ -70,16 +68,16 @@ export async function getOverdueCreditsController(
   if (params.clientId) {
     const isOwner = String(payload.sub ?? "") === params.clientId;
     const allowed = isEmployee(payload) || isOwner;
-    if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+    if (!allowed) return { status: 403, body: { error: "forbidden" } };
   } else {
     if (!isEmployee(payload))
-      return { status: 403 as const, body: { error: "forbidden" } };
+      return { status: 403, body: { error: "forbidden" } };
   }
 
   const credits = params.clientId
     ? await creditsService.findOverdueCredits(ds, params.clientId)
     : await creditsService.findOverdueCredits(ds);
-  return { status: 200 as const, body: credits };
+  return { status: 200, body: credits };
 }
 
 export async function getCreditRatingController(
@@ -89,10 +87,13 @@ export async function getCreditRatingController(
 ) {
   const isOwner = String(payload.sub ?? "") === params.clientId;
   const allowed = isEmployee(payload) || isOwner;
-  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  if (!allowed) return { status: 403, body: { error: "forbidden" } };
 
-  const rating = await creditsService.calculateCreditRating(ds, params.clientId);
-  return { status: 200 as const, body: rating };
+  const rating = await creditsService.calculateCreditRating(
+    ds,
+    params.clientId,
+  );
+  return { status: 200, body: rating };
 }
 
 export async function issueCreditController(
@@ -117,12 +118,12 @@ export async function issueCreditController(
     typeof amount !== "number" ||
     amount <= 0
   ) {
-    return { status: 400 as const, body: { error: "invalid_input" } };
+    return { status: 400, body: { error: "invalid_input" } };
   }
 
   const isOwner = String(payload.sub ?? "") === clientId;
   const allowed = isEmployee(payload) || isOwner;
-  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  if (!allowed) return { status: 403, body: { error: "forbidden" } };
 
   const credit = await creditsService.issueCredit(ds, {
     clientId,
@@ -132,9 +133,8 @@ export async function issueCreditController(
     performedBy: String(payload.sub ?? "unknown"),
   });
 
-  if (!credit)
-    return { status: 404 as const, body: { error: "tariff_not_found" } };
-  return { status: 201 as const, body: credit };
+  if (!credit) return { status: 404, body: { error: "tariff_not_found" } };
+  return { status: 201, body: credit };
 }
 
 export async function repayCreditController(
@@ -144,16 +144,15 @@ export async function repayCreditController(
 ) {
   const amount = params.amount;
   if (typeof amount !== "number" || amount <= 0) {
-    return { status: 400 as const, body: { error: "invalid_amount" } };
+    return { status: 400, body: { error: "invalid_amount" } };
   }
 
   const existing = await creditsService.findCreditById(ds, params.id);
-  if (!existing)
-    return { status: 404 as const, body: { error: "credit_not_found" } };
+  if (!existing) return { status: 404, body: { error: "credit_not_found" } };
 
   const isOwner = String(payload.sub ?? "") === existing.clientId;
   const allowed = isEmployee(payload) || isOwner;
-  if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
+  if (!allowed) return { status: 403, body: { error: "forbidden" } };
 
   const result = await creditsService.repayCredit(ds, {
     creditId: params.id,
@@ -161,21 +160,18 @@ export async function repayCreditController(
     performedBy: String(payload.sub ?? "unknown"),
   });
 
-  if (!result) return { status: 404 as const, body: { error: "credit_not_found" } };
+  if (!result) return { status: 404, body: { error: "credit_not_found" } };
   if (result === "not_active")
-    return { status: 400 as const, body: { error: "credit_not_active" } };
-  return { status: 200 as const, body: result };
+    return { status: 400, body: { error: "credit_not_active" } };
+  return { status: 200, body: result };
 }
 
-export async function accrueRunController(
-  ds: DataSource,
-  payload: JWTPayload,
-) {
+export async function accrueRunController(ds: DataSource, payload: JWTPayload) {
   if (!isEmployee(payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   const result = await creditsService.accrueDueCredits(ds);
-  return { status: 200 as const, body: result };
+  return { status: 200, body: result };
 }
 
 export async function internalByClientsController(
@@ -183,8 +179,7 @@ export async function internalByClientsController(
   internalOk: boolean,
   params: { clientIds?: string },
 ) {
-  if (!internalOk)
-    return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!internalOk) return { status: 401, body: { error: "unauthorized" } };
 
   const clientIdsRaw = params.clientIds?.trim();
   const clientIds = clientIdsRaw
@@ -195,5 +190,5 @@ export async function internalByClientsController(
     : [];
 
   const credits = await creditsService.findCreditsByClientIds(ds, clientIds);
-  return { status: 200 as const, body: credits };
+  return { status: 200, body: credits };
 }

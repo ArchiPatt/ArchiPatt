@@ -13,21 +13,20 @@ export function isEmployee(payload: JWTPayload): boolean {
 }
 
 export function requireAuth(payload: JWTPayload | null) {
-  if (!payload) return { ok: false as const, code: 401 as const };
-  return { ok: true as const, payload };
+  if (!payload) return { ok: false, code: 401 };
+  return { ok: true, payload };
 }
 
 export async function requireActiveAuth(payload: JWTPayload | null) {
   const a = requireAuth(payload);
-  if (!a.ok)
-    return { ok: false as const, code: a.code, error: "unauthorized" as const };
+  if (!a.ok) return { ok: false, code: a.code, error: "unauthorized" };
   const username =
     typeof a.payload.username === "string" ? a.payload.username : null;
   if (!a.payload.sub || !username) {
     return {
-      ok: false as const,
-      code: 401 as const,
-      error: "unauthorized" as const,
+      ok: false,
+      code: 401,
+      error: "unauthorized",
     };
   }
 
@@ -35,25 +34,25 @@ export async function requireActiveAuth(payload: JWTPayload | null) {
     const profile = await fetchUserProfileByUsername(username);
     if (!profile)
       return {
-        ok: false as const,
-        code: 401 as const,
-        error: "unauthorized" as const,
+        ok: false,
+        code: 401,
+        error: "unauthorized",
       };
     if (profile.isBlocked)
       return {
-        ok: false as const,
-        code: 403 as const,
-        error: "blocked_user" as const,
+        ok: false,
+        code: 403,
+        error: "blocked_user",
       };
   } catch {
     return {
-      ok: false as const,
-      code: 401 as const,
-      error: "unauthorized" as const,
+      ok: false,
+      code: 401,
+      error: "unauthorized",
     };
   }
 
-  return { ok: true as const, payload: a.payload };
+  return { ok: true, payload: a.payload };
 }
 
 export async function safeVerify(req: FastifyRequest) {
