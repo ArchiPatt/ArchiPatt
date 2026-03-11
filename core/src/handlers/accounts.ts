@@ -14,6 +14,8 @@ import {
   internalTransferFromMasterController,
   internalTransferToMasterController,
 } from "../controllers/accounts";
+import { notifyNewOperation } from "../ws/account-operations-broadcast";
+import type { AccountOperation } from "../db/entities/AccountOperation";
 
 export function createAccountsHandlers(app: FastifyInstance) {
   return {
@@ -98,6 +100,9 @@ export function createAccountsHandlers(app: FastifyInstance) {
         ...req.params,
         amount: req.body?.amount,
       });
+      if (res.status === 200 && "operation" in res && res.operation) {
+        notifyNewOperation(req.params.id, res.operation);
+      }
       return reply.code(res.status).send(res.body);
     },
 
@@ -114,6 +119,9 @@ export function createAccountsHandlers(app: FastifyInstance) {
         ...req.params,
         amount: req.body?.amount,
       });
+      if (res.status === 200 && "operation" in res && res.operation) {
+        notifyNewOperation(req.params.id, res.operation);
+      }
       return reply.code(res.status).send(res.body);
     },
 
@@ -136,6 +144,18 @@ export function createAccountsHandlers(app: FastifyInstance) {
         amount: req.body?.amount,
         idempotencyKey: req.body?.idempotencyKey,
       });
+      if (
+        res.status === 200 &&
+        "fromOperation" in res &&
+        res.fromOperation &&
+        "toOperation" in res &&
+        res.toOperation &&
+        req.body?.fromAccountId &&
+        req.body?.toAccountId
+      ) {
+        notifyNewOperation(req.body.fromAccountId, res.fromOperation);
+        notifyNewOperation(req.body.toAccountId, res.toOperation);
+      }
       return reply.code(res.status).send(res.body);
     },
 
@@ -157,6 +177,9 @@ export function createAccountsHandlers(app: FastifyInstance) {
         ...req.params,
         ...req.body,
       });
+      if ((res.status === 200 || res.status === 201) && res.body) {
+        notifyNewOperation(req.params.id, res.body as AccountOperation);
+      }
       return reply.code(res.status).send(res.body);
     },
 
@@ -198,6 +221,14 @@ export function createAccountsHandlers(app: FastifyInstance) {
           meta: req.body.meta,
         },
       );
+      if (
+        res.status === 200 &&
+        "toAccountOperation" in res &&
+        res.toAccountOperation &&
+        req.body.toAccountId
+      ) {
+        notifyNewOperation(req.body.toAccountId, res.toAccountOperation);
+      }
       return reply.code(res.status).send(res.body);
     },
 
@@ -235,6 +266,14 @@ export function createAccountsHandlers(app: FastifyInstance) {
         type: req.body.type,
         meta: req.body.meta,
       });
+      if (
+        res.status === 200 &&
+        "fromAccountOperation" in res &&
+        res.fromAccountOperation &&
+        req.body.fromAccountId
+      ) {
+        notifyNewOperation(req.body.fromAccountId, res.fromAccountOperation);
+      }
       return reply.code(res.status).send(res.body);
     },
   };

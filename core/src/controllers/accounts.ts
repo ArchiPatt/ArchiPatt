@@ -126,9 +126,10 @@ export async function depositController(
     accountsService.deposit(em, params.id, amount),
   );
 
+  if (!result) return { status: 404, body: { error: "account_not_found" } };
   if (result === "closed")
     return { status: 400, body: { error: "account_closed" } };
-  return { status: 200, body: result };
+  return { status: 200, body: result.account, operation: result.operation };
 }
 
 export async function withdrawController(
@@ -148,11 +149,12 @@ export async function withdrawController(
     accountsService.withdraw(em, params.id, amount),
   );
 
+  if (!result) return { status: 404, body: { error: "account_not_found" } };
   if (result === "closed")
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
-  return { status: 200, body: result };
+  return { status: 200, body: result.account, operation: result.operation };
 }
 
 export async function internalPostOperationController(
@@ -246,7 +248,11 @@ export async function internalTransferFromMasterController(
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
-  return { status: 200, body: { ok: true } };
+  return {
+    status: 200,
+    body: { ok: true },
+    toAccountOperation: result.toAccountOperation,
+  };
 }
 
 export async function internalTransferToMasterController(
@@ -279,7 +285,11 @@ export async function internalTransferToMasterController(
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
-  return { status: 200, body: { ok: true } };
+  return {
+    status: 200,
+    body: { ok: true },
+    fromAccountOperation: result.fromAccountOperation,
+  };
 }
 
 export async function transferController(
@@ -323,11 +333,16 @@ export async function transferController(
 
   if (result === "same_account")
     return { status: 400, body: { error: "same_account" } };
-  if (result === "account_not_found")
+  if (result === null || result === "account_not_found")
     return { status: 404, body: { error: "account_not_found" } };
   if (result === "closed")
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
-  return { status: 200, body: { ok: true } };
+  return {
+    status: 200,
+    body: { ok: true },
+    fromOperation: result.fromOperation,
+    toOperation: result.toOperation,
+  };
 }

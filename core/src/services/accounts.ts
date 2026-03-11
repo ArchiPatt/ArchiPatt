@@ -76,7 +76,9 @@ export async function deposit(
   em: EntityManager,
   accountId: string,
   amount: number,
-) {
+): Promise<
+  { account: Account; operation: AccountOperation } | null | "closed"
+> {
   const account = await em.findOne(Account, {
     where: { id: accountId },
     lock: { mode: "pessimistic_write" },
@@ -88,21 +90,26 @@ export async function deposit(
   const next = (prev + amount).toFixed(2);
   account.balance = next;
   await em.save(account);
-  await em.save(
+  const operation = await em.save(
     em.create(AccountOperation, {
       accountId: account.id,
       amount: amount.toFixed(2),
       type: "deposit",
     }),
   );
-  return account;
+  return { account, operation };
 }
 
 export async function withdraw(
   em: EntityManager,
   accountId: string,
   amount: number,
-) {
+): Promise<
+  | { account: Account; operation: AccountOperation }
+  | null
+  | "closed"
+  | "insufficient_balance"
+> {
   const account = await em.findOne(Account, {
     where: { id: accountId },
     lock: { mode: "pessimistic_write" },
@@ -116,14 +123,14 @@ export async function withdraw(
   const next = (prev - amount).toFixed(2);
   account.balance = next;
   await em.save(account);
-  await em.save(
+  const operation = await em.save(
     em.create(AccountOperation, {
       accountId: account.id,
       amount: (-amount).toFixed(2),
       type: "withdraw",
     }),
   );
-  return account;
+  return { account, operation };
 }
 
 export async function postOperation(
@@ -181,12 +188,17 @@ export async function transferFromMaster(
     type?: string | null;
     meta?: Record<string, unknown> | null;
   },
-) {
+): Promise<
+  | { success: true; toAccountOperation: AccountOperation }
+  | null
+  | "closed"
+  | "insufficient_balance"
+> {
   const clientKey = `${params.idempotencyKey}:client`;
   const existing = await em.findOne(AccountOperation, {
     where: { accountId: params.toAccountId, idempotencyKey: clientKey },
   });
-  if (existing) return { success: true };
+  if (existing) return { success: true, toAccountOperation: existing };
 
   const master = await em.findOne(Account, {
     where: { id: params.masterAccountId },
@@ -224,7 +236,7 @@ export async function transferFromMaster(
       meta: params.meta ?? null,
     }),
   );
-  await em.save(
+  const toAccountOperation = await em.save(
     em.create(AccountOperation, {
       accountId: toAccount.id,
       amount: params.amount.toFixed(2),
@@ -233,7 +245,7 @@ export async function transferFromMaster(
       meta: params.meta ?? null,
     }),
   );
-  return { success: true };
+  return { success: true, toAccountOperation };
 }
 
 export async function transferToMaster(
@@ -246,12 +258,17 @@ export async function transferToMaster(
     type?: string | null;
     meta?: Record<string, unknown> | null;
   },
-) {
+): Promise<
+  | { success: true; fromAccountOperation: AccountOperation }
+  | null
+  | "closed"
+  | "insufficient_balance"
+> {
   const clientKey = `${params.idempotencyKey}:client`;
   const existing = await em.findOne(AccountOperation, {
     where: { accountId: params.fromAccountId, idempotencyKey: clientKey },
   });
-  if (existing) return { success: true };
+  if (existing) return { success: true, fromAccountOperation: existing };
 
   const master = await em.findOne(Account, {
     where: { id: params.masterAccountId },
@@ -280,7 +297,7 @@ export async function transferToMaster(
   await em.save(fromAccount);
   await em.save(master);
 
-  await em.save(
+  const fromAccountOperation = await em.save(
     em.create(AccountOperation, {
       accountId: fromAccount.id,
       amount: (-params.amount).toFixed(2),
@@ -298,7 +315,7 @@ export async function transferToMaster(
       meta: params.meta ?? null,
     }),
   );
-  return { success: true };
+  return { success: true, fromAccountOperation };
 }
 
 export async function transferBetweenAccounts(
@@ -310,7 +327,11 @@ export async function transferBetweenAccounts(
     idempotencyKey?: string | null;
   },
 ): Promise<
-  | { success: true }
+  | {
+      success: true;
+      fromOperation: AccountOperation;
+      toOperation: AccountOperation;
+    }
   | null
   | "same_account"
   | "closed"
@@ -321,14 +342,28 @@ export async function transferBetweenAccounts(
 
   const idempotencyKey = params.idempotencyKey?.trim();
   if (idempotencyKey) {
-    const existing = await em.findOne(AccountOperation, {
+    const existingOut = await em.findOne(AccountOperation, {
       where: {
         accountId: params.fromAccountId,
         idempotencyKey,
         type: "transfer_out",
       },
     });
-    if (existing) return { success: true };
+    if (existingOut?.correlationId) {
+      const existingIn = await em.findOne(AccountOperation, {
+        where: {
+          accountId: params.toAccountId,
+          correlationId: existingOut.correlationId,
+          type: "transfer_in",
+        },
+      });
+      if (existingIn)
+        return {
+          success: true,
+          fromOperation: existingOut,
+          toOperation: existingIn,
+        };
+    }
   }
 
   const [idFirst, idSecond] =
@@ -368,7 +403,7 @@ export async function transferBetweenAccounts(
   await em.save(toAccount);
 
   const correlationId = crypto.randomUUID();
-  await em.save(
+  const fromOperation = await em.save(
     em.create(AccountOperation, {
       accountId: fromAccount.id,
       amount: (-params.amount).toFixed(2),
@@ -378,7 +413,7 @@ export async function transferBetweenAccounts(
       meta: { toAccountId: params.toAccountId },
     }),
   );
-  await em.save(
+  const toOperation = await em.save(
     em.create(AccountOperation, {
       accountId: toAccount.id,
       amount: params.amount.toFixed(2),
@@ -388,5 +423,5 @@ export async function transferBetweenAccounts(
       meta: { fromAccountId: params.fromAccountId },
     }),
   );
-  return { success: true };
+  return { success: true, fromOperation, toOperation };
 }
