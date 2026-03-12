@@ -9,6 +9,7 @@ import {
   closeAccountController,
 } from "../controllers/accounts";
 import * as accountsService from "../services/accounts";
+import { SUPPORTED_CURRENCIES } from "../db/enums/Currency";
 import { publishOperationCommand, registerPendingReply } from "../messaging";
 import type { OperationReply } from "../messaging";
 
@@ -20,6 +21,9 @@ function sendOperationReply(reply: FastifyReply, result: OperationReply): void {
 
 export function createAccountsHandlers(app: FastifyInstance) {
   return {
+    listCurrencies: async (_req: FastifyRequest, reply: FastifyReply) => {
+      return reply.code(200).send({ currencies: [...SUPPORTED_CURRENCIES] });
+    },
     list: async (
       req: FastifyRequest<{ Querystring: { clientId?: string } }>,
       reply: FastifyReply,
@@ -63,13 +67,16 @@ export function createAccountsHandlers(app: FastifyInstance) {
     },
 
     create: async (
-      req: FastifyRequest<{ Body: { clientId?: string } }>,
+      req: FastifyRequest<{
+        Body: { clientId?: string; currency?: string };
+      }>,
       reply: FastifyReply,
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
       const res = await createAccountController(app.db, auth.payload, {
         clientId: req.body?.clientId,
+        currency: req.body?.currency,
       });
       return reply.code(res.status).send(res.body);
     },

@@ -2,6 +2,8 @@ import { DataSource, EntityManager, In } from "typeorm";
 import { Account } from "../db/entities/Account";
 import { AccountOperation } from "../db/entities/AccountOperation";
 import { AccountStatus } from "../db/enums/AccountStatus";
+import { Currency, isSupportedCurrency } from "../db/enums/Currency";
+import * as exchangeRates from "./exchange-rates";
 
 export async function findAccounts(
   ds: DataSource,
@@ -29,10 +31,22 @@ export async function findAccountsByClientIds(
   });
 }
 
-export async function createAccount(ds: DataSource, clientId: string) {
+export async function createAccount(
+  ds: DataSource,
+  clientId: string,
+  currency: Currency = Currency.RUB,
+) {
+  if (!isSupportedCurrency(currency)) {
+    throw new Error(`Unsupported currency: ${currency}`);
+  }
   const repo = ds.getRepository(Account);
   return repo.save(
-    repo.create({ clientId, balance: "0", status: AccountStatus.Open }),
+    repo.create({
+      clientId,
+      currency,
+      balance: "0",
+      status: AccountStatus.Open,
+    }),
   );
 }
 
@@ -70,6 +84,11 @@ export function parseAmount(v: unknown): number | null {
   const n =
     typeof v === "string" ? parseFloat(v) : typeof v === "number" ? v : NaN;
   return Number.isFinite(n) && n > 0 ? n : null;
+}
+
+export function parseCurrency(v: unknown): Currency {
+  if (typeof v !== "string" || !v) return Currency.RUB;
+  return isSupportedCurrency(v) ? (v as Currency) : Currency.RUB;
 }
 
 export async function deposit(
@@ -217,6 +236,7 @@ export async function transferFromMaster(
   | null
   | "closed"
   | "insufficient_balance"
+  | "exchange_rate_unavailable"
 > {
   const clientKey = `${params.idempotencyKey}:client`;
   const existing = await em.findOne(AccountOperation, {
@@ -239,12 +259,45 @@ export async function transferFromMaster(
   )
     return "closed";
 
+  let masterDebitAmount = params.amount;
+  const toCreditAmount = params.amount;
+  let masterMeta = params.meta ?? null;
+  let toMeta = params.meta ?? null;
+
+  if (master.currency !== toAccount.currency) {
+    try {
+      const rate = await exchangeRates.getExchangeRate(
+        toAccount.currency as Currency,
+        master.currency as Currency,
+      );
+      masterDebitAmount = Math.round(params.amount * rate * 100) / 100;
+      masterMeta = {
+        ...(params.meta as Record<string, unknown>),
+        fromCurrency: toAccount.currency,
+        toCurrency: master.currency,
+        toAmount: params.amount,
+        fromAmount: masterDebitAmount,
+        exchangeRate: rate,
+      };
+      toMeta = {
+        ...(params.meta as Record<string, unknown>),
+        fromCurrency: master.currency,
+        toCurrency: toAccount.currency,
+        fromAmount: masterDebitAmount,
+        toAmount: params.amount,
+        exchangeRate: rate,
+      };
+    } catch {
+      return "exchange_rate_unavailable";
+    }
+  }
+
   const masterPrev = parseFloat(master.balance);
-  const masterNext = (masterPrev - params.amount).toFixed(2);
+  const masterNext = (masterPrev - masterDebitAmount).toFixed(2);
   if (parseFloat(masterNext) < 0) return "insufficient_balance";
 
   const toPrev = parseFloat(toAccount.balance);
-  const toNext = (toPrev + params.amount).toFixed(2);
+  const toNext = (toPrev + toCreditAmount).toFixed(2);
 
   master.balance = masterNext;
   toAccount.balance = toNext;
@@ -254,19 +307,19 @@ export async function transferFromMaster(
   await em.save(
     em.create(AccountOperation, {
       accountId: master.id,
-      amount: (-params.amount).toFixed(2),
+      amount: (-masterDebitAmount).toFixed(2),
       type: params.type ?? "credit_issue_from_master",
       idempotencyKey: `${params.idempotencyKey}:master`,
-      meta: params.meta ?? null,
+      meta: masterMeta,
     }),
   );
   const toAccountOperation = await em.save(
     em.create(AccountOperation, {
       accountId: toAccount.id,
-      amount: params.amount.toFixed(2),
+      amount: toCreditAmount.toFixed(2),
       type: params.type ?? "credit_issue",
       idempotencyKey: `${params.idempotencyKey}:client`,
-      meta: params.meta ?? null,
+      meta: toMeta,
     }),
   );
   return { success: true, toAccountOperation };
@@ -287,6 +340,7 @@ export async function transferToMaster(
   | null
   | "closed"
   | "insufficient_balance"
+  | "exchange_rate_unavailable"
 > {
   const clientKey = `${params.idempotencyKey}:client`;
   const existing = await em.findOne(AccountOperation, {
@@ -309,12 +363,45 @@ export async function transferToMaster(
   )
     return "closed";
 
+  const fromDebitAmount = params.amount;
+  let masterCreditAmount = params.amount;
+  let fromMeta = params.meta ?? null;
+  let masterMeta = params.meta ?? null;
+
+  if (master.currency !== fromAccount.currency) {
+    try {
+      const rate = await exchangeRates.getExchangeRate(
+        fromAccount.currency as Currency,
+        master.currency as Currency,
+      );
+      masterCreditAmount = Math.round(params.amount * rate * 100) / 100;
+      fromMeta = {
+        ...(params.meta as Record<string, unknown>),
+        fromCurrency: fromAccount.currency,
+        toCurrency: master.currency,
+        fromAmount: params.amount,
+        toAmount: masterCreditAmount,
+        exchangeRate: rate,
+      };
+      masterMeta = {
+        ...(params.meta as Record<string, unknown>),
+        fromCurrency: fromAccount.currency,
+        toCurrency: master.currency,
+        fromAmount: params.amount,
+        toAmount: masterCreditAmount,
+        exchangeRate: rate,
+      };
+    } catch {
+      return "exchange_rate_unavailable";
+    }
+  }
+
   const fromPrev = parseFloat(fromAccount.balance);
-  const fromNext = (fromPrev - params.amount).toFixed(2);
+  const fromNext = (fromPrev - fromDebitAmount).toFixed(2);
   if (parseFloat(fromNext) < 0) return "insufficient_balance";
 
   const masterPrev = parseFloat(master.balance);
-  const masterNext = (masterPrev + params.amount).toFixed(2);
+  const masterNext = (masterPrev + masterCreditAmount).toFixed(2);
 
   fromAccount.balance = fromNext;
   master.balance = masterNext;
@@ -324,19 +411,19 @@ export async function transferToMaster(
   const fromAccountOperation = await em.save(
     em.create(AccountOperation, {
       accountId: fromAccount.id,
-      amount: (-params.amount).toFixed(2),
+      amount: (-fromDebitAmount).toFixed(2),
       type: params.type ?? "credit_repayment",
       idempotencyKey: `${params.idempotencyKey}:client`,
-      meta: params.meta ?? null,
+      meta: fromMeta,
     }),
   );
   await em.save(
     em.create(AccountOperation, {
       accountId: master.id,
-      amount: params.amount.toFixed(2),
+      amount: masterCreditAmount.toFixed(2),
       type: params.type ?? "credit_repayment_to_master",
       idempotencyKey: `${params.idempotencyKey}:master`,
-      meta: params.meta ?? null,
+      meta: masterMeta,
     }),
   );
   return { success: true, fromAccountOperation };
@@ -361,6 +448,7 @@ export async function transferBetweenAccounts(
   | "closed"
   | "insufficient_balance"
   | "account_not_found"
+  | "exchange_rate_unavailable"
 > {
   if (params.fromAccountId === params.toAccountId) return "same_account";
 
@@ -414,12 +502,47 @@ export async function transferBetweenAccounts(
   )
     return "closed";
 
+  let debitAmount = params.amount;
+  let creditAmount = params.amount;
+  let metaFrom: Record<string, unknown> = { toAccountId: params.toAccountId };
+  let metaTo: Record<string, unknown> = {
+    fromAccountId: params.fromAccountId,
+  };
+
+  if (fromAccount.currency !== toAccount.currency) {
+    try {
+      const rate = await exchangeRates.getExchangeRate(
+        fromAccount.currency as Currency,
+        toAccount.currency as Currency,
+      );
+      creditAmount = Math.round(params.amount * rate * 100) / 100;
+      metaFrom = {
+        ...metaFrom,
+        fromCurrency: fromAccount.currency,
+        toCurrency: toAccount.currency,
+        fromAmount: params.amount,
+        toAmount: creditAmount,
+        exchangeRate: rate,
+      };
+      metaTo = {
+        ...metaTo,
+        fromCurrency: fromAccount.currency,
+        toCurrency: toAccount.currency,
+        fromAmount: params.amount,
+        toAmount: creditAmount,
+        exchangeRate: rate,
+      };
+    } catch {
+      return "exchange_rate_unavailable";
+    }
+  }
+
   const fromPrev = parseFloat(fromAccount.balance);
-  const fromNext = (fromPrev - params.amount).toFixed(2);
+  const fromNext = (fromPrev - debitAmount).toFixed(2);
   if (parseFloat(fromNext) < 0) return "insufficient_balance";
 
   const toPrev = parseFloat(toAccount.balance);
-  const toNext = (toPrev + params.amount).toFixed(2);
+  const toNext = (toPrev + creditAmount).toFixed(2);
 
   fromAccount.balance = fromNext;
   toAccount.balance = toNext;
@@ -430,21 +553,21 @@ export async function transferBetweenAccounts(
   const fromOperation = await em.save(
     em.create(AccountOperation, {
       accountId: fromAccount.id,
-      amount: (-params.amount).toFixed(2),
+      amount: (-debitAmount).toFixed(2),
       type: "transfer_out",
       correlationId,
       idempotencyKey: idempotencyKey ?? null,
-      meta: { toAccountId: params.toAccountId },
+      meta: metaFrom,
     }),
   );
   const toOperation = await em.save(
     em.create(AccountOperation, {
       accountId: toAccount.id,
-      amount: params.amount.toFixed(2),
+      amount: creditAmount.toFixed(2),
       type: "transfer_in",
       correlationId,
       idempotencyKey: null,
-      meta: { fromAccountId: params.fromAccountId },
+      meta: metaTo,
     }),
   );
   return { success: true, fromOperation, toOperation };

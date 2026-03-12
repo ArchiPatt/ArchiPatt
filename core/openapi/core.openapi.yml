@@ -86,6 +86,27 @@ paths:
                 $ref: "#/components/schemas/HealthResponse"
               example:
                 ok: true
+  /currencies:
+    get:
+      tags: [Core]
+      summary: Supported currencies
+      description: Список валют, поддерживаемых банком
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currencies]
+                properties:
+                  currencies:
+                    type: array
+                    items:
+                      type: string
+                      enum: [USD, EUR, RUB]
+              example:
+                currencies: [USD, EUR, RUB]
   /accounts:
     get:
       tags: [Core]
@@ -571,7 +592,7 @@ components:
     Account:
       type: object
       description: Банковский счёт клиента.
-      required: [id, clientId, balance, status, createdAt]
+      required: [id, clientId, currency, balance, status, createdAt]
       properties:
         id:
           type: string
@@ -583,6 +604,11 @@ components:
           format: uuid
           description: ID владельца счёта (это `user.id` из Users Service).
           example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        currency:
+          type: string
+          description: Валюта счёта (ISO 4217). Поддерживаются USD, EUR, RUB.
+          enum: [USD, EUR, RUB]
+          example: RUB
         balance:
           $ref: "#/components/schemas/MoneyString"
         status:
@@ -732,14 +758,19 @@ components:
       description: |
         Создание счёта.
 
-        - **client**: тело можно не передавать — счёт создаётся на `token.sub`
-        - **employee/admin**: можно указать `clientId`, чтобы создать счёт на конкретного клиента
+        - **client**: тело можно не передавать — счёт создаётся на `token.sub` в валюте RUB по умолчанию
+        - **employee/admin**: можно указать `clientId` и `currency`
       properties:
         clientId:
           type: string
           format: uuid
           description: ID клиента, для которого создаём счёт (только employee/admin).
           example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        currency:
+          type: string
+          description: Валюта счёта. По умолчанию RUB.
+          enum: [USD, EUR, RUB]
+          example: RUB
 
     InternalCreateAccountOperationRequest:
       type: object

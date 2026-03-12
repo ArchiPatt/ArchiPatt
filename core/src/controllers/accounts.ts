@@ -76,7 +76,7 @@ export async function getOperationsController(
 export async function createAccountController(
   ds: DataSource,
   payload: JWTPayload,
-  params: { clientId?: string },
+  params: { clientId?: string; currency?: string },
 ) {
   if (!payload.sub) return { status: 403, body: { error: "forbidden" } };
 
@@ -87,7 +87,8 @@ export async function createAccountController(
     return { status: 403, body: { error: "forbidden" } };
   }
 
-  const account = await accountsService.createAccount(ds, clientId);
+  const currency = accountsService.parseCurrency(params.currency);
+  const account = await accountsService.createAccount(ds, clientId, currency);
   return { status: 201, body: account };
 }
 
@@ -248,6 +249,8 @@ export async function internalTransferFromMasterController(
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
+  if (result === "exchange_rate_unavailable")
+    return { status: 503, body: { error: "exchange_rate_unavailable" } };
   return {
     status: 200,
     body: { ok: true },
@@ -285,6 +288,8 @@ export async function internalTransferToMasterController(
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
+  if (result === "exchange_rate_unavailable")
+    return { status: 503, body: { error: "exchange_rate_unavailable" } };
   return {
     status: 200,
     body: { ok: true },
@@ -339,6 +344,8 @@ export async function transferController(
     return { status: 400, body: { error: "account_closed" } };
   if (result === "insufficient_balance")
     return { status: 400, body: { error: "insufficient_balance" } };
+  if (result === "exchange_rate_unavailable")
+    return { status: 503, body: { error: "exchange_rate_unavailable" } };
   return {
     status: 200,
     body: { ok: true },
