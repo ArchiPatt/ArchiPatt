@@ -596,6 +596,61 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /accounts/transfer:
+    post:
+      tags: [Core]
+      summary: Proxied to core /accounts/transfer
+      description: Перевод между счетами (своими или на чужой). Конвертация валют по курсу.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        "400":
+          description: Bad request (invalid_amount, same_account, account_closed, insufficient_balance, etc.)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Operation timeout or exchange rate unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /accounts/{id}:
     get:
       tags: [Core]
@@ -968,7 +1023,7 @@ components:
       description: |
         Ответ с access/refresh токенами.
 
-        `access_token` — JWT (Bearer). Его нужно класть в заголовок:
+        `access_token` – JWT (Bearer). Его нужно класть в заголовок:
         `Authorization: Bearer <access_token>`.
       required: [token_type, access_token, refresh_token, expires_in, scope]
       properties:
@@ -1053,7 +1108,7 @@ components:
           description: Список ролей.
         isBlocked:
           type: boolean
-          description: Если `true` — пользователь заблокирован.
+          description: Если `true` – пользователь заблокирован.
 
     UserListItemResponse:
       allOf:
@@ -1080,7 +1135,7 @@ components:
       description: |
         Создание тарифа (доступно `employee/admin`).
 
-        `interestRate` — доля начисления за период, например `0.015` = 1.5% за `billingPeriodDays` дней.
+        `interestRate` – доля начисления за период, например `0.015` = 1.5% за `billingPeriodDays` дней.
       required: [name, interestRate]
       properties:
         name:
@@ -1275,6 +1330,22 @@ components:
         clientId:
           type: string
           format: uuid
+
+    TransferRequest:
+      type: object
+      required: [fromAccountId, toAccountId, amount]
+      properties:
+        fromAccountId:
+          type: string
+          format: uuid
+        toAccountId:
+          type: string
+          format: uuid
+        amount:
+          type: number
+          minimum: 0.01
+        idempotencyKey:
+          type: string
 
     DepositWithdrawRequest:
       type: object

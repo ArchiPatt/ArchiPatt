@@ -1,5 +1,5 @@
 export const formatMoney = (value?: string | null) => {
-   if (!value) return '—'
+   if (!value) return '–'
 
    const number = Number(value)
 
