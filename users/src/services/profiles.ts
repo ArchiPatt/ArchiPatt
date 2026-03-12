@@ -34,7 +34,7 @@ export async function createUser(
 ) {
   const repo = ds.getRepository(UserProfile);
   const exists = await repo.findOne({ where: { username: input.username } });
-  if (exists) return { kind: "conflict" as const };
+  if (exists) return { kind: "conflict" };
   const user = await repo.save(
     repo.create({
       username: input.username,
@@ -43,7 +43,7 @@ export async function createUser(
       isBlocked: false,
     }),
   );
-  return { kind: "ok" as const, user };
+  return { kind: "ok", user };
 }
 
 export async function setBlocked(
@@ -53,10 +53,10 @@ export async function setBlocked(
 ) {
   const repo = ds.getRepository(UserProfile);
   const user = await repo.findOne({ where: { id } });
-  if (!user) return { kind: "not_found" as const };
+  if (!user) return { kind: "not_found" };
   user.isBlocked = isBlocked;
   await repo.save(user);
-  return { kind: "ok" as const, user };
+  return { kind: "ok", user };
 }
 
 export async function deleteById(ds: DataSource, id: string) {

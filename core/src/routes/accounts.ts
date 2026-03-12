@@ -4,13 +4,16 @@ import { createAccountsHandlers } from "../handlers/accounts";
 export function registerAccountsRoutes(app: FastifyInstance) {
   const h = createAccountsHandlers(app);
 
+  app.get("/currencies", h.listCurrencies);
   app.get<{ Querystring: { clientId?: string } }>("/accounts", h.list);
   app.get<{ Params: { id: string } }>("/accounts/:id", h.get);
   app.get<{
     Params: { id: string };
     Querystring: { limit?: string; offset?: string; sort?: string };
   }>("/accounts/:id/operations", h.getOperations);
-  app.post<{ Body: { clientId?: string } }>("/accounts", h.create);
+  app.post<{
+    Body: { clientId?: string; currency?: string };
+  }>("/accounts", h.create);
   app.post<{ Params: { id: string } }>("/accounts/:id/close", h.close);
   app.post<{
     Params: { id: string };
@@ -20,6 +23,14 @@ export function registerAccountsRoutes(app: FastifyInstance) {
     Params: { id: string };
     Body: { amount?: unknown };
   }>("/accounts/:id/withdraw", h.withdraw);
+  app.post<{
+    Body: {
+      fromAccountId?: string;
+      toAccountId?: string;
+      amount?: unknown;
+      idempotencyKey?: string;
+    };
+  }>("/accounts/transfer", h.transfer);
   app.post<{
     Params: { id: string };
     Body: {

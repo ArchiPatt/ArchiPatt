@@ -3,11 +3,11 @@ info:
   title: Core Service API
   version: 1.0.0
   description: |
-    Core — сервис счетов и операций.
+    Core – сервис счетов и операций.
 
     **Договорённости по форматам данных**
     - Денежные значения в ответах (`balance`, `amount`) отдаются строкой, чтобы не терять точность на фронте (decimal с 2 знаками после точки), например `"1250.00"` или `"-10.50"`.
-    - Все даты/время — ISO 8601 в UTC (`date-time`), например `"2026-02-23T12:34:56.000Z"`.
+    - Все даты/время – ISO 8601 в UTC (`date-time`), например `"2026-02-23T12:34:56.000Z"`.
 servers:
   - url: http://localhost:4003
 tags:
@@ -86,6 +86,27 @@ paths:
                 $ref: "#/components/schemas/HealthResponse"
               example:
                 ok: true
+  /currencies:
+    get:
+      tags: [Core]
+      summary: Supported currencies
+      description: Список валют, поддерживаемых банком
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [currencies]
+                properties:
+                  currencies:
+                    type: array
+                    items:
+                      type: string
+                      enum: [USD, EUR, RUB]
+              example:
+                currencies: [USD, EUR, RUB]
   /accounts:
     get:
       tags: [Core]
@@ -102,7 +123,7 @@ paths:
             Фильтр по владельцу счета.
 
             - **client**: параметр игнорируется, всегда вернутся только свои счета (`clientId = token.sub`)
-            - **employee/admin**: можно указать `clientId` и получить счета конкретного клиента, либо без фильтра — все счета
+            - **employee/admin**: можно указать `clientId` и получить счета конкретного клиента, либо без фильтра – все счета
       responses:
         "200":
           description: OK
@@ -162,6 +183,96 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: forbidden
+  /accounts/transfer:
+    post:
+      tags: [Core]
+      summary: Transfer between accounts
+      description: |
+        Перевод средств между счетами. Можно переводить между своими счетами и на чужой счёт.
+        При разной валюте счетов выполняется конвертация по текущему курсу (внешний API).
+        Операция выполняется через очередь сообщений; баланс не может стать отрицательным.
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TransferRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [ok]
+                properties:
+                  ok:
+                    type: boolean
+                    example: true
+        "400":
+          description: Invalid input or business rule
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                invalid_amount:
+                  summary: Некорректная сумма
+                  value: { error: invalid_amount }
+                from_account_id_and_to_account_id_required:
+                  summary: Не указаны счета
+                  value: { error: from_account_id_and_to_account_id_required }
+                same_account:
+                  summary: Один и тот же счёт
+                  value: { error: same_account }
+                account_closed:
+                  summary: Счёт закрыт
+                  value: { error: account_closed }
+                insufficient_balance:
+                  summary: Недостаточно средств
+                  value: { error: insufficient_balance }
+        "401":
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
+        "403":
+          description: Forbidden
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
+        "404":
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                from_account_not_found:
+                  value: { error: from_account_not_found }
+                to_account_not_found:
+                  value: { error: to_account_not_found }
+                account_not_found:
+                  value: { error: account_not_found }
+        "503":
+          description: Timeout or exchange rate unavailable
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              examples:
+                operation_timeout:
+                  value: { error: operation_timeout }
+                exchange_rate_unavailable:
+                  value: { error: exchange_rate_unavailable }
   /accounts/{id}:
     get:
       tags: [Core]
@@ -552,7 +663,7 @@ components:
       description: |
         Единый формат ошибки в JSON.
 
-        `error` — машинно-читаемый код, по нему удобно делать маппинг на фронте.
+        `error` – машинно-читаемый код, по нему удобно делать маппинг на фронте.
       required: [error]
       properties:
         error:
@@ -571,7 +682,7 @@ components:
     Account:
       type: object
       description: Банковский счёт клиента.
-      required: [id, clientId, balance, status, createdAt]
+      required: [id, clientId, currency, balance, status, createdAt]
       properties:
         id:
           type: string
@@ -583,14 +694,19 @@ components:
           format: uuid
           description: ID владельца счёта (это `user.id` из Users Service).
           example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        currency:
+          type: string
+          description: Валюта счёта (ISO 4217). Поддерживаются USD, EUR, RUB.
+          enum: [USD, EUR, RUB]
+          example: RUB
         balance:
           $ref: "#/components/schemas/MoneyString"
         status:
           type: string
           description: |
             Статус счёта:
-            - `open` — активен
-            - `closed` — закрыт (операции списания/зачисления запрещены)
+            - `open` – активен
+            - `closed` – закрыт (операции списания/зачисления запрещены)
           enum: [open, closed]
           example: open
         createdAt:
@@ -732,14 +848,44 @@ components:
       description: |
         Создание счёта.
 
-        - **client**: тело можно не передавать — счёт создаётся на `token.sub`
-        - **employee/admin**: можно указать `clientId`, чтобы создать счёт на конкретного клиента
+        - **client**: тело можно не передавать – счёт создаётся на `token.sub` в валюте RUB по умолчанию
+        - **employee/admin**: можно указать `clientId` и `currency`
       properties:
         clientId:
           type: string
           format: uuid
           description: ID клиента, для которого создаём счёт (только employee/admin).
           example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        currency:
+          type: string
+          description: Валюта счёта. По умолчанию RUB.
+          enum: [USD, EUR, RUB]
+          example: RUB
+
+    TransferRequest:
+      type: object
+      description: Запрос на перевод между счетами. При разной валюте – конвертация по курсу.
+      required: [fromAccountId, toAccountId, amount]
+      properties:
+        fromAccountId:
+          type: string
+          format: uuid
+          description: ID счёта списания (должен принадлежать текущему пользователю или доступен employee/admin).
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        toAccountId:
+          type: string
+          format: uuid
+          description: ID счёта зачисления (свой или чужой).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        amount:
+          type: number
+          minimum: 0.01
+          description: Сумма в валюте счёта списания. Должна быть строго больше 0.
+          example: 100.5
+        idempotencyKey:
+          type: string
+          description: Опциональный ключ идемпотентности для повторных запросов.
+          example: transfer-abc-123
 
     InternalCreateAccountOperationRequest:
       type: object
@@ -750,8 +896,8 @@ components:
           type: number
           description: |
             Сумма операции.
-            - положительное число — зачисление
-            - отрицательное число — списание
+            - положительное число – зачисление
+            - отрицательное число – списание
           example: 1000
         idempotencyKey:
           type: string

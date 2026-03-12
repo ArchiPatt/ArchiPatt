@@ -3,12 +3,12 @@ info:
   title: Credits Service API
   version: 1.0.0
   description: |
-    Credits — сервис кредитов и тарифов.
+    Credits – сервис кредитов и тарифов.
 
     **Договорённости по форматам данных**
     - Денежные значения в ответах (`principalAmount`, `outstandingAmount`, `amount`) отдаются строкой (decimal с 2 знаками), чтобы избежать проблем точности `number` на фронте.
     - `interestRate` в тарифе хранится строкой с 4 знаками (decimal), а в запросе на создание приходит как `number`.
-    - Все даты/время — ISO 8601 в UTC (`date-time`).
+    - Все даты/время – ISO 8601 в UTC (`date-time`).
 servers:
   - url: http://localhost:4002
 tags:
@@ -487,7 +487,7 @@ components:
       description: |
         Единый формат ошибки в JSON.
 
-        `error` — машинно-читаемый код.
+        `error` – машинно-читаемый код.
       properties:
         error:
           type: string
@@ -498,7 +498,7 @@ components:
       description: |
         Создание кредитного тарифа (доступно `employee/admin`).
 
-        `interestRate` — **доля** (не проценты) начисления за один расчётный период.
+        `interestRate` – **доля** (не проценты) начисления за один расчётный период.
         Пример: `0.015` = 1.5% за период (`billingPeriodDays` дней).
       properties:
         name:
@@ -515,7 +515,7 @@ components:
           description: |
             Длина расчётного периода в днях.
 
-            Если не передано — берётся значение по умолчанию `1`.
+            Если не передано – берётся значение по умолчанию `1`.
           minimum: 1
           default: 1
           example: 1
@@ -602,8 +602,8 @@ components:
       description: |
         Кредит.
 
-        `principalAmount` — первоначальная сумма кредита.
-        `outstandingAmount` — остаток долга (с учётом начислений и платежей).
+        `principalAmount` – первоначальная сумма кредита.
+        `outstandingAmount` – остаток долга (с учётом начислений и платежей).
       properties:
         id:
           type: string
@@ -633,9 +633,9 @@ components:
           type: string
           description: |
             Статус кредита:
-            - `active` — активен
-            - `closed` — полностью погашен
-            - `defaulted` — дефолт (зарезервировано на будущее)
+            - `active` – активен
+            - `closed` – полностью погашен
+            - `defaulted` – дефолт (зарезервировано на будущее)
           enum: [active, closed, defaulted]
           example: active
         issuedAt:
@@ -714,9 +714,9 @@ components:
           type: string
           description: |
             Тип события:
-            - `issue` — выдача кредита
-            - `repayment` — платёж клиента
-            - `accrual` — начисление процентов (системное)
+            - `issue` – выдача кредита
+            - `repayment` – платёж клиента
+            - `accrual` – начисление процентов (системное)
           enum: [issue, repayment, accrual]
           example: repayment
         performedBy:

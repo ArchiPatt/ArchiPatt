@@ -42,13 +42,11 @@ async function issueTokensForProfile(
     clientId: "frontend",
     username,
     scopes,
-    expiresAt: new Date(
-      Date.now() + env.tokens.refreshTtlSeconds * 1000,
-    ),
+    expiresAt: new Date(Date.now() + env.tokens.refreshTtlSeconds * 1000),
   });
 
   return {
-    token_type: "Bearer" as const,
+    token_type: "Bearer",
     access_token: accessToken,
     refresh_token: refreshTokenValue,
     expires_in: env.tokens.accessTtlSeconds,
@@ -61,18 +59,17 @@ export async function internalTokensRevokedController(
   internalOk: boolean,
   params: { jti: string },
 ) {
-  if (!internalOk)
-    return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!internalOk) return { status: 401, body: { error: "unauthorized" } };
   const jti = params.jti?.trim();
-  if (!jti) return { status: 400 as const, body: { error: "invalid_jti" } };
+  if (!jti) return { status: 400, body: { error: "invalid_jti" } };
 
   const revoked = await authService.findRevokedTokenByJti(ds, jti);
-  return { status: 200 as const, body: { revoked: Boolean(revoked) } };
+  return { status: 200, body: { revoked: Boolean(revoked) } };
 }
 
 export async function jwksController() {
   const jwks = await getJwks();
-  return { status: 200 as const, body: jwks };
+  return { status: 200, body: jwks };
 }
 
 export async function loginGetController(
@@ -91,10 +88,7 @@ export async function loginGetController(
       app.db,
       params.sessionId,
     );
-    if (
-      session &&
-      session.expiresAt.getTime() >= Date.now()
-    ) {
+    if (session && session.expiresAt.getTime() >= Date.now()) {
       const user = await authService.findUserById(app.db, session.userId);
       if (user) {
         const profile = await fetchUserProfileByUsername(session.username);
@@ -109,7 +103,7 @@ export async function loginGetController(
           const redirect = new URL(normalizedReturnTo);
           redirect.searchParams.set("code", code);
           return {
-            status: 302 as const,
+            status: 302,
             redirect: redirect.toString(),
             sso: true,
           };
@@ -119,8 +113,8 @@ export async function loginGetController(
   }
 
   return {
-    status: 200 as const,
-    body: { showForm: true as const, returnTo, error: params.error },
+    status: 200,
+    body: { showForm: true, returnTo, error: params.error },
   };
 }
 
@@ -139,7 +133,7 @@ export async function loginPostController(
 
   if (!username || !password || !normalizedReturnTo) {
     return {
-      status: 302 as const,
+      status: 302,
       redirect: `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("Проверьте логин, пароль и return_to")}`,
     };
   }
@@ -147,7 +141,7 @@ export async function loginPostController(
   const user = await authService.findUserByUsername(app.db, username);
   if (!user) {
     return {
-      status: 302 as const,
+      status: 302,
       redirect: `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`,
     };
   }
@@ -156,7 +150,7 @@ export async function loginPostController(
     const setupToken = await authService.findSetupTokenForUser(app.db, user.id);
     if (setupToken && setupToken.expiresAt.getTime() >= Date.now()) {
       return {
-        status: 403 as const,
+        status: 403,
         body: {
           error: "password_setup_required",
           message: "сначала подтвердите пароль",
@@ -165,28 +159,29 @@ export async function loginPostController(
       };
     }
     return {
-      status: 403 as const,
-      body: { error: "password_setup_required", message: "сначала подтвердите пароль" },
+      status: 403,
+      body: {
+        error: "password_setup_required",
+        message: "сначала подтвердите пароль",
+      },
     };
   }
 
   const ok = await bcrypt.compare(password, user.passwordHash);
   if (!ok) {
     return {
-      status: 302 as const,
+      status: 302,
       redirect: `/login?return_to=${encodeURIComponent(returnTo)}&error=${encodeURIComponent("invalid_credentials")}`,
     };
   }
 
   const profile = await fetchUserProfileByUsername(user.username);
   if (!profile || profile.isBlocked) {
-    return { status: 403 as const, body: { error: "user_blocked_or_not_found" } };
+    return { status: 403, body: { error: "user_blocked_or_not_found" } };
   }
 
   const sessionId = nanoid(48);
-  const expiresAt = new Date(
-    Date.now() + env.session.ttlSeconds * 1000,
-  );
+  const expiresAt = new Date(Date.now() + env.session.ttlSeconds * 1000);
   await authService.createSession(app.db, {
     sessionId,
     userId: user.id,
@@ -205,7 +200,7 @@ export async function loginPostController(
   const redirect = new URL(normalizedReturnTo);
   redirect.searchParams.set("code", code);
   return {
-    status: 302 as const,
+    status: 302,
     redirect: redirect.toString(),
     sessionId,
     sessionMaxAge: env.session.ttlSeconds,
@@ -225,59 +220,55 @@ export async function tokenController(
   if (body.grant_type === "authorization_code") {
     if (!body.code) {
       return {
-        status: 400 as const,
+        status: 400,
         body: oauthError("invalid_request", "code обязателен"),
       };
     }
 
     const row = await authService.findAuthCodeByCode(app.db, body.code);
-    if (!row)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+    if (!row) return { status: 400, body: oauthError("invalid_grant") };
     if (row.consumedAt)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+      return { status: 400, body: oauthError("invalid_grant") };
     if (row.expiresAt.getTime() < Date.now())
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+      return { status: 400, body: oauthError("invalid_grant") };
 
     await authService.consumeAuthCode(app.db, row);
 
     const user = await authService.findUserById(app.db, row.userId);
-    if (!user)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+    if (!user) return { status: 400, body: oauthError("invalid_grant") };
     const profile = await fetchUserProfileByUsername(user.username);
     if (!profile || profile.isBlocked)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+      return { status: 400, body: oauthError("invalid_grant") };
 
     const tokenPayload = await issueTokensForProfile(app, user.username, {
       id: profile.id,
       roles: profile.roles,
     });
-    return { status: 200 as const, body: tokenPayload };
+    return { status: 200, body: tokenPayload };
   }
 
   if (body.grant_type === "refresh_token") {
     if (!body.refresh_token) {
       return {
-        status: 400 as const,
+        status: 400,
         body: oauthError("invalid_request", "refresh_token обязателен"),
       };
     }
 
     const row = await authService.findRefreshToken(app.db, body.refresh_token);
-    if (!row)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+    if (!row) return { status: 400, body: oauthError("invalid_grant") };
     if (row.revokedAt)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+      return { status: 400, body: oauthError("invalid_grant") };
     if (row.expiresAt.getTime() < Date.now())
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+      return { status: 400, body: oauthError("invalid_grant") };
 
     await authService.revokeRefreshToken(app.db, row);
 
     const user = await authService.findUserByUsername(app.db, row.username);
-    if (!user)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+    if (!user) return { status: 400, body: oauthError("invalid_grant") };
     const profile = await fetchUserProfileByUsername(user.username);
     if (!profile || profile.isBlocked)
-      return { status: 400 as const, body: oauthError("invalid_grant") };
+      return { status: 400, body: oauthError("invalid_grant") };
 
     const tokenPayload = await issueTokensForProfile(
       app,
@@ -285,10 +276,10 @@ export async function tokenController(
       { id: profile.id, roles: profile.roles },
       row.scopes,
     );
-    return { status: 200 as const, body: tokenPayload };
+    return { status: 200, body: tokenPayload };
   }
 
-  return { status: 400 as const, body: oauthError("unsupported_grant_type") };
+  return { status: 400, body: oauthError("unsupported_grant_type") };
 }
 
 export async function internalUsersController(
@@ -296,17 +287,16 @@ export async function internalUsersController(
   internalOk: boolean,
   params: { username?: string },
 ) {
-  if (!internalOk)
-    return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!internalOk) return { status: 401, body: { error: "unauthorized" } };
 
   const username = params.username?.trim();
   if (!username) {
-    return { status: 400 as const, body: { error: "invalid_input" } };
+    return { status: 400, body: { error: "invalid_input" } };
   }
 
   const exists = await authService.findUserByUsername(app.db, username);
   if (exists) {
-    return { status: 409 as const, body: { error: "username_exists" } };
+    return { status: 409, body: { error: "username_exists" } };
   }
 
   const user = await authService.createUser(app.db, username);
@@ -320,7 +310,7 @@ export async function internalUsersController(
   });
 
   return {
-    status: 201 as const,
+    status: 201,
     body: {
       id: user.id,
       username: user.username,
@@ -336,8 +326,8 @@ export async function setupPasswordGetController(
   const token = params.token?.trim();
   if (!token) {
     return {
-      status: 400 as const,
-      body: { type: "html" as const, error: "Токен обязателен" },
+      status: 400,
+      body: { type: "html", error: "Токен обязателен" },
     };
   }
 
@@ -349,12 +339,12 @@ export async function setupPasswordGetController(
     row.expiresAt.getTime() < Date.now()
   ) {
     return {
-      status: 400 as const,
-      body: { type: "html" as const, error: "Токен недействителен или истёк" },
+      status: 400,
+      body: { type: "html", error: "Токен недействителен или истёк" },
     };
   }
 
-  return { status: 200 as const, body: { type: "html" as const, token } };
+  return { status: 200, body: { type: "html", token } };
 }
 
 export async function setupPasswordPostController(
@@ -371,9 +361,9 @@ export async function setupPasswordPostController(
 
   if (!token || password.length < 6 || password !== passwordRepeat) {
     return {
-      status: 400 as const,
+      status: 400,
       body: {
-        type: "html" as const,
+        type: "html",
         error: "Проверьте токен и пароль (мин. 6 символов)",
       },
     };
@@ -387,9 +377,9 @@ export async function setupPasswordPostController(
     row.expiresAt.getTime() < Date.now()
   ) {
     return {
-      status: 400 as const,
+      status: 400,
       body: {
-        type: "html" as const,
+        type: "html",
         error: "Токен недействителен или истёк",
       },
     };
@@ -398,9 +388,9 @@ export async function setupPasswordPostController(
   const user = await authService.findUserById(app.db, row.userId);
   if (!user) {
     return {
-      status: 400 as const,
+      status: 400,
       body: {
-        type: "html" as const,
+        type: "html",
         error: "Пользователь не найден",
       },
     };
@@ -411,8 +401,8 @@ export async function setupPasswordPostController(
   await authService.consumeAuthCode(app.db, row);
 
   return {
-    status: 200 as const,
-    body: { type: "html" as const, success: true },
+    status: 200,
+    body: { type: "html", success: true },
   };
 }
 
@@ -420,19 +410,19 @@ export async function logoutController(
   app: FastifyInstance,
   payload: { jti?: string; exp?: number } | null,
 ) {
-  if (!payload) return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!payload) return { status: 401, body: { error: "unauthorized" } };
 
   const jti = typeof payload.jti === "string" ? payload.jti : null;
   const exp = typeof payload.exp === "number" ? payload.exp : null;
   if (!jti || !exp) {
-    return { status: 400 as const, body: { error: "token_without_jti_or_exp" } };
+    return { status: 400, body: { error: "token_without_jti_or_exp" } };
   }
 
   const exists = await authService.findRevokedTokenByJti(app.db, jti);
   if (!exists) {
     await authService.createRevokedToken(app.db, jti, new Date(exp * 1000));
   }
-  return { status: 200 as const, body: { ok: true } };
+  return { status: 200, body: { ok: true } };
 }
 
 export async function logoutSessionController(
@@ -447,5 +437,5 @@ export async function logoutSessionController(
     returnTo && normalizeReturnTo(returnTo)
       ? normalizeReturnTo(returnTo)!
       : `${env.issuer}/login`;
-  return { status: 302 as const, redirect };
+  return { status: 302, redirect };
 }

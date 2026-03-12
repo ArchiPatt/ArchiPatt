@@ -22,7 +22,10 @@ export const env = {
   authIssuer: must("AUTH_ISSUER"),
   internalToken: must("INTERNAL_TOKEN"),
   authService: {
-    baseUrl: process.env.AUTH_SERVICE_URL ?? process.env.AUTH_ISSUER ?? "http://localhost:4000",
+    baseUrl:
+      process.env.AUTH_SERVICE_URL ??
+      process.env.AUTH_ISSUER ??
+      "http://localhost:4000",
     internalToken:
       process.env.AUTH_INTERNAL_TOKEN ??
       process.env.USERS_INTERNAL_TOKEN ??
@@ -44,6 +47,9 @@ export const env = {
   },
   masterAccountId:
     process.env.MASTER_ACCOUNT_ID ?? "00000000-0000-0000-0000-000000000001",
+  rabbitmq: {
+    url: process.env.RABBITMQ_URL ?? "amqp://localhost",
+  },
   db: {
     host: process.env.DB_HOST ?? "localhost",
     port: num("DB_PORT", 5432),

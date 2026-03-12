@@ -1,11 +1,11 @@
 const formatDate = (value?: string | null) => {
-    if (!value) return '—'
+  if (!value) return "–";
 
-    const date = new Date(value)
+  const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) return value
+  if (Number.isNaN(date.getTime())) return value;
 
-    return date.toLocaleDateString('ru-RU')
-}
+  return date.toLocaleDateString("ru-RU");
+};
 
-export { formatDate }
+export { formatDate };

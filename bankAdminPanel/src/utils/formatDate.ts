@@ -1,5 +1,5 @@
 export const formatDate = (value?: string | null) => {
-   if (!value) return '—'
+   if (!value) return '–'
 
    const date = new Date(value)
 

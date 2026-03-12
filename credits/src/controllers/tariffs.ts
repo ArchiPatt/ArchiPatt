@@ -8,7 +8,7 @@ export async function listTariffsController(
   _payload: JWTPayload,
 ) {
   const tariffs = await creditsService.findActiveTariffs(ds);
-  return { status: 200 as const, body: tariffs };
+  return { status: 200, body: tariffs };
 }
 
 export async function getTariffController(
@@ -17,9 +17,8 @@ export async function getTariffController(
   params: { id: string },
 ) {
   const tariff = await creditsService.findTariffById(ds, params.id);
-  if (!tariff)
-    return { status: 404 as const, body: { error: "tariff_not_found" } };
-  return { status: 200 as const, body: tariff };
+  if (!tariff) return { status: 404, body: { error: "tariff_not_found" } };
+  return { status: 200, body: tariff };
 }
 
 export async function createTariffController(
@@ -32,26 +31,26 @@ export async function createTariffController(
   },
 ) {
   if (!isEmployee(payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   const name = params.name?.trim();
   const interestRate = params.interestRate;
   const billingPeriodDays = params.billingPeriodDays ?? 1;
 
   if (!name || typeof interestRate !== "number" || interestRate < 0) {
-    return { status: 400 as const, body: { error: "invalid_input" } };
+    return { status: 400, body: { error: "invalid_input" } };
   }
   if (!Number.isInteger(billingPeriodDays) || billingPeriodDays <= 0) {
-    return { status: 400 as const, body: { error: "invalid_billing_period" } };
+    return { status: 400, body: { error: "invalid_billing_period" } };
   }
 
   const exists = await creditsService.findTariffByName(ds, name);
-  if (exists) return { status: 409 as const, body: { error: "tariff_exists" } };
+  if (exists) return { status: 409, body: { error: "tariff_exists" } };
 
   const tariff = await creditsService.createTariff(ds, {
     name,
     interestRate: interestRate.toFixed(4),
     billingPeriodDays,
   });
-  return { status: 201 as const, body: tariff };
+  return { status: 201, body: tariff };
 }

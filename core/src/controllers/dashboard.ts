@@ -12,7 +12,7 @@ export async function clientsOverviewController(
   authorization?: string,
 ) {
   if (!canManageAll(payload)) {
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
   }
 
   const pageLimit = Math.min(Math.max(1, params.limit ?? 20), 100);
@@ -21,7 +21,7 @@ export async function clientsOverviewController(
   const { items: users, total } = await fetchUsersInternal(1000, 0, authorization);
   const clientIds = users.map((u) => u.id);
   if (clientIds.length === 0) {
-    return { status: 200 as const, body: { items: [], total: 0 } };
+    return { status: 200, body: { items: [], total: 0 } };
   }
 
   const [accounts, allCredits] = await Promise.all([
@@ -64,7 +64,7 @@ export async function clientsOverviewController(
   const items = filtered.slice(pageOffset, pageOffset + pageLimit);
 
   return {
-    status: 200 as const,
+    status: 200,
     body: { items, total: filtered.length },
   };
 }

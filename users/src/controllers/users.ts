@@ -22,15 +22,15 @@ async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
   const auth = requireAuth(payload);
   if (!auth.ok) {
     return {
-      ok: false as const,
+      ok: false,
       status: auth.code,
       body: { error: "unauthorized" },
     };
   }
   if (!auth.payload.sub) {
     return {
-      ok: false as const,
-      status: 401 as const,
+      ok: false,
+      status: 401,
       body: { error: "unauthorized" },
     };
   }
@@ -38,20 +38,20 @@ async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
   const actor = await findById(ds, String(auth.payload.sub));
   if (!actor) {
     return {
-      ok: false as const,
-      status: 401 as const,
+      ok: false,
+      status: 401,
       body: { error: "unauthorized" },
     };
   }
   if (actor.isBlocked) {
     return {
-      ok: false as const,
-      status: 403 as const,
+      ok: false,
+      status: 403,
       body: { error: "blocked_user" },
     };
   }
 
-  return { ok: true as const, payload: auth.payload, actor };
+  return { ok: true, payload: auth.payload, actor };
 }
 
 export async function internalListController(
@@ -72,7 +72,7 @@ export async function internalListController(
   const offset = Math.max(0, params.offset ?? 0);
   const { rows, total } = await listUsersPaginated(ds, limit, offset);
   return {
-    status: 200 as const,
+    status: 200,
     body: {
       items: rows.map((u) => ({
         id: u.id,
@@ -92,8 +92,7 @@ export async function internalByUsernameController(
   params: { username: string },
   authorization?: string,
 ) {
-  if (!internalOk)
-    return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!internalOk) return { status: 401, body: { error: "unauthorized" } };
   const username = params.username.trim();
   if (!username)
     return { status: 400 as const, body: { error: "username_required" } };
@@ -109,10 +108,10 @@ export async function internalByUsernameController(
   }
 
   const user = await findByUsername(ds, username);
-  if (!user) return { status: 404 as const, body: { error: "not_found" } };
+  if (!user) return { status: 404, body: { error: "not_found" } };
 
   return {
-    status: 200 as const,
+    status: 200,
     body: {
       id: user.id,
       username: user.username,
@@ -127,7 +126,7 @@ export async function meController(ds: DataSource, payload: JWTPayload | null) {
   if (!actor.ok) return { status: actor.status, body: actor.body };
 
   return {
-    status: 200 as const,
+    status: 200,
     body: {
       id: actor.actor.id,
       username: actor.actor.username,
@@ -145,11 +144,11 @@ export async function listController(
   const actor = await requireActiveUser(ds, payload);
   if (!actor.ok) return { status: actor.status, body: actor.body };
   if (!canManage(actor.payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   const rows = await listUsers(ds);
   return {
-    status: 200 as const,
+    status: 200,
     body: rows.map((u) => ({
       id: u.id,
       username: u.username,
@@ -169,13 +168,13 @@ export async function getController(
   const actor = await requireActiveUser(ds, payload);
   if (!actor.ok) return { status: actor.status, body: actor.body };
   if (!canManage(actor.payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   const user = await findById(ds, params.id);
-  if (!user) return { status: 404 as const, body: { error: "not_found" } };
+  if (!user) return { status: 404, body: { error: "not_found" } };
 
   return {
-    status: 200 as const,
+    status: 200,
     body: {
       id: user.id,
       username: user.username,
@@ -194,15 +193,13 @@ export async function createController(
   const actor = await requireActiveUser(ds, payload);
   if (!actor.ok) return { status: actor.status, body: actor.body };
   if (!canManage(actor.payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   const username = body.username?.trim();
-  if (!username)
-    return { status: 400 as const, body: { error: "username_required" } };
+  if (!username) return { status: 400, body: { error: "username_required" } };
 
   const roles = normalizeRoles(body.roles);
-  if (!roles.length)
-    return { status: 400 as const, body: { error: "roles_required" } };
+  if (!roles.length) return { status: 400, body: { error: "roles_required" } };
 
   const res = await createUser(ds, {
     username,
@@ -210,7 +207,7 @@ export async function createController(
     roles,
   });
   if (res.kind === "conflict")
-    return { status: 409 as const, body: { error: "username_exists" } };
+    return { status: 409, body: { error: "username_exists" } };
 
   let setupUrl: string | null = null;
   try {
@@ -218,7 +215,7 @@ export async function createController(
     if (authRes.kind === "conflict") {
       await deleteById(ds, res.user.id);
       return {
-        status: 409 as const,
+        status: 409,
         body: { error: "username_exists_in_auth" },
       };
     }
@@ -226,13 +223,13 @@ export async function createController(
   } catch {
     await deleteById(ds, res.user.id);
     return {
-      status: 502 as const,
+      status: 502,
       body: { error: "auth_service_unavailable" },
     };
   }
 
   return {
-    status: 201 as const,
+    status: 201,
     body: {
       id: res.user.id,
       username: res.user.username,
@@ -253,21 +250,21 @@ export async function blockController(
   const actor = await requireActiveUser(ds, payload);
   if (!actor.ok) return { status: actor.status, body: actor.body };
   if (!canManage(actor.payload))
-    return { status: 403 as const, body: { error: "forbidden" } };
+    return { status: 403, body: { error: "forbidden" } };
 
   if (typeof body.isBlocked !== "boolean") {
     return {
-      status: 400 as const,
+      status: 400,
       body: { error: "isBlocked_boolean_required" },
     };
   }
 
   const res = await setBlocked(ds, params.id, body.isBlocked);
   if (res.kind === "not_found")
-    return { status: 404 as const, body: { error: "not_found" } };
+    return { status: 404, body: { error: "not_found" } };
 
   return {
-    status: 200 as const,
+    status: 200,
     body: {
       id: res.user.id,
       username: res.user.username,

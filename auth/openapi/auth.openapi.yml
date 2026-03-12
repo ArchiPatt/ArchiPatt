@@ -272,9 +272,9 @@ components:
           type: string
           description: |
             Код ошибки. Обычно:
-            - `invalid_request` — не хватает обязательных полей
-            - `invalid_grant` — неверный/просроченный code или refresh token
-            - `unsupported_grant_type` — неизвестный grant_type
+            - `invalid_request` – не хватает обязательных полей
+            - `invalid_grant` – неверный/просроченный code или refresh token
+            - `unsupported_grant_type` – неизвестный grant_type
           example: invalid_grant
         error_description:
           type: string
@@ -341,7 +341,7 @@ components:
       description: |
         Ответ с access/refresh токенами.
 
-        `access_token` — JWT (RS256). Внутри:
+        `access_token` – JWT (RS256). Внутри:
         - `sub` = `user.id` (из Users Service)
         - `roles` = роли пользователя
         - `iss` = `ISSUER`

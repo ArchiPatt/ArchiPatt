@@ -7,15 +7,23 @@ import {
   getOperationsController,
   createAccountController,
   closeAccountController,
-  depositController,
-  withdrawController,
-  internalPostOperationController,
-  internalTransferFromMasterController,
-  internalTransferToMasterController,
 } from "../controllers/accounts";
+import * as accountsService from "../services/accounts";
+import { SUPPORTED_CURRENCIES } from "../db/enums/Currency";
+import { publishOperationCommand, registerPendingReply } from "../messaging";
+import type { OperationReply } from "../messaging";
+
+function sendOperationReply(reply: FastifyReply, result: OperationReply): void {
+  const status = result.status ?? (result.ok ? 200 : 500);
+  const body = result.ok ? result.body : { error: result.error };
+  reply.code(status).send(body);
+}
 
 export function createAccountsHandlers(app: FastifyInstance) {
   return {
+    listCurrencies: async (_req: FastifyRequest, reply: FastifyReply) => {
+      return reply.code(200).send({ currencies: [...SUPPORTED_CURRENCIES] });
+    },
     list: async (
       req: FastifyRequest<{ Querystring: { clientId?: string } }>,
       reply: FastifyReply,
@@ -59,13 +67,16 @@ export function createAccountsHandlers(app: FastifyInstance) {
     },
 
     create: async (
-      req: FastifyRequest<{ Body: { clientId?: string } }>,
+      req: FastifyRequest<{
+        Body: { clientId?: string; currency?: string };
+      }>,
       reply: FastifyReply,
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
       const res = await createAccountController(app.db, auth.payload, {
         clientId: req.body?.clientId,
+        currency: req.body?.currency,
       });
       return reply.code(res.status).send(res.body);
     },
@@ -76,34 +87,133 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
-      const res = await closeAccountController(app.db, auth.payload, req.params);
+      const res = await closeAccountController(
+        app.db,
+        auth.payload,
+        req.params,
+      );
       return reply.code(res.status).send(res.body);
     },
 
     deposit: async (
-      req: FastifyRequest<{ Params: { id: string }; Body: { amount?: unknown } }>,
+      req: FastifyRequest<{
+        Params: { id: string };
+        Body: { amount?: unknown };
+      }>,
       reply: FastifyReply,
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
-      const res = await depositController(app.db, auth.payload, {
-        ...req.params,
-        amount: req.body?.amount,
+      const accountRes = await getAccountController(app.db, auth.payload, {
+        id: req.params.id,
       });
-      return reply.code(res.status).send(res.body);
+      if (accountRes.status !== 200) {
+        return reply.code(accountRes.status).send(accountRes.body);
+      }
+      const amount = accountsService.parseAmount(req.body?.amount);
+      if (amount == null)
+        return reply.code(400).send({ error: "invalid_amount" });
+      const correlationId = crypto.randomUUID();
+      const resultPromise = registerPendingReply(correlationId);
+      await publishOperationCommand({
+        kind: "deposit",
+        correlationId,
+        accountId: req.params.id,
+        amount,
+      });
+      try {
+        const result = await resultPromise;
+        sendOperationReply(reply, result);
+      } catch (err) {
+        reply.code(503).send({ error: "operation_timeout" });
+      }
     },
 
     withdraw: async (
-      req: FastifyRequest<{ Params: { id: string }; Body: { amount?: unknown } }>,
+      req: FastifyRequest<{
+        Params: { id: string };
+        Body: { amount?: unknown };
+      }>,
       reply: FastifyReply,
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
-      const res = await withdrawController(app.db, auth.payload, {
-        ...req.params,
-        amount: req.body?.amount,
+      const accountRes = await getAccountController(app.db, auth.payload, {
+        id: req.params.id,
       });
-      return reply.code(res.status).send(res.body);
+      if (accountRes.status !== 200) {
+        return reply.code(accountRes.status).send(accountRes.body);
+      }
+      const amount = accountsService.parseAmount(req.body?.amount);
+      if (amount == null)
+        return reply.code(400).send({ error: "invalid_amount" });
+      const correlationId = crypto.randomUUID();
+      const resultPromise = registerPendingReply(correlationId);
+      await publishOperationCommand({
+        kind: "withdraw",
+        correlationId,
+        accountId: req.params.id,
+        amount,
+      });
+      try {
+        const result = await resultPromise;
+        sendOperationReply(reply, result);
+      } catch (err) {
+        reply.code(503).send({ error: "operation_timeout" });
+      }
+    },
+
+    transfer: async (
+      req: FastifyRequest<{
+        Body: {
+          fromAccountId?: string;
+          toAccountId?: string;
+          amount?: unknown;
+          idempotencyKey?: string;
+        };
+      }>,
+      reply: FastifyReply,
+    ) => {
+      const auth = await authPayloadOrNull(req);
+      if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+      const amount = accountsService.parseAmount(req.body?.amount);
+      if (amount == null)
+        return reply.code(400).send({ error: "invalid_amount" });
+      const fromAccountId = req.body?.fromAccountId;
+      const toAccountId = req.body?.toAccountId;
+      if (!fromAccountId || !toAccountId) {
+        return reply
+          .code(400)
+          .send({ error: "from_account_id_and_to_account_id_required" });
+      }
+      const fromRes = await getAccountController(app.db, auth.payload, {
+        id: fromAccountId,
+      });
+      if (fromRes.status !== 200) {
+        return reply.code(fromRes.status).send(fromRes.body);
+      }
+      const toRes = await getAccountController(app.db, auth.payload, {
+        id: toAccountId,
+      });
+      if (toRes.status !== 200) {
+        return reply.code(toRes.status).send(toRes.body);
+      }
+      const correlationId = crypto.randomUUID();
+      const resultPromise = registerPendingReply(correlationId);
+      await publishOperationCommand({
+        kind: "transfer",
+        correlationId,
+        fromAccountId,
+        toAccountId,
+        amount,
+        idempotencyKey: req.body?.idempotencyKey ?? null,
+      });
+      try {
+        const result = await resultPromise;
+        sendOperationReply(reply, result);
+      } catch (err) {
+        reply.code(503).send({ error: "operation_timeout" });
+      }
     },
 
     internalPostOperation: async (
@@ -119,14 +229,37 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
-      const res = await internalPostOperationController(
-        app.db,
-        internalOk,
-        { ...req.params, ...req.body },
-      );
-      return reply.code(res.status).send(res.body);
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
+      if (!internalOk) return reply.code(401).send({ error: "unauthorized" });
+      const idempotencyKey = req.body?.idempotencyKey?.trim();
+      if (!idempotencyKey)
+        return reply.code(400).send({ error: "idempotency_key_required" });
+      const n =
+        typeof req.body?.amount === "string"
+          ? parseFloat(req.body.amount)
+          : typeof req.body?.amount === "number"
+            ? req.body.amount
+            : NaN;
+      if (!Number.isFinite(n) || n === 0)
+        return reply.code(400).send({ error: "invalid_amount" });
+      const correlationId = crypto.randomUUID();
+      const resultPromise = registerPendingReply(correlationId);
+      await publishOperationCommand({
+        kind: "post_operation",
+        correlationId,
+        accountId: req.params.id,
+        amount: n,
+        type: req.body?.type ?? null,
+        idempotencyKey,
+        operationCorrelationId: req.body?.correlationId ?? null,
+        meta: req.body?.meta ?? null,
+      });
+      try {
+        const result = await resultPromise;
+        sendOperationReply(reply, result);
+      } catch (err) {
+        reply.code(503).send({ error: "operation_timeout" });
+      }
     },
 
     internalTransferFromMaster: async (
@@ -150,10 +283,19 @@ export function createAccountsHandlers(app: FastifyInstance) {
           : typeof req.body?.amount === "string"
             ? parseFloat(req.body.amount)
             : NaN;
-      if (!req.body?.toAccountId || !Number.isFinite(amount) || amount <= 0 || !req.body?.idempotencyKey) {
+      if (
+        !req.body?.toAccountId ||
+        !Number.isFinite(amount) ||
+        amount <= 0 ||
+        !req.body?.idempotencyKey
+      ) {
         return reply.code(400).send({ error: "invalid_input" });
       }
-      const res = await internalTransferFromMasterController(app.db, internalOk, {
+      const correlationId = crypto.randomUUID();
+      const resultPromise = registerPendingReply(correlationId);
+      await publishOperationCommand({
+        kind: "transfer_from_master",
+        correlationId,
         toAccountId: req.body.toAccountId,
         amount,
         idempotencyKey: req.body.idempotencyKey,
@@ -184,10 +326,19 @@ export function createAccountsHandlers(app: FastifyInstance) {
           : typeof req.body?.amount === "string"
             ? parseFloat(req.body.amount)
             : NaN;
-      if (!req.body?.fromAccountId || !Number.isFinite(amount) || amount <= 0 || !req.body?.idempotencyKey) {
+      if (
+        !req.body?.fromAccountId ||
+        !Number.isFinite(amount) ||
+        amount <= 0 ||
+        !req.body?.idempotencyKey
+      ) {
         return reply.code(400).send({ error: "invalid_input" });
       }
-      const res = await internalTransferToMasterController(app.db, internalOk, {
+      const correlationId = crypto.randomUUID();
+      const resultPromise = registerPendingReply(correlationId);
+      await publishOperationCommand({
+        kind: "transfer_to_master",
+        correlationId,
         fromAccountId: req.body.fromAccountId,
         amount,
         idempotencyKey: req.body.idempotencyKey,

@@ -6,6 +6,7 @@ import {
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { AccountStatus } from "../enums/AccountStatus";
+import { Currency } from "../enums/Currency";
 
 @Entity()
 export class Account {
@@ -15,6 +16,9 @@ export class Account {
   @Index()
   @Column({ type: "uuid" })
   clientId!: string;
+
+  @Column({ type: "text", default: Currency.RUB })
+  currency!: Currency;
 
   @Column({ type: "numeric", precision: 18, scale: 2, default: "0" })
   balance!: string;
