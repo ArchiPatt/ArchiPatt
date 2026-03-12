@@ -24,9 +24,11 @@
     "pg": "^8.13.3",
     "reflect-metadata": "^0.2.2",
     "swagger-ui-dist": "^5.17.14",
-    "typeorm": "^0.3.28"
+    "typeorm": "^0.3.28",
+    "amqplib": "^0.10.4"
   },
   "devDependencies": {
+    "@types/amqplib": "^0.10.5",
     "@types/node": "^20.17.19",
     "@types/ws": "^8.18.1",
     "ts-node": "^10.9.2",

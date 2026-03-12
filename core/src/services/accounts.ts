@@ -76,9 +76,20 @@ export async function deposit(
   em: EntityManager,
   accountId: string,
   amount: number,
+  idempotencyKey?: string | null,
 ): Promise<
   { account: Account; operation: AccountOperation } | null | "closed"
 > {
+  if (idempotencyKey) {
+    const existing = await em.findOne(AccountOperation, {
+      where: { accountId, idempotencyKey, type: "deposit" },
+    });
+    if (existing) {
+      const account = await em.findOne(Account, { where: { id: accountId } });
+      if (account) return { account, operation: existing };
+    }
+  }
+
   const account = await em.findOne(Account, {
     where: { id: accountId },
     lock: { mode: "pessimistic_write" },
@@ -95,6 +106,7 @@ export async function deposit(
       accountId: account.id,
       amount: amount.toFixed(2),
       type: "deposit",
+      idempotencyKey: idempotencyKey ?? null,
     }),
   );
   return { account, operation };
@@ -104,12 +116,23 @@ export async function withdraw(
   em: EntityManager,
   accountId: string,
   amount: number,
+  idempotencyKey?: string | null,
 ): Promise<
   | { account: Account; operation: AccountOperation }
   | null
   | "closed"
   | "insufficient_balance"
 > {
+  if (idempotencyKey) {
+    const existing = await em.findOne(AccountOperation, {
+      where: { accountId, idempotencyKey, type: "withdraw" },
+    });
+    if (existing) {
+      const account = await em.findOne(Account, { where: { id: accountId } });
+      if (account) return { account, operation: existing };
+    }
+  }
+
   const account = await em.findOne(Account, {
     where: { id: accountId },
     lock: { mode: "pessimistic_write" },
@@ -128,6 +151,7 @@ export async function withdraw(
       accountId: account.id,
       amount: (-amount).toFixed(2),
       type: "withdraw",
+      idempotencyKey: idempotencyKey ?? null,
     }),
   );
   return { account, operation };
