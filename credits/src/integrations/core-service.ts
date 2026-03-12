@@ -50,6 +50,7 @@ export async function transferFromMaster(input: {
   amount: number;
   idempotencyKey: string;
   metadata?: Record<string, unknown>;
+  authorization?: string;
 }) {
   if (!env.coreService.internalToken) {
     throw new Error(
@@ -57,13 +58,16 @@ export async function transferFromMaster(input: {
     );
   }
 
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    "x-internal-token": env.coreService.internalToken,
+  };
+  if (input.authorization) headers["authorization"] = input.authorization;
+
   const url = `${env.coreService.baseUrl}/internal/transfers/from-master`;
   const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-internal-token": env.coreService.internalToken,
-    },
+    headers,
     body: JSON.stringify({
       toAccountId: input.toAccountId,
       amount: input.amount,
@@ -85,6 +89,7 @@ export async function transferToMaster(input: {
   amount: number;
   idempotencyKey: string;
   metadata?: Record<string, unknown>;
+  authorization?: string;
 }) {
   if (!env.coreService.internalToken) {
     throw new Error(
@@ -92,13 +97,16 @@ export async function transferToMaster(input: {
     );
   }
 
+  const headers: Record<string, string> = {
+    "content-type": "application/json",
+    "x-internal-token": env.coreService.internalToken,
+  };
+  if (input.authorization) headers["authorization"] = input.authorization;
+
   const url = `${env.coreService.baseUrl}/internal/transfers/to-master`;
   const res = await fetch(url, {
     method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-internal-token": env.coreService.internalToken,
-    },
+    headers,
     body: JSON.stringify({
       fromAccountId: input.fromAccountId,
       amount: input.amount,

@@ -8,6 +8,7 @@ import {
   canCreateAccountFor,
   canCloseAccount,
 } from "../security/access";
+import { verifyBearerToken } from "../security/jwt";
 import * as accountsService from "../services/accounts";
 
 export async function listAccountsController(
@@ -234,9 +235,25 @@ export async function internalTransferFromMasterController(
     type?: string;
     meta?: Record<string, unknown>;
   },
+  authorization?: string,
 ) {
   if (!internalOk)
     return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!authorization?.startsWith("Bearer "))
+    return { status: 401 as const, body: { error: "authorization_required" } };
+  const payload = await verifyBearerToken(authorization);
+  if (!payload)
+    return { status: 401 as const, body: { error: "unauthorized" } };
+
+  let clientId = params.meta && typeof params.meta.clientId === "string"
+    ? params.meta.clientId
+    : null;
+  if (!clientId) {
+    const account = await accountsService.findAccountById(ds, params.toAccountId);
+    clientId = account?.clientId ?? null;
+  }
+  if (!clientId || !canReadAccount(payload, clientId))
+    return { status: 403 as const, body: { error: "forbidden" } };
 
   const result = await ds.manager.transaction((em) =>
     accountsService.transferFromMaster(em, {
@@ -268,9 +285,25 @@ export async function internalTransferToMasterController(
     type?: string;
     meta?: Record<string, unknown>;
   },
+  authorization?: string,
 ) {
   if (!internalOk)
     return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!authorization?.startsWith("Bearer "))
+    return { status: 401 as const, body: { error: "authorization_required" } };
+  const payload = await verifyBearerToken(authorization);
+  if (!payload)
+    return { status: 401 as const, body: { error: "unauthorized" } };
+
+  let clientId = params.meta && typeof params.meta.clientId === "string"
+    ? params.meta.clientId
+    : null;
+  if (!clientId) {
+    const account = await accountsService.findAccountById(ds, params.fromAccountId);
+    clientId = account?.clientId ?? null;
+  }
+  if (!clientId || !canReadAccount(payload, clientId))
+    return { status: 403 as const, body: { error: "forbidden" } };
 
   const result = await ds.manager.transaction((em) =>
     accountsService.transferToMaster(em, {

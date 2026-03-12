@@ -140,7 +140,11 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
-      const res = await issueCreditController(app.db, a.payload, req.body ?? {});
+      const authorization = req.headers.authorization as string | undefined;
+      const res = await issueCreditController(app.db, a.payload, {
+        ...(req.body ?? {}),
+        authorization,
+      });
       return reply.code(res.status).send(res.body);
     },
 
@@ -154,9 +158,11 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
+      const authorization = req.headers.authorization as string | undefined;
       const res = await repayCreditController(app.db, a.payload, {
         ...req.params,
         amount: req.body?.amount,
+        authorization,
       });
       return reply.code(res.status).send(res.body);
     },
@@ -175,9 +181,10 @@ export function createCreditsHandlers(app: FastifyInstance) {
     ) => {
       const internalOk =
         req.headers["x-internal-token"] === env.internalToken;
+      const authorization = req.headers.authorization as string | undefined;
       const res = await internalByClientsController(app.db, internalOk, {
         clientIds: req.query?.clientIds,
-      });
+      }, authorization);
       return reply.code(res.status).send(res.body);
     },
   };

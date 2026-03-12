@@ -9,6 +9,7 @@ export async function clientsOverviewController(
   ds: DataSource,
   payload: JWTPayload,
   params: { limit?: number; offset?: number },
+  authorization?: string,
 ) {
   if (!canManageAll(payload)) {
     return { status: 403 as const, body: { error: "forbidden" } };
@@ -17,7 +18,7 @@ export async function clientsOverviewController(
   const pageLimit = Math.min(Math.max(1, params.limit ?? 20), 100);
   const pageOffset = Math.max(0, params.offset ?? 0);
 
-  const { items: users, total } = await fetchUsersInternal(1000, 0);
+  const { items: users, total } = await fetchUsersInternal(1000, 0, authorization);
   const clientIds = users.map((u) => u.id);
   if (clientIds.length === 0) {
     return { status: 200 as const, body: { items: [], total: 0 } };
@@ -25,7 +26,7 @@ export async function clientsOverviewController(
 
   const [accounts, allCredits] = await Promise.all([
     accountsService.findAccountsByClientIds(ds, clientIds),
-    fetchAllCredits(),
+    fetchAllCredits(authorization),
   ]);
 
   const clientIdsSet = new Set(clientIds);

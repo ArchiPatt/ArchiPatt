@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { JWTPayload } from "jose";
 import { isEmployee } from "./auth";
+import { verifyBearerToken } from "../security/jwt";
 import * as creditsService from "../services/credits";
 
 export async function listCreditsController(
@@ -103,6 +104,7 @@ export async function issueCreditController(
     accountId?: string;
     tariffId?: string;
     amount?: number;
+    authorization?: string;
   },
 ) {
   const clientId = params.clientId;
@@ -130,6 +132,7 @@ export async function issueCreditController(
     tariffId,
     amount,
     performedBy: String(payload.sub ?? "unknown"),
+    authorization: params.authorization,
   });
 
   if (!credit)
@@ -140,7 +143,7 @@ export async function issueCreditController(
 export async function repayCreditController(
   ds: DataSource,
   payload: JWTPayload,
-  params: { id: string; amount?: number },
+  params: { id: string; amount?: number; authorization?: string },
 ) {
   const amount = params.amount;
   if (typeof amount !== "number" || amount <= 0) {
@@ -159,6 +162,7 @@ export async function repayCreditController(
     creditId: params.id,
     amount,
     performedBy: String(payload.sub ?? "unknown"),
+    authorization: params.authorization,
   });
 
   if (!result) return { status: 404 as const, body: { error: "credit_not_found" } };
@@ -182,8 +186,14 @@ export async function internalByClientsController(
   ds: DataSource,
   internalOk: boolean,
   params: { clientIds?: string },
+  authorization?: string,
 ) {
   if (!internalOk)
+    return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!authorization?.startsWith("Bearer "))
+    return { status: 401 as const, body: { error: "authorization_required" } };
+  const payload = await verifyBearerToken(authorization);
+  if (!payload)
     return { status: 401 as const, body: { error: "unauthorized" } };
 
   const clientIdsRaw = params.clientIds?.trim();
@@ -193,6 +203,18 @@ export async function internalByClientsController(
         .map((s) => s.trim())
         .filter(Boolean)
     : [];
+
+  if (clientIds.length === 0) {
+    if (!isEmployee(payload))
+      return { status: 403 as const, body: { error: "forbidden" } };
+  } else {
+    const sub = String(payload.sub ?? "");
+    const allowed =
+      isEmployee(payload) ||
+      (clientIds.length === 1 && clientIds[0] === sub);
+    if (!allowed)
+      return { status: 403 as const, body: { error: "forbidden" } };
+  }
 
   const credits = await creditsService.findCreditsByClientIds(ds, clientIds);
   return { status: 200 as const, body: credits };

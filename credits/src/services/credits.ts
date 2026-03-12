@@ -148,6 +148,7 @@ export async function issueCredit(
     tariffId: string;
     amount: number;
     performedBy: string;
+    authorization?: string;
   },
 ) {
   const tariff = await findTariffById(ds, params.tariffId);
@@ -189,6 +190,7 @@ export async function issueCredit(
       clientId: params.clientId,
       tariffId: params.tariffId,
     },
+    authorization: params.authorization,
   });
 
   return credit;
@@ -200,6 +202,7 @@ export async function repayCredit(
     creditId: string;
     amount: number;
     performedBy: string;
+    authorization?: string;
   },
 ) {
   const credit = await findCreditById(ds, params.creditId);
@@ -234,6 +237,7 @@ export async function repayCredit(
       creditId: savedCredit.id,
       clientId: savedCredit.clientId,
     },
+    authorization: params.authorization,
   });
 
   return {

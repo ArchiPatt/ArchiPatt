@@ -18,10 +18,12 @@ export function createUsersHandlers(app: FastifyInstance) {
       reply: FastifyReply,
     ) => {
       const internalOk = req.headers["x-internal-token"] === env.internalToken;
+      const authorization = req.headers.authorization as string | undefined;
       const res = await internalByUsernameController(
         app.db,
         internalOk,
         req.params,
+        authorization,
       );
       return reply.code(res.status).send(res.body);
     },
@@ -31,12 +33,13 @@ export function createUsersHandlers(app: FastifyInstance) {
       reply: FastifyReply,
     ) => {
       const internalOk = req.headers["x-internal-token"] === env.internalToken;
+      const authorization = req.headers.authorization as string | undefined;
       const limit = parseInt(req.query?.limit ?? "20", 10) || 20;
       const offset = parseInt(req.query?.offset ?? "0", 10) || 0;
       const res = await internalListController(app.db, internalOk, {
         limit,
         offset,
-      });
+      }, authorization);
       return reply.code(res.status).send(res.body);
     },
 

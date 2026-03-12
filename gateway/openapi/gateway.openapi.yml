@@ -24,7 +24,7 @@ paths:
   /health:
     get:
       tags: [Gateway]
-      summary: Healthcheck
+      summary: Проверка здоровья
       responses:
         "200":
           description: OK
@@ -35,31 +35,31 @@ paths:
   /swagger:
     get:
       tags: [Gateway]
-      summary: Swagger UI for gateway
+      summary: Swagger UI для шлюза
       responses:
         "200":
-          description: HTML page
+          description: HTML-страница
   /swagger.yml:
     get:
       tags: [Gateway]
-      summary: OpenAPI YAML for gateway
+      summary: OpenAPI YAML для шлюза
       responses:
         "200":
-          description: YAML spec
+          description: Спецификация YAML
 
   /login:
     get:
       tags: [Auth]
-      summary: Redirect to auth login page
+      summary: Редирект на страницу входа Auth
       responses:
         "302":
-          description: Redirect to auth
+          description: Редирект на Auth
     post:
       tags: [Auth]
-      summary: Disabled on gateway (password only on auth page)
+      summary: Отключено на шлюзе (пароль только на странице Auth)
       responses:
         "400":
-          description: login_via_auth_only
+          description: Ввод пароля только на странице auth
           content:
             application/json:
               schema:
@@ -68,16 +68,16 @@ paths:
   /setup-password:
     get:
       tags: [Auth]
-      summary: Redirect to auth password setup page
+      summary: Редирект на страницу установки пароля Auth
       responses:
         "302":
-          description: Redirect to auth
+          description: Редирект на Auth
     post:
       tags: [Auth]
-      summary: Disabled on gateway (password only on auth page)
+      summary: Отключено на шлюзе (пароль только на странице Auth)
       responses:
         "400":
-          description: password_setup_via_auth_only
+          description: Установка пароля только на странице auth
           content:
             application/json:
               schema:
@@ -86,7 +86,7 @@ paths:
   /token:
     post:
       tags: [Auth]
-      summary: Proxied to auth /token
+      summary: Проксирован на auth /token
       requestBody:
         required: true
         content:
@@ -97,13 +97,13 @@ paths:
                 - $ref: "#/components/schemas/RefreshTokenRequest"
       responses:
         "200":
-          description: Proxied response from auth
+          description: Ответ от Auth (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TokenResponse"
         "400":
-          description: OAuth-like error from auth
+          description: Ошибка OAuth от Auth
           content:
             application/json:
               schema:
@@ -111,10 +111,10 @@ paths:
   /logout:
     post:
       tags: [Auth]
-      summary: Proxied to auth /logout
+      summary: Проксирован на auth /logout
       responses:
         "200":
-          description: Proxied response from auth
+          description: Ответ от Auth (проксирован)
           content:
             application/json:
               schema:
@@ -122,10 +122,10 @@ paths:
   /jwks:
     get:
       tags: [Auth]
-      summary: Proxied to auth /jwks
+      summary: Проксирован на auth /jwks
       responses:
         "200":
-          description: Proxied response from auth
+          description: Ответ от Auth (проксирован)
           content:
             application/json:
               schema:
@@ -134,24 +134,24 @@ paths:
   /me:
     get:
       tags: [Users]
-      summary: Proxied to users /me
+      summary: Проксирован на users /me
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Proxied response from users
+          description: Ответ от Users (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/UserProfileResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Not found
+          description: Не найден
           content:
             application/json:
               schema:
@@ -159,12 +159,12 @@ paths:
   /users:
     get:
       tags: [Users]
-      summary: Proxied to users /users
+      summary: Проксирован на users /users
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Proxied response from users
+          description: Ответ от Users (проксирован)
           content:
             application/json:
               schema:
@@ -172,20 +172,20 @@ paths:
                 items:
                   $ref: "#/components/schemas/UserListItemResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Users]
-      summary: Proxied to users /users
+      summary: Проксирован на users /users
       security:
         - bearerAuth: []
       requestBody:
@@ -196,37 +196,37 @@ paths:
               $ref: "#/components/schemas/CreateUserRequest"
       responses:
         "201":
-          description: Proxied response from users
+          description: Ответ от Users (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreateUserResponse"
         "400":
-          description: Invalid input
+          description: Некорректный ввод
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "409":
-          description: Conflict
+          description: Конфликт
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "502":
-          description: Auth service unavailable
+          description: Сервис Auth недоступен
           content:
             application/json:
               schema:
@@ -235,7 +235,7 @@ paths:
   /credits/issue:
     post:
       tags: [Credits]
-      summary: Proxied to credits /credits/issue
+      summary: Проксирован на credits /credits/issue
       security:
         - bearerAuth: []
       requestBody:
@@ -246,31 +246,31 @@ paths:
               $ref: "#/components/schemas/IssueCreditRequest"
       responses:
         "201":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreditResponse"
         "400":
-          description: Invalid input
+          description: Некорректный ввод
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Tariff not found
+          description: Тариф не найден
           content:
             application/json:
               schema:
@@ -279,7 +279,7 @@ paths:
   /credits/{id}:
     get:
       tags: [Credits]
-      summary: Proxied to credits /credits/{id}
+      summary: Проксирован на credits /credits/{id}
       security:
         - bearerAuth: []
       parameters:
@@ -291,25 +291,25 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreditResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Credit not found
+          description: Кредит не найден
           content:
             application/json:
               schema:
@@ -318,7 +318,7 @@ paths:
   /credits/{id}/repay:
     post:
       tags: [Credits]
-      summary: Proxied to credits /credits/{id}/repay
+      summary: Проксирован на credits /credits/{id}/repay
       security:
         - bearerAuth: []
       parameters:
@@ -336,31 +336,31 @@ paths:
               $ref: "#/components/schemas/RepayCreditRequest"
       responses:
         "200":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/RepayCreditResponse"
         "400":
-          description: Invalid state or amount
+          description: Некорректное состояние или сумма
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Credit not found
+          description: Кредит не найден
           content:
             application/json:
               schema:
@@ -369,7 +369,7 @@ paths:
   /credits/by-client/{clientId}:
     get:
       tags: [Credits]
-      summary: Proxied to credits /credits/by-client/{clientId}
+      summary: Проксирован на credits /credits/by-client/{clientId}
       security:
         - bearerAuth: []
       parameters:
@@ -381,7 +381,7 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
@@ -389,13 +389,13 @@ paths:
                 items:
                   $ref: "#/components/schemas/CreditResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -404,7 +404,7 @@ paths:
   /credits/{id}/payments:
     get:
       tags: [Credits]
-      summary: Proxied to credits /credits/{id}/payments
+      summary: Проксирован на credits /credits/{id}/payments
       security:
         - bearerAuth: []
       parameters:
@@ -416,7 +416,7 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
@@ -424,19 +424,19 @@ paths:
                 items:
                   $ref: "#/components/schemas/CreditPaymentResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Credit not found
+          description: Кредит не найден
           content:
             application/json:
               schema:
@@ -444,12 +444,12 @@ paths:
   /tariffs:
     get:
       tags: [Credits]
-      summary: Proxied to credits /tariffs
+      summary: Проксирован на credits /tariffs
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
@@ -457,14 +457,14 @@ paths:
                 items:
                   $ref: "#/components/schemas/TariffResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Credits]
-      summary: Proxied to credits /tariffs
+      summary: Проксирован на credits /tariffs
       security:
         - bearerAuth: []
       requestBody:
@@ -475,31 +475,31 @@ paths:
               $ref: "#/components/schemas/CreateTariffRequest"
       responses:
         "201":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TariffResponse"
         "400":
-          description: Invalid input
+          description: Некорректный ввод
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "409":
-          description: Tariff exists
+          description: Тариф уже существует
           content:
             application/json:
               schema:
@@ -508,7 +508,7 @@ paths:
   /tariffs/{id}:
     get:
       tags: [Credits]
-      summary: Proxied to credits /tariffs/{id}
+      summary: Проксирован на credits /tariffs/{id}
       description: Тариф по ID.
       security:
         - bearerAuth: []
@@ -521,19 +521,19 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Proxied response from credits
+          description: Ответ от Credits (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TariffResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Tariff not found
+          description: Тариф не найден
           content:
             application/json:
               schema:
@@ -542,12 +542,12 @@ paths:
   /accounts:
     get:
       tags: [Core]
-      summary: Proxied to core /accounts
+      summary: Проксирован на core /accounts
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
@@ -555,20 +555,20 @@ paths:
                 items:
                   $ref: "#/components/schemas/Account"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
     post:
       tags: [Core]
-      summary: Proxied to core /accounts
+      summary: Проксирован на core /accounts
       security:
         - bearerAuth: []
       requestBody:
@@ -579,19 +579,19 @@ paths:
               $ref: "#/components/schemas/CreateAccountRequest"
       responses:
         "201":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -599,7 +599,7 @@ paths:
   /accounts/{id}:
     get:
       tags: [Core]
-      summary: Proxied to core /accounts/{id}
+      summary: Проксирован на core /accounts/{id}
       security:
         - bearerAuth: []
       parameters:
@@ -611,25 +611,25 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -638,7 +638,7 @@ paths:
   /accounts/{id}/close:
     post:
       tags: [Core]
-      summary: Proxied to core /accounts/{id}/close
+      summary: Проксирован на core /accounts/{id}/close
       security:
         - bearerAuth: []
       parameters:
@@ -650,31 +650,31 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "400":
-          description: Account already closed
+          description: Счёт уже закрыт
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -683,7 +683,7 @@ paths:
   /accounts/{id}/deposit:
     post:
       tags: [Core]
-      summary: Proxied to core /accounts/{id}/deposit
+      summary: Проксирован на core /accounts/{id}/deposit
       security:
         - bearerAuth: []
       parameters:
@@ -701,31 +701,31 @@ paths:
               $ref: "#/components/schemas/DepositWithdrawRequest"
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "400":
-          description: Invalid amount or account closed
+          description: Некорректная сумма или счёт закрыт
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -734,7 +734,7 @@ paths:
   /accounts/{id}/withdraw:
     post:
       tags: [Core]
-      summary: Proxied to core /accounts/{id}/withdraw
+      summary: Проксирован на core /accounts/{id}/withdraw
       security:
         - bearerAuth: []
       parameters:
@@ -752,31 +752,31 @@ paths:
               $ref: "#/components/schemas/DepositWithdrawRequest"
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "400":
-          description: Invalid amount, account closed, or insufficient balance
+          description: Некорректная сумма, счёт закрыт или недостаточно средств
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -785,7 +785,7 @@ paths:
   /accounts/{id}/operations:
     get:
       tags: [Core]
-      summary: Proxied to core /accounts/{id}/operations
+      summary: Проксирован на core /accounts/{id}/operations
       security:
         - bearerAuth: []
       parameters:
@@ -816,25 +816,25 @@ paths:
             default: desc
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccountOperationsPage"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -843,7 +843,7 @@ paths:
   /dashboard/clients-overview:
     get:
       tags: [Core]
-      summary: Proxied to core /dashboard/clients-overview
+      summary: Проксирован на core /dashboard/clients-overview
       description: Агрегированный обзор клиентов со счетами и кредитами (employee/admin).
       security:
         - bearerAuth: []
@@ -863,7 +863,7 @@ paths:
             default: 0
       responses:
         "200":
-          description: Proxied response from core
+          description: Ответ от Core (проксирован)
           content:
             application/json:
               schema:
@@ -884,9 +884,9 @@ paths:
                   total:
                     type: integer
         "401":
-          description: Unauthorized
+          description: Не авторизован
         "403":
-          description: Forbidden
+          description: Доступ запрещён
 components:
   securitySchemes:
     bearerAuth:
@@ -948,7 +948,7 @@ components:
           description: Тип гранта.
         refresh_token:
           type: string
-          description: Refresh token (opaque строка).
+          description: Refresh token (непрозрачная строка).
 
     AuthCodeRequest:
       type: object
@@ -978,7 +978,7 @@ components:
           description: Тип токена для заголовка Authorization.
         access_token:
           type: string
-          description: JWT access token.
+          description: JWT access token (токен доступа).
         refresh_token:
           type: string
           description: Refresh token (хранить безопасно, не логировать).

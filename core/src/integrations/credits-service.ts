@@ -13,13 +13,17 @@ export type CreditItem = {
   closedAt: string | null;
 };
 
-export async function fetchAllCredits(): Promise<CreditItem[]> {
+export async function fetchAllCredits(
+  authorization?: string,
+): Promise<CreditItem[]> {
   const url = `${env.creditsService.baseUrl}/internal/credits/by-clients`;
+  const headers: Record<string, string> = {
+    "x-internal-token": env.creditsService.internalToken,
+  };
+  if (authorization) headers["authorization"] = authorization;
   const res = await fetch(url, {
     method: "GET",
-    headers: {
-      "x-internal-token": env.creditsService.internalToken,
-    },
+    headers,
   });
 
   if (!res.ok) {

@@ -18,7 +18,7 @@ paths:
   /health:
     get:
       tags: [Credits]
-      summary: Healthcheck
+      summary: Проверка здоровья
       responses:
         "200":
           description: OK
@@ -29,13 +29,13 @@ paths:
   /tariffs:
     get:
       tags: [Credits]
-      summary: Active tariffs
+      summary: Активные тарифы
       description: Возвращает список активных тарифов (виден всем авторизованным пользователям).
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Tariffs list
+          description: Список тарифов
           content:
             application/json:
               schema:
@@ -43,7 +43,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/TariffResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -52,7 +52,7 @@ paths:
                 error: unauthorized
     post:
       tags: [Credits]
-      summary: Create tariff (employee/admin)
+      summary: Создание тарифа (employee/admin)
       description: Создаёт новый тариф. Доступно только `employee/admin`.
       security:
         - bearerAuth: []
@@ -70,7 +70,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/TariffResponse"
         "400":
-          description: Invalid input
+          description: Некорректный ввод
           content:
             application/json:
               schema:
@@ -81,7 +81,7 @@ paths:
                 invalid_billing_period:
                   value: { error: invalid_billing_period }
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -89,7 +89,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -97,7 +97,7 @@ paths:
               example:
                 error: forbidden
         "409":
-          description: Tariff exists
+          description: Тариф уже существует
           content:
             application/json:
               schema:
@@ -107,7 +107,7 @@ paths:
   /tariffs/{id}:
     get:
       tags: [Credits]
-      summary: Tariff by ID
+      summary: Тариф по ID
       description: Возвращает тариф по ID. Доступно всем авторизованным пользователям.
       security:
         - bearerAuth: []
@@ -120,13 +120,13 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Tariff
+          description: Тариф
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/TariffResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -134,7 +134,7 @@ paths:
               example:
                 error: unauthorized
         "404":
-          description: Tariff not found
+          description: Тариф не найден
           content:
             application/json:
               schema:
@@ -144,13 +144,13 @@ paths:
   /credits:
     get:
       tags: [Credits]
-      summary: All credits (employee/admin)
+      summary: Все кредиты (employee/admin)
       description: Возвращает полный список кредитов. Доступ только `employee/admin`.
       security:
         - bearerAuth: []
       responses:
         "200":
-          description: Credits list
+          description: Список кредитов
           content:
             application/json:
               schema:
@@ -158,7 +158,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/CreditResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -166,7 +166,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -176,7 +176,7 @@ paths:
   /credits/issue:
     post:
       tags: [Credits]
-      summary: Issue credit
+      summary: Выдача кредита
       description: |
         Выдаёт кредит и зачисляет деньги на `accountId` через интеграцию с Core.
 
@@ -193,13 +193,13 @@ paths:
               $ref: "#/components/schemas/IssueCreditRequest"
       responses:
         "201":
-          description: Credit created
+          description: Кредит создан
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreditResponse"
         "400":
-          description: Invalid input
+          description: Некорректный ввод
           content:
             application/json:
               schema:
@@ -208,7 +208,7 @@ paths:
                 invalid_input:
                   value: { error: invalid_input }
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -216,7 +216,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -224,7 +224,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Tariff not found
+          description: Тариф не найден
           content:
             application/json:
               schema:
@@ -234,7 +234,7 @@ paths:
   /credits/{id}/repay:
     post:
       tags: [Credits]
-      summary: Repay credit
+      summary: Погашение кредита
       description: |
         Погашает кредит (уменьшает `outstandingAmount`).
 
@@ -256,13 +256,13 @@ paths:
               $ref: "#/components/schemas/RepayCreditRequest"
       responses:
         "200":
-          description: Credit updated
+          description: Кредит обновлён
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/RepayCreditResponse"
         "400":
-          description: Invalid state or amount
+          description: Некорректное состояние или сумма
           content:
             application/json:
               schema:
@@ -273,7 +273,7 @@ paths:
                 credit_not_active:
                   value: { error: credit_not_active }
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -281,7 +281,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -289,7 +289,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Credit not found
+          description: Кредит не найден
           content:
             application/json:
               schema:
@@ -317,7 +317,7 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Credits list
+          description: Список кредитов
           content:
             application/json:
               schema:
@@ -325,7 +325,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/CreditResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -333,7 +333,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -343,7 +343,7 @@ paths:
   /credits/{id}:
     get:
       tags: [Credits]
-      summary: Credit details
+      summary: Детали кредита
       description: Детальная информация по кредиту.
       security:
         - bearerAuth: []
@@ -356,13 +356,13 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Credit
+          description: Кредит
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreditResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -370,7 +370,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -378,7 +378,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Credit not found
+          description: Кредит не найден
           content:
             application/json:
               schema:
@@ -388,7 +388,7 @@ paths:
   /credits/{id}/payments:
     get:
       tags: [Credits]
-      summary: Credit payment history
+      summary: История платежей по кредиту
       description: История событий по кредиту (платежи, выдача, начисления).
       security:
         - bearerAuth: []
@@ -401,7 +401,7 @@ paths:
             format: uuid
       responses:
         "200":
-          description: Payments list
+          description: Список платежей
           content:
             application/json:
               schema:
@@ -409,7 +409,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/CreditPaymentResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -417,7 +417,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -425,7 +425,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Credit not found
+          description: Кредит не найден
           content:
             application/json:
               schema:
@@ -435,7 +435,7 @@ paths:
   /credits/accrue/run:
     post:
       tags: [Credits]
-      summary: Run accrual worker cycle manually (employee/admin)
+      summary: Ручной запуск цикла начислений (employee/admin)
       description: |
         Ручной запуск цикла начислений процентов (для тестов/демо).
 
@@ -445,13 +445,13 @@ paths:
         - bearerAuth: []
       responses:
         "200":
-          description: Accrual summary
+          description: Итог начислений
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccrualSummaryResponse"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -459,7 +459,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:

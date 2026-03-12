@@ -19,7 +19,7 @@ paths:
   /dashboard/clients-overview:
     get:
       tags: [Core]
-      summary: Clients overview (employee/admin)
+      summary: Обзор клиентов (employee/admin)
       description: |
         Агрегированный обзор клиентов со счетами и кредитами.
         Только для employee/admin.
@@ -70,13 +70,13 @@ paths:
                     type: integer
                     description: Общее количество пользователей
         "401":
-          description: Unauthorized
+          description: Не авторизован
         "403":
-          description: Forbidden
+          description: Доступ запрещён
   /health:
     get:
       tags: [Core]
-      summary: Healthcheck
+      summary: Проверка здоровья
       responses:
         "200":
           description: OK
@@ -89,7 +89,7 @@ paths:
   /accounts:
     get:
       tags: [Core]
-      summary: List accounts
+      summary: Список счетов
       security:
         - bearerAuth: []
       parameters:
@@ -113,7 +113,7 @@ paths:
                 items:
                   $ref: "#/components/schemas/Account"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -121,7 +121,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -130,7 +130,7 @@ paths:
                 error: forbidden
     post:
       tags: [Core]
-      summary: Create account
+      summary: Создание счёта
       security:
         - bearerAuth: []
       requestBody:
@@ -141,13 +141,13 @@ paths:
               $ref: "#/components/schemas/CreateAccountRequest"
       responses:
         "201":
-          description: Created
+          description: Создано
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/Account"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -155,7 +155,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -165,7 +165,7 @@ paths:
   /accounts/{id}:
     get:
       tags: [Core]
-      summary: Get account
+      summary: Получить счёт
       security:
         - bearerAuth: []
       parameters:
@@ -183,7 +183,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Account"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -191,7 +191,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -199,7 +199,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -209,7 +209,7 @@ paths:
   /accounts/{id}/close:
     post:
       tags: [Core]
-      summary: Close account
+      summary: Закрытие счёта
       security:
         - bearerAuth: []
       parameters:
@@ -227,7 +227,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Account"
         "400":
-          description: Account already closed
+          description: Счёт уже закрыт
           content:
             application/json:
               schema:
@@ -235,7 +235,7 @@ paths:
               example:
                 error: account_already_closed
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -243,7 +243,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -251,7 +251,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -261,7 +261,7 @@ paths:
   /accounts/{id}/deposit:
     post:
       tags: [Core]
-      summary: Deposit to account
+      summary: Пополнение счёта
       security:
         - bearerAuth: []
       parameters:
@@ -285,7 +285,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Account"
         "400":
-          description: Invalid amount or account closed
+          description: Некорректная сумма или счёт закрыт
           content:
             application/json:
               schema:
@@ -298,7 +298,7 @@ paths:
                   summary: Счёт закрыт
                   value: { error: account_closed }
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -306,7 +306,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -314,7 +314,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -324,7 +324,7 @@ paths:
   /accounts/{id}/withdraw:
     post:
       tags: [Core]
-      summary: Withdraw from account
+      summary: Снятие со счёта
       security:
         - bearerAuth: []
       parameters:
@@ -348,7 +348,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Account"
         "400":
-          description: Invalid amount, account closed, or insufficient balance
+          description: Некорректная сумма, счёт закрыт или недостаточно средств
           content:
             application/json:
               schema:
@@ -364,7 +364,7 @@ paths:
                   summary: Недостаточно средств
                   value: { error: insufficient_balance }
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -372,7 +372,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -380,7 +380,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -390,7 +390,7 @@ paths:
   /accounts/{id}/operations:
     get:
       tags: [Core]
-      summary: List account operations
+      summary: Список операций по счёту
       security:
         - bearerAuth: []
       parameters:
@@ -430,7 +430,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/AccountOperationsPage"
         "401":
-          description: Unauthorized
+          description: Не авторизован
           content:
             application/json:
               schema:
@@ -438,7 +438,7 @@ paths:
               example:
                 error: unauthorized
         "403":
-          description: Forbidden
+          description: Доступ запрещён
           content:
             application/json:
               schema:
@@ -446,7 +446,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:
@@ -456,7 +456,7 @@ paths:
   /internal/accounts/{id}/operations:
     post:
       tags: [Internal]
-      summary: Internal create operation (for integrations)
+      summary: Внутренняя операция (для интеграций)
       description: |
         Интеграционный метод для других сервисов (например, `credits`).
 
@@ -481,19 +481,19 @@ paths:
               $ref: "#/components/schemas/InternalCreateAccountOperationRequest"
       responses:
         "201":
-          description: Created
+          description: Создано
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccountOperation"
         "200":
-          description: Idempotent replay, existing operation returned
+          description: Идемпотентный повтор, возвращена существующая операция
           content:
             application/json:
               schema:
                 $ref: "#/components/schemas/AccountOperation"
         "400":
-          description: Invalid amount, idempotency key required, account closed, or insufficient balance
+          description: Некорректная сумма, требуется ключ идемпотентности, счёт закрыт или недостаточно средств
           content:
             application/json:
               schema:
@@ -508,7 +508,7 @@ paths:
                 insufficient_balance:
                   value: { error: insufficient_balance }
         "401":
-          description: Unauthorized internal token
+          description: Не авторизован internal token
           content:
             application/json:
               schema:
@@ -516,7 +516,7 @@ paths:
               example:
                 error: unauthorized
         "404":
-          description: Account not found
+          description: Счёт не найден
           content:
             application/json:
               schema:

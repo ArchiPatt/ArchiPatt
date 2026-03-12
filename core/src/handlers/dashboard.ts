@@ -15,10 +15,11 @@ export function createDashboardHandlers(app: FastifyInstance) {
 
       const limit = parseInt(req.query?.limit ?? "20", 10) || 20;
       const offset = parseInt(req.query?.offset ?? "0", 10) || 0;
+      const authorization = req.headers.authorization as string | undefined;
       const res = await clientsOverviewController(app.db, auth.payload, {
         limit,
         offset,
-      });
+      }, authorization);
       return reply.code(res.status).send(res.body);
     },
   };

@@ -143,6 +143,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const internalOk =
         req.headers["x-internal-token"] === env.internalToken;
+      const authorization = req.headers.authorization as string | undefined;
       const amount =
         typeof req.body?.amount === "number"
           ? req.body.amount
@@ -158,7 +159,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
         idempotencyKey: req.body.idempotencyKey,
         type: req.body.type,
         meta: req.body.meta,
-      });
+      }, authorization);
       return reply.code(res.status).send(res.body);
     },
 
@@ -176,6 +177,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const internalOk =
         req.headers["x-internal-token"] === env.internalToken;
+      const authorization = req.headers.authorization as string | undefined;
       const amount =
         typeof req.body?.amount === "number"
           ? req.body.amount
@@ -191,7 +193,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
         idempotencyKey: req.body.idempotencyKey,
         type: req.body.type,
         meta: req.body.meta,
-      });
+      }, authorization);
       return reply.code(res.status).send(res.body);
     },
   };

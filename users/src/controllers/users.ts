@@ -1,6 +1,7 @@
 import { DataSource } from "typeorm";
 import { JWTPayload } from "jose";
 import { requireAuth, canManage } from "./auth";
+import { verifyBearerToken } from "../security/jwt";
 import {
   createUser,
   deleteById,
@@ -57,9 +58,16 @@ export async function internalListController(
   ds: DataSource,
   internalOk: boolean,
   params: { limit?: number; offset?: number },
+  authorization?: string,
 ) {
   if (!internalOk)
     return { status: 401 as const, body: { error: "unauthorized" } };
+  if (!authorization?.startsWith("Bearer "))
+    return { status: 401 as const, body: { error: "authorization_required" } };
+  const payload = await verifyBearerToken(authorization);
+  if (!payload || !canManage(payload))
+    return { status: 403 as const, body: { error: "forbidden" } };
+
   const limit = Math.max(1, params.limit ?? 20);
   const offset = Math.max(0, params.offset ?? 0);
   const { rows, total } = await listUsersPaginated(ds, limit, offset);
@@ -82,12 +90,23 @@ export async function internalByUsernameController(
   ds: DataSource,
   internalOk: boolean,
   params: { username: string },
+  authorization?: string,
 ) {
   if (!internalOk)
     return { status: 401 as const, body: { error: "unauthorized" } };
   const username = params.username.trim();
   if (!username)
     return { status: 400 as const, body: { error: "username_required" } };
+
+  if (authorization?.startsWith("Bearer ")) {
+    const payload = await verifyBearerToken(authorization);
+    if (!payload)
+      return { status: 401 as const, body: { error: "unauthorized" } };
+    const tokenUsername =
+      typeof payload.username === "string" ? payload.username : null;
+    if (!canManage(payload) && tokenUsername !== username)
+      return { status: 403 as const, body: { error: "forbidden" } };
+  }
 
   const user = await findByUsername(ds, username);
   if (!user) return { status: 404 as const, body: { error: "not_found" } };
