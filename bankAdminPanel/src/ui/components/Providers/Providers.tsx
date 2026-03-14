@@ -1,6 +1,6 @@
 import { MantineProvider } from '@mantine/core'
 import { Notifications } from '@mantine/notifications'
-import { queryClient } from '../../consts/queryClient'
+import { queryClient } from '../../../consts/queryClient'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { ModalsProvider } from '@mantine/modals'
 import { CreateTariffModal } from '../Modals/CreateTariffModal'

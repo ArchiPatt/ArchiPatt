@@ -4,11 +4,11 @@
  * Стандартный ответ healthcheck.
  */
 export type HealthResponse = {
-   /**
-    * Признак, что сервис жив.
-    */
-   ok: boolean
-}
+    /**
+     * Признак, что сервис жив.
+     */
+    ok: boolean;
+};
 
 /**
  * Единый формат ошибки в JSON.
@@ -17,8 +17,8 @@ export type HealthResponse = {
  *
  */
 export type ErrorResponse = {
-   error: string
-}
+    error: string;
+};
 
 /**
  * Денежное значение **строкой** с 2 знаками после точки (decimal).
@@ -26,70 +26,74 @@ export type ErrorResponse = {
  * Почему строкой: чтобы не ловить проблемы точности `number` (IEEE754) на фронте.
  *
  */
-export type MoneyString = string
+export type MoneyString = string;
 
 /**
  * Банковский счёт клиента.
  */
 export type Account = {
-   /**
-    * ID счёта.
-    */
-   id: string
-   /**
-    * ID владельца счёта (это `user.id` из Users Service).
-    */
-   clientId: string
-   balance: MoneyString
-   /**
-    * Статус счёта:
-    * - `open` – активен
-    * - `closed` – закрыт (операции списания/зачисления запрещены)
-    *
-    */
-   status: 'open' | 'closed'
-   /**
-    * Дата создания счёта.
-    */
-   createdAt: string
-}
+    /**
+     * ID счёта.
+     */
+    id: string;
+    /**
+     * ID владельца счёта (это `user.id` из Users Service).
+     */
+    clientId: string;
+    /**
+     * Валюта счёта (ISO 4217). Поддерживаются USD, EUR, RUB.
+     */
+    currency: 'USD' | 'EUR' | 'RUB';
+    balance: MoneyString;
+    /**
+     * Статус счёта:
+     * - `open` – активен
+     * - `closed` – закрыт (операции списания/зачисления запрещены)
+     *
+     */
+    status: 'open' | 'closed';
+    /**
+     * Дата создания счёта.
+     */
+    createdAt: string;
+};
 
 /**
  * Краткая информация о пользователе (из Users Service).
  */
 export type UserOverview = {
-   id?: string
-   username?: string
-   displayName?: string | null
-   roles?: Array<string>
-   isBlocked?: boolean
-}
+    id?: string;
+    username?: string;
+    displayName?: string | null;
+    roles?: Array<string>;
+    isBlocked?: boolean;
+};
 
 /**
  * Краткая информация о кредите (из Credits Service).
  */
 export type CreditOverview = {
-   id?: string
-   clientId?: string
-   accountId?: string
-   tariffId?: string
-   principalAmount?: MoneyString
-   outstandingAmount?: MoneyString
-   status?: 'active' | 'closed' | 'defaulted'
-   issuedAt?: string
-   nextPaymentDueAt?: string | null
-   closedAt?: string | null
-}
+    id?: string;
+    clientId?: string;
+    accountId?: string;
+    tariffId?: string;
+    principalAmount?: MoneyString;
+    outstandingAmount?: MoneyString;
+    status?: 'active' | 'closed' | 'defaulted';
+    issuedAt?: string;
+    nextPaymentDueAt?: string | null;
+    closedAt?: string | null;
+};
 
 /**
  * Тело запроса для пополнения/снятия.
  */
 export type DepositWithdrawRequest = {
-   /**
-    * Сумма операции. Должна быть строго больше 0.
-    */
-   amount: number
-}
+    /**
+     * Сумма операции. Должна быть строго больше 0.
+     */
+    amount: number;
+};
 
 /**
  * Операция по счёту (движение денег).
@@ -98,479 +102,556 @@ export type DepositWithdrawRequest = {
  *
  */
 export type AccountOperation = {
-   /**
-    * ID операции.
-    */
-   id: string
-   /**
-    * ID счёта.
-    */
-   accountId: string
-   amount: MoneyString
-   /**
-    * Тип операции (бизнес-метка).
-    * Для публичных операций может быть `deposit` или `withdraw`.
-    * Для интеграций может быть любая строка или `null`.
-    *
-    */
-   type?: string | null
-   /**
-    * ID корреляции (для сквозной трассировки между сервисами).
-    */
-   correlationId?: string | null
-   /**
-    * Ключ идемпотентности (используется в internal-операциях).
-    * Уникален в рамках `accountId`.
-    *
-    */
-   idempotencyKey?: string | null
-   /**
-    * Произвольные метаданные операции (JSON).
-    */
-   meta?: {
-      [key: string]: unknown
-   } | null
-   /**
-    * Время создания операции.
-    */
-   createdAt: string
-}
+    /**
+     * ID операции.
+     */
+    id: string;
+    /**
+     * ID счёта.
+     */
+    accountId: string;
+    amount: MoneyString;
+    /**
+     * Тип операции (бизнес-метка).
+     * Для публичных операций может быть `deposit` или `withdraw`.
+     * Для интеграций может быть любая строка или `null`.
+     *
+     */
+    type?: string | null;
+    /**
+     * ID корреляции (для сквозной трассировки между сервисами).
+     */
+    correlationId?: string | null;
+    /**
+     * Ключ идемпотентности (используется в internal-операциях).
+     * Уникален в рамках `accountId`.
+     *
+     */
+    idempotencyKey?: string | null;
+    /**
+     * Произвольные метаданные операции (JSON).
+     */
+    meta?: {
+        [key: string]: unknown;
+    } | null;
+    /**
+     * Время создания операции.
+     */
+    createdAt: string;
+};
 
 /**
  * Пагинированный список операций по счёту.
  */
 export type AccountOperationsPage = {
-   items: Array<AccountOperation>
-   /**
-    * Общее количество операций по счёту (без учёта limit/offset).
-    */
-   total: number
-}
+    items: Array<AccountOperation>;
+    /**
+     * Общее количество операций по счёту (без учёта limit/offset).
+     */
+    total: number;
+};
 
 /**
  * Создание счёта.
  *
- * - **client**: тело можно не передавать – счёт создаётся на `token.sub`
- * - **employee/admin**: можно указать `clientId`, чтобы создать счёт на конкретного клиента
+ * - **client**: тело можно не передавать – счёт создаётся на `token.sub` в валюте RUB по умолчанию
+ * - **employee/admin**: можно указать `clientId` и `currency`
  *
  */
 export type CreateAccountRequest = {
-   /**
-    * ID клиента, для которого создаём счёт (только employee/admin).
-    */
-   clientId?: string
-}
+    /**
+     * ID клиента, для которого создаём счёт (только employee/admin).
+     */
+    clientId?: string;
+    /**
+     * Валюта счёта. По умолчанию RUB.
+     */
+    currency?: 'USD' | 'EUR' | 'RUB';
+};
+
+/**
+ * Запрос на перевод между счетами. При разной валюте – конвертация по курсу.
+ */
+export type TransferRequest = {
+    /**
+     * ID счёта списания (должен принадлежать текущему пользователю или доступен employee/admin).
+     */
+    fromAccountId: string;
+    /**
+     * ID счёта зачисления (свой или чужой).
+     */
+    toAccountId: string;
+    /**
+     * Сумма в валюте счёта списания. Должна быть строго больше 0.
+     */
+    amount: number;
+    /**
+     * Опциональный ключ идемпотентности для повторных запросов.
+     */
+    idempotencyKey?: string;
+};
 
 /**
  * Запрос на создание операции по счёту из другого сервиса.
  */
 export type InternalCreateAccountOperationRequest = {
-   /**
-    * Сумма операции.
-    * - положительное число – зачисление
-    * - отрицательное число – списание
-    *
-    */
-   amount: number
-   /**
-    * Ключ идемпотентности. Повтор запроса с тем же ключом вернёт ту же операцию.
-    *
-    */
-   idempotencyKey: string
-   /**
-    * Бизнес-тип операции (опционально).
-    */
-   type?: string | null
-   /**
-    * Идентификатор корреляции (опционально).
-    */
-   correlationId?: string | null
-   /**
-    * Любые метаданные (JSON), например `{ creditId, clientId }`.
-    */
-   meta?: {
-      [key: string]: unknown
-   } | null
-}
+    /**
+     * Сумма операции.
+     * - положительное число – зачисление
+     * - отрицательное число – списание
+     *
+     */
+    amount: number;
+    /**
+     * Ключ идемпотентности. Повтор запроса с тем же ключом вернёт ту же операцию.
+     *
+     */
+    idempotencyKey: string;
+    /**
+     * Бизнес-тип операции (опционально).
+     */
+    type?: string | null;
+    /**
+     * Идентификатор корреляции (опционально).
+     */
+    correlationId?: string | null;
+    /**
+     * Любые метаданные (JSON), например `{ creditId, clientId }`.
+     */
+    meta?: {
+        [key: string]: unknown;
+    } | null;
+};
 
 export type GetDashboardClientsOverviewData = {
-   body?: never
-   path?: never
-   query?: {
-      /**
-       * Количество клиентов на странице
-       */
-      limit?: number
-      /**
-       * Смещение для пагинации
-       */
-      offset?: number
-   }
-   url: '/dashboard/clients-overview'
-}
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Количество клиентов на странице
+         */
+        limit?: number;
+        /**
+         * Смещение для пагинации
+         */
+        offset?: number;
+    };
+    url: '/dashboard/clients-overview';
+};
 
 export type GetDashboardClientsOverviewErrors = {
-   /**
-    * Unauthorized
-    */
-   401: unknown
-   /**
-    * Forbidden
-    */
-   403: unknown
-}
+    /**
+     * Не авторизован
+     */
+    401: unknown;
+    /**
+     * Доступ запрещён
+     */
+    403: unknown;
+};
 
 export type GetDashboardClientsOverviewResponses = {
-   /**
-    * OK
-    */
-   200: {
-      items: Array<{
-         user: UserOverview
-         accounts: Array<Account>
-         credits: Array<CreditOverview>
-      }>
-      /**
-       * Общее количество пользователей
-       */
-      total: number
-   }
-}
+    /**
+     * OK
+     */
+    200: {
+        items: Array<{
+            user: UserOverview;
+            accounts: Array<Account>;
+            credits: Array<CreditOverview>;
+        }>;
+        /**
+         * Общее количество пользователей
+         */
+        total: number;
+    };
+};
 
-export type GetDashboardClientsOverviewResponse =
-   GetDashboardClientsOverviewResponses[keyof GetDashboardClientsOverviewResponses]
+export type GetDashboardClientsOverviewResponse = GetDashboardClientsOverviewResponses[keyof GetDashboardClientsOverviewResponses];
 
 export type GetHealthData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/health'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/health';
+};
 
 export type GetHealthResponses = {
-   /**
-    * OK
-    */
-   200: HealthResponse
-}
+    /**
+     * OK
+     */
+    200: HealthResponse;
+};
 
-export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses]
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+
+export type GetCurrenciesData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/currencies';
+};
+
+export type GetCurrenciesResponses = {
+    /**
+     * OK
+     */
+    200: {
+        currencies: Array<'USD' | 'EUR' | 'RUB'>;
+    };
+};
+
+export type GetCurrenciesResponse = GetCurrenciesResponses[keyof GetCurrenciesResponses];
 
 export type GetAccountsData = {
-   body?: never
-   path?: never
-   query?: {
-      /**
-       * Фильтр по владельцу счета.
-       *
-       * - **client**: параметр игнорируется, всегда вернутся только свои счета (`clientId = token.sub`)
-       * - **employee/admin**: можно указать `clientId` и получить счета конкретного клиента, либо без фильтра – все счета
-       *
-       */
-      clientId?: string
-   }
-   url: '/accounts'
-}
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Фильтр по владельцу счета.
+         *
+         * - **client**: параметр игнорируется, всегда вернутся только свои счета (`clientId = token.sub`)
+         * - **employee/admin**: можно указать `clientId` и получить счета конкретного клиента, либо без фильтра – все счета
+         *
+         */
+        clientId?: string;
+    };
+    url: '/accounts';
+};
 
 export type GetAccountsErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
 
-export type GetAccountsError = GetAccountsErrors[keyof GetAccountsErrors]
+export type GetAccountsError = GetAccountsErrors[keyof GetAccountsErrors];
 
 export type GetAccountsResponses = {
-   /**
-    * OK
-    */
-   200: Array<Account>
-}
+    /**
+     * OK
+     */
+    200: Array<Account>;
+};
 
-export type GetAccountsResponse = GetAccountsResponses[keyof GetAccountsResponses]
+export type GetAccountsResponse = GetAccountsResponses[keyof GetAccountsResponses];
 
 export type PostAccountsData = {
-   body?: CreateAccountRequest
-   path?: never
-   query?: never
-   url: '/accounts'
-}
+    body?: CreateAccountRequest;
+    path?: never;
+    query?: never;
+    url: '/accounts';
+};
 
 export type PostAccountsErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
 
-export type PostAccountsError = PostAccountsErrors[keyof PostAccountsErrors]
+export type PostAccountsError = PostAccountsErrors[keyof PostAccountsErrors];
 
 export type PostAccountsResponses = {
-   /**
-    * Created
-    */
-   201: Account
-}
+    /**
+     * Создано
+     */
+    201: Account;
+};
 
-export type PostAccountsResponse = PostAccountsResponses[keyof PostAccountsResponses]
+export type PostAccountsResponse = PostAccountsResponses[keyof PostAccountsResponses];
+
+export type PostAccountsTransferData = {
+    body: TransferRequest;
+    path?: never;
+    query?: never;
+    url: '/accounts/transfer';
+};
+
+export type PostAccountsTransferErrors = {
+    /**
+     * Invalid input or business rule
+     */
+    400: ErrorResponse;
+    /**
+     * Unauthorized
+     */
+    401: ErrorResponse;
+    /**
+     * Forbidden
+     */
+    403: ErrorResponse;
+    /**
+     * Account not found
+     */
+    404: ErrorResponse;
+    /**
+     * Timeout or exchange rate unavailable
+     */
+    503: ErrorResponse;
+};
+
+export type PostAccountsTransferError = PostAccountsTransferErrors[keyof PostAccountsTransferErrors];
+
+export type PostAccountsTransferResponses = {
+    /**
+     * OK
+     */
+    200: {
+        ok: boolean;
+    };
+};
+
+export type PostAccountsTransferResponse = PostAccountsTransferResponses[keyof PostAccountsTransferResponses];
 
 export type GetAccountsByIdData = {
-   body?: never
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/accounts/{id}'
-}
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/accounts/{id}';
+};
 
 export type GetAccountsByIdErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Account not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Счёт не найден
+     */
+    404: ErrorResponse;
+};
 
-export type GetAccountsByIdError = GetAccountsByIdErrors[keyof GetAccountsByIdErrors]
+export type GetAccountsByIdError = GetAccountsByIdErrors[keyof GetAccountsByIdErrors];
 
 export type GetAccountsByIdResponses = {
-   /**
-    * OK
-    */
-   200: Account
-}
+    /**
+     * OK
+     */
+    200: Account;
+};
 
-export type GetAccountsByIdResponse = GetAccountsByIdResponses[keyof GetAccountsByIdResponses]
+export type GetAccountsByIdResponse = GetAccountsByIdResponses[keyof GetAccountsByIdResponses];
 
 export type PostAccountsByIdCloseData = {
-   body?: never
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/accounts/{id}/close'
-}
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/accounts/{id}/close';
+};
 
 export type PostAccountsByIdCloseErrors = {
-   /**
-    * Account already closed
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Account not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Счёт уже закрыт
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Счёт не найден
+     */
+    404: ErrorResponse;
+};
 
-export type PostAccountsByIdCloseError = PostAccountsByIdCloseErrors[keyof PostAccountsByIdCloseErrors]
+export type PostAccountsByIdCloseError = PostAccountsByIdCloseErrors[keyof PostAccountsByIdCloseErrors];
 
 export type PostAccountsByIdCloseResponses = {
-   /**
-    * OK
-    */
-   200: Account
-}
+    /**
+     * OK
+     */
+    200: Account;
+};
 
-export type PostAccountsByIdCloseResponse =
-   PostAccountsByIdCloseResponses[keyof PostAccountsByIdCloseResponses]
+export type PostAccountsByIdCloseResponse = PostAccountsByIdCloseResponses[keyof PostAccountsByIdCloseResponses];
 
 export type PostAccountsByIdDepositData = {
-   body: DepositWithdrawRequest
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/accounts/{id}/deposit'
-}
+    body: DepositWithdrawRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/accounts/{id}/deposit';
+};
 
 export type PostAccountsByIdDepositErrors = {
-   /**
-    * Invalid amount or account closed
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Account not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Некорректная сумма или счёт закрыт
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Счёт не найден
+     */
+    404: ErrorResponse;
+};
 
-export type PostAccountsByIdDepositError =
-   PostAccountsByIdDepositErrors[keyof PostAccountsByIdDepositErrors]
+export type PostAccountsByIdDepositError = PostAccountsByIdDepositErrors[keyof PostAccountsByIdDepositErrors];
 
 export type PostAccountsByIdDepositResponses = {
-   /**
-    * OK
-    */
-   200: Account
-}
+    /**
+     * OK
+     */
+    200: Account;
+};
 
-export type PostAccountsByIdDepositResponse =
-   PostAccountsByIdDepositResponses[keyof PostAccountsByIdDepositResponses]
+export type PostAccountsByIdDepositResponse = PostAccountsByIdDepositResponses[keyof PostAccountsByIdDepositResponses];
 
 export type PostAccountsByIdWithdrawData = {
-   body: DepositWithdrawRequest
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/accounts/{id}/withdraw'
-}
+    body: DepositWithdrawRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/accounts/{id}/withdraw';
+};
 
 export type PostAccountsByIdWithdrawErrors = {
-   /**
-    * Invalid amount, account closed, or insufficient balance
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Account not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Некорректная сумма, счёт закрыт или недостаточно средств
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Счёт не найден
+     */
+    404: ErrorResponse;
+};
 
-export type PostAccountsByIdWithdrawError =
-   PostAccountsByIdWithdrawErrors[keyof PostAccountsByIdWithdrawErrors]
+export type PostAccountsByIdWithdrawError = PostAccountsByIdWithdrawErrors[keyof PostAccountsByIdWithdrawErrors];
 
 export type PostAccountsByIdWithdrawResponses = {
-   /**
-    * OK
-    */
-   200: Account
-}
+    /**
+     * OK
+     */
+    200: Account;
+};
 
-export type PostAccountsByIdWithdrawResponse =
-   PostAccountsByIdWithdrawResponses[keyof PostAccountsByIdWithdrawResponses]
+export type PostAccountsByIdWithdrawResponse = PostAccountsByIdWithdrawResponses[keyof PostAccountsByIdWithdrawResponses];
 
 export type GetAccountsByIdOperationsData = {
-   body?: never
-   path: {
-      id: string
-   }
-   query?: {
-      /**
-       * Размер страницы.
-       */
-      limit?: number
-      /**
-       * Смещение от начала списка (для пагинации).
-       */
-      offset?: number
-      /**
-       * Сортировка по `createdAt` (новые сверху по умолчанию).
-       */
-      sort?: 'asc' | 'desc'
-   }
-   url: '/accounts/{id}/operations'
-}
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: {
+        /**
+         * Размер страницы.
+         */
+        limit?: number;
+        /**
+         * Смещение от начала списка (для пагинации).
+         */
+        offset?: number;
+        /**
+         * Сортировка по `createdAt` (новые сверху по умолчанию).
+         */
+        sort?: 'asc' | 'desc';
+    };
+    url: '/accounts/{id}/operations';
+};
 
 export type GetAccountsByIdOperationsErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Account not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Счёт не найден
+     */
+    404: ErrorResponse;
+};
 
-export type GetAccountsByIdOperationsError =
-   GetAccountsByIdOperationsErrors[keyof GetAccountsByIdOperationsErrors]
+export type GetAccountsByIdOperationsError = GetAccountsByIdOperationsErrors[keyof GetAccountsByIdOperationsErrors];
 
 export type GetAccountsByIdOperationsResponses = {
-   /**
-    * OK
-    */
-   200: AccountOperationsPage
-}
+    /**
+     * OK
+     */
+    200: AccountOperationsPage;
+};
 
-export type GetAccountsByIdOperationsResponse =
-   GetAccountsByIdOperationsResponses[keyof GetAccountsByIdOperationsResponses]
+export type GetAccountsByIdOperationsResponse = GetAccountsByIdOperationsResponses[keyof GetAccountsByIdOperationsResponses];
 
 export type PostInternalAccountsByIdOperationsData = {
-   body: InternalCreateAccountOperationRequest
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/internal/accounts/{id}/operations'
-}
+    body: InternalCreateAccountOperationRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/internal/accounts/{id}/operations';
+};
 
 export type PostInternalAccountsByIdOperationsErrors = {
-   /**
-    * Invalid amount, idempotency key required, account closed, or insufficient balance
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized internal token
-    */
-   401: ErrorResponse
-   /**
-    * Account not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Некорректная сумма, требуется ключ идемпотентности, счёт закрыт или недостаточно средств
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован internal token
+     */
+    401: ErrorResponse;
+    /**
+     * Счёт не найден
+     */
+    404: ErrorResponse;
+};
 
-export type PostInternalAccountsByIdOperationsError =
-   PostInternalAccountsByIdOperationsErrors[keyof PostInternalAccountsByIdOperationsErrors]
+export type PostInternalAccountsByIdOperationsError = PostInternalAccountsByIdOperationsErrors[keyof PostInternalAccountsByIdOperationsErrors];
 
 export type PostInternalAccountsByIdOperationsResponses = {
-   /**
-    * Idempotent replay, existing operation returned
-    */
-   200: AccountOperation
-   /**
-    * Created
-    */
-   201: AccountOperation
-}
+    /**
+     * Идемпотентный повтор, возвращена существующая операция
+     */
+    200: AccountOperation;
+    /**
+     * Создано
+     */
+    201: AccountOperation;
+};
 
-export type PostInternalAccountsByIdOperationsResponse =
-   PostInternalAccountsByIdOperationsResponses[keyof PostInternalAccountsByIdOperationsResponses]
+export type PostInternalAccountsByIdOperationsResponse = PostInternalAccountsByIdOperationsResponses[keyof PostInternalAccountsByIdOperationsResponses];
 
 export type ClientOptions = {
-   baseUrl: 'http://localhost:4003' | (string & {})
-}
+    baseUrl: 'http://localhost:4003' | (string & {});
+};

@@ -11,12 +11,9 @@ import {
    Text,
    Title
 } from '@mantine/core'
-import { useSearchParams } from 'react-router-dom'
-import { useDashboardClientsOverviewQuery } from '../../api/hooks/useDashboardClientsOverviewQuery'
 import { AccountCard } from '../../components/Dashboard/AccountCard'
 import { CreditCard } from '../../components/Dashboard/CreditCard'
-
-const DEFAULT_LIMIT = 10
+import { useHome } from '../../../useCases/pages/useHome'
 
 const getUserRoleLabel = (roles?: string[]) => {
    if (!roles || roles.length === 0) return 'Клиент'
@@ -29,33 +26,9 @@ const getUserRoleLabel = (roles?: string[]) => {
 }
 
 export const Home = () => {
-   const [searchParams, setSearchParams] = useSearchParams()
+   const { state, functions } = useHome()
 
-   const pageParam = Number(searchParams.get('page') || '1')
-   const limitParam = Number(searchParams.get('limit') || `${DEFAULT_LIMIT}`)
-
-   const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam
-   const limit = Number.isNaN(limitParam) || limitParam <= 0 ? DEFAULT_LIMIT : limitParam
-
-   const offset = (page - 1) * limit
-
-   const dashboardQuery = useDashboardClientsOverviewQuery({ limit, offset })
-
-   const total = dashboardQuery.data?.data?.total ?? 0
-   const totalPages = total > 0 ? Math.ceil(total / limit) : 1
-
-   const handlePageChange = (nextPage: number) => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev)
-
-         next.set('page', String(nextPage))
-         next.set('limit', String(limit))
-
-         return next
-      })
-   }
-
-   if (dashboardQuery.isLoading) {
+   if (state.isLoading) {
       return (
          <Center h="100%">
             <Loader />
@@ -63,7 +36,7 @@ export const Home = () => {
       )
    }
 
-   if (!dashboardQuery.data || dashboardQuery.data.data.items.length === 0) {
+   if (!state.dashboardData || state.dashboardData.items.length === 0) {
       return (
          <Alert color="blue" title="Главная страница">
             Клиенты не найдены
@@ -76,12 +49,12 @@ export const Home = () => {
          <Group justify="space-between">
             <Title order={2}>Обзор клиентов</Title>
             <Text c="dimmed" size="sm">
-               Всего клиентов: {total}
+               Всего клиентов: {state.total}
             </Text>
          </Group>
 
          <Stack gap="lg">
-            {dashboardQuery.data.data.items.map((item) => (
+            {state.dashboardData.items.map((item) => (
                <Card key={item.user.id} withBorder shadow="sm" radius="md" p="lg">
                   <Stack gap="md">
                      <Group justify="space-between" align="flex-start">
@@ -161,14 +134,14 @@ export const Home = () => {
 
          <Center>
             <Pagination
-               value={page}
-               onChange={handlePageChange}
-               total={Math.max(totalPages, 1)}
+               value={state.page}
+               onChange={functions.handlePageChange}
+               total={Math.max(state.totalPages, 1)}
                size="md"
                radius="md"
                withEdges
                withControls
-               disabled={totalPages <= 1}
+               disabled={state.totalPages <= 1}
             />
          </Center>
       </Stack>

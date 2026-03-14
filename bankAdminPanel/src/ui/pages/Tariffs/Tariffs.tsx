@@ -1,19 +1,10 @@
 import { Alert, Badge, Button, Center, Group, Loader, Stack, Table, Title } from '@mantine/core'
-import { useTariffsQuery } from '../../api/hooks/useTariffsQuery'
-import { modals } from '@mantine/modals'
+import { useTariffs } from '../../../useCases/pages/useTariffs'
 
 export const Tariffs = () => {
-   const tariffsQuery = useTariffsQuery()
+   const { state, functions } = useTariffs()
 
-   const handleOpenCreateTariff = () => {
-      modals.openContextModal({
-         modal: 'createTariff',
-         title: 'Создать тариф',
-         innerProps: {}
-      })
-   }
-
-   if (tariffsQuery.isLoading) {
+   if (state.isLoading) {
       return (
          <Center h="100%">
             <Loader />
@@ -21,7 +12,7 @@ export const Tariffs = () => {
       )
    }
 
-   if (tariffsQuery.isFetched && (!tariffsQuery.data || tariffsQuery.data.data.length === 0)) {
+   if (state.isFetched && (!state.tariffsData || state.tariffsData.length === 0)) {
       return (
          <Alert color="blue" title="Тарифы">
             Тарифы не найдены
@@ -33,7 +24,7 @@ export const Tariffs = () => {
       <Stack gap="md">
          <Group justify="space-between">
             <Title order={2}>Тарифы</Title>
-            <Button onClick={handleOpenCreateTariff}>Создать тариф</Button>
+            <Button onClick={functions.handleOpenCreateTariff}>Создать тариф</Button>
          </Group>
          <Table striped highlightOnHover withTableBorder withColumnBorders>
             <Table.Thead>
@@ -45,7 +36,7 @@ export const Tariffs = () => {
                </Table.Tr>
             </Table.Thead>
             <Table.Tbody>
-               {tariffsQuery.data?.data.map((tariff) => (
+               {state.tariffsData?.map((tariff) => (
                   <Table.Tr key={tariff.id}>
                      <Table.Td>{tariff.name}</Table.Td>
                      <Table.Td>{`${(Number(tariff.interestRate) * 100).toFixed(2)}%`}</Table.Td>

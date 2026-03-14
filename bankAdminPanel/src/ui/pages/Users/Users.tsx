@@ -11,12 +11,9 @@ import {
    Text,
    Title
 } from '@mantine/core'
-import { modals } from '@mantine/modals'
-import { useUsersQuery } from '../../api/hooks/useUsersQuery'
-import { useBlockUserMutation } from '../../api/hooks/useBlockUserMutation'
-import { formatDate } from '../../utils/formatDate'
-import { useUserQuery } from '../../api/hooks/useUserQuery'
+import { formatDate } from '../../../utils/formatDate'
 import classes from './Users.module.css'
+import { useUsers } from '../../../useCases/pages/useUsers'
 
 const getUserRoleLabel = (roles?: string[]) => {
    if (!roles || roles.length === 0) return 'Клиент'
@@ -29,17 +26,9 @@ const getUserRoleLabel = (roles?: string[]) => {
 }
 
 export const Users = () => {
-   const usersQuery = useUsersQuery()
-   const blockUser = useBlockUserMutation()
-   const meQuery = useUserQuery()
+   const { state, functions } = useUsers()
 
-   const currentUserId = meQuery.data?.data?.id
-
-   const handleOpenCreateUserModal = () => {
-      modals.openContextModal({ modal: 'createUser', title: 'Создать пользователя', innerProps: {} })
-   }
-
-   if (usersQuery.isLoading) {
+   if (state.isLoading) {
       return (
          <Center h="100%">
             <Loader />
@@ -47,7 +36,7 @@ export const Users = () => {
       )
    }
 
-   if (usersQuery.isError) {
+   if (state.isError) {
       return (
          <Alert color="red" title="Ошибка">
             Не удалось загрузить пользователей
@@ -55,9 +44,7 @@ export const Users = () => {
       )
    }
 
-   const users = usersQuery.data?.data ?? []
-
-   if (users.length === 0) {
+   if (state.usersData?.length === 0) {
       return (
          <Alert color="blue" title="Пользователи">
             Пользователи не найдены
@@ -71,16 +58,16 @@ export const Users = () => {
             <Title order={2}>Пользователи</Title>
             <Group>
                <Text c="dimmed" size="sm">
-                  Всего пользователей: {users.length}
+                  Всего пользователей: {state.usersData?.length}
                </Text>
-               <Button onClick={handleOpenCreateUserModal}>Создать пользователя</Button>
+               <Button onClick={functions.handleOpenCreateUserModal}>Создать пользователя</Button>
             </Group>
          </Group>
 
          <Stack gap="md">
-            {users.map((user) => {
+            {state.usersData?.map((user) => {
                const isBlocked = user.isBlocked
-               const isCurrentUser = currentUserId === user.id
+               const isCurrentUser = state.meData?.id === user.id
 
                return (
                   <Card key={user.id} withBorder shadow="sm" radius="md" p="lg">
@@ -118,10 +105,10 @@ export const Users = () => {
                         <Button
                            variant={isBlocked ? 'light' : 'outline'}
                            color={isBlocked ? 'green' : 'red'}
-                           loading={blockUser.isPending}
+                           loading={state.blockUser.isPending}
                            disabled={isCurrentUser}
                            onClick={() =>
-                              blockUser.mutate({
+                              state.blockUser.mutate({
                                  id: user.id,
                                  isBlocked: !isBlocked
                               })

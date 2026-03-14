@@ -1,11 +1,11 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { Providers } from './components/Providers/Providers'
-import { Layout } from './components/Layout/Layout'
-import { Home } from './pages/Home/Home'
-import { Tariffs } from './pages/Tariffs/Tariffs'
-import { Users } from './pages/Users/Users'
-import { AccountDetails } from './pages/AccountDetails/AccountDetails'
-import { CreditDetails } from './pages/CreditDetails/CreditDetails'
+import { Providers } from './ui/components/Providers/Providers'
+import { Layout } from './ui/components/Layout/Layout'
+import { Home } from './ui/pages/Home/Home'
+import { Tariffs } from './ui/pages/Tariffs/Tariffs'
+import { Users } from './ui/pages/Users/Users'
+import { AccountDetails } from './ui/pages/AccountDetails/AccountDetails'
+import { CreditDetails } from './ui/pages/CreditDetails/CreditDetails'
 
 function App() {
    return (
