@@ -86,6 +86,28 @@ export type CreditOverview = {
 };
 
 /**
+ * Кредитный рейтинг клиента (0–100).
+ */
+export type CreditRating = {
+    /**
+     * Балл рейтинга (0–100).
+     */
+    score: number;
+    /**
+     * Количество просроченных кредитов.
+     */
+    overdueCount: number;
+    /**
+     * Всего кредитов у клиента.
+     */
+    totalCredits: number;
+    /**
+     * Количество закрытых кредитов.
+     */
+    closedCount: number;
+};
+
+/**
  * Тело запроса для пополнения/снятия.
  */
 export type DepositWithdrawRequest = {
@@ -259,6 +281,7 @@ export type GetDashboardClientsOverviewResponses = {
             user: UserOverview;
             accounts: Array<Account>;
             credits: Array<CreditOverview>;
+            creditRating: CreditRating;
         }>;
         /**
          * Общее количество пользователей
