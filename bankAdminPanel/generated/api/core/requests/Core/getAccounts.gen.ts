@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetAccountsData, GetAccountsResponse } from "..\\..\\types.gen";
+import type { GetAccountsData, GetAccountsResponse, GetAccountsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetAccountsRequestParams = AxiosRequestParams<GetAccountsData>;
 
-export const getAccounts = ({ config, query }: GetAccountsRequestParams = {}) => instance.request<GetAccountsResponse>({
+export const getAccounts = ({ config, query }: GetAccountsRequestParams = {}) => instance.request<GetAccountsResponse | GetAccountsError>({
     method: "GET",
     url: "/accounts",
     params: query,

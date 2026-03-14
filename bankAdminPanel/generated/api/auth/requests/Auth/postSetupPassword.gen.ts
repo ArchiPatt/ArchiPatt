@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostSetupPasswordData, PostSetupPasswordResponse } from "..\\..\\types.gen";
+import type { PostSetupPasswordData, PostSetupPasswordResponse, PostSetupPasswordError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostSetupPasswordRequestParams = AxiosRequestParams<PostSetupPasswordData>;
 
-export const postSetupPassword = ({ config, body }: PostSetupPasswordRequestParams) => instance.request<PostSetupPasswordResponse>({
+export const postSetupPassword = ({ config, body }: PostSetupPasswordRequestParams) => instance.request<PostSetupPasswordResponse | PostSetupPasswordError>({
     method: "POST",
     url: "/setup-password",
     data: body,

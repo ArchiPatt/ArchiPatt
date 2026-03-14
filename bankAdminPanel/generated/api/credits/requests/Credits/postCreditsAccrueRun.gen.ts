@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostCreditsAccrueRunData, PostCreditsAccrueRunResponse } from "..\\..\\types.gen";
+import type { PostCreditsAccrueRunData, PostCreditsAccrueRunResponse, PostCreditsAccrueRunError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostCreditsAccrueRunRequestParams = AxiosRequestParams<PostCreditsAccrueRunData>;
 
-export const postCreditsAccrueRun = ({ config }: PostCreditsAccrueRunRequestParams = {}) => instance.request<PostCreditsAccrueRunResponse>({
+export const postCreditsAccrueRun = ({ config }: PostCreditsAccrueRunRequestParams = {}) => instance.request<PostCreditsAccrueRunResponse | PostCreditsAccrueRunError>({
     method: "POST",
     url: "/credits/accrue/run",
     ...config

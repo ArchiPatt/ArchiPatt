@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostCreditsByIdRepayData, PostCreditsByIdRepayResponse } from "..\\..\\types.gen";
+import type { PostCreditsByIdRepayData, PostCreditsByIdRepayResponse, PostCreditsByIdRepayError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostCreditByIdRepayRequestParams = AxiosRequestParams<PostCreditsByIdRepayData>;
 
-export const postCreditByIdRepay = ({ config, body, path }: PostCreditByIdRepayRequestParams) => instance.request<PostCreditsByIdRepayResponse>({
+export const postCreditByIdRepay = ({ config, body, path }: PostCreditByIdRepayRequestParams) => instance.request<PostCreditsByIdRepayResponse | PostCreditsByIdRepayError>({
     method: "POST",
     url: `/credits/${path.id}/repay`,
     data: body,

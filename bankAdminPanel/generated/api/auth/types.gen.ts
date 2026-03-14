@@ -4,27 +4,27 @@
  * Ошибка в OAuth-like формате (используется в `/token`).
  */
 export type OAuthError = {
-   /**
-    * Код ошибки. Обычно:
-    * - `invalid_request` – не хватает обязательных полей
-    * - `invalid_grant` – неверный/просроченный code или refresh token
-    * - `unsupported_grant_type` – неизвестный grant_type
-    *
-    */
-   error: string
-   /**
-    * Человекочитаемое пояснение (может отсутствовать).
-    */
-   error_description?: string
-}
+    /**
+     * Код ошибки. Обычно:
+     * - `invalid_request` – не хватает обязательных полей
+     * - `invalid_grant` – неверный/просроченный code или refresh token
+     * - `unsupported_grant_type` – неизвестный grant_type
+     *
+     */
+    error: string;
+    /**
+     * Человекочитаемое пояснение (может отсутствовать).
+     */
+    error_description?: string;
+};
 
 /**
  * Простой JSON-формат ошибки: `{ "error": "..." }`.
  *
  */
 export type SimpleError = {
-   error: string
-}
+    error: string;
+};
 
 /**
  * Ошибка логина, когда у пользователя ещё не установлен пароль.
@@ -33,47 +33,47 @@ export type SimpleError = {
  *
  */
 export type PasswordSetupRequiredError = {
-   /**
-    * Машинный код ошибки.
-    */
-   error: 'password_setup_required'
-   /**
-    * Пояснение для пользователя.
-    */
-   message: string
-   /**
-    * URL страницы установки пароля (может отсутствовать).
-    */
-   setupUrl?: string | null
-}
+    /**
+     * Машинный код ошибки.
+     */
+    error: 'password_setup_required';
+    /**
+     * Пояснение для пользователя.
+     */
+    message: string;
+    /**
+     * URL страницы установки пароля (может отсутствовать).
+     */
+    setupUrl?: string | null;
+};
 
 /**
  * Запрос обновления токенов по refresh token.
  */
 export type RefreshTokenRequest = {
-   /**
-    * Тип гранта.
-    */
-   grant_type: 'refresh_token'
-   /**
-    * Refresh token (opaque строка).
-    */
-   refresh_token: string
-}
+    /**
+     * Тип гранта.
+     */
+    grant_type: 'refresh_token';
+    /**
+     * Refresh token (opaque строка).
+     */
+    refresh_token: string;
+};
 
 /**
  * Запрос обмена authorization code на токены.
  */
 export type AuthCodeRequest = {
-   /**
-    * Тип гранта.
-    */
-   grant_type: 'authorization_code'
-   /**
-    * Authorization code, полученный из редиректа `/login`.
-    */
-   code: string
-}
+    /**
+     * Тип гранта.
+     */
+    grant_type: 'authorization_code';
+    /**
+     * Authorization code, полученный из редиректа `/login`.
+     */
+    code: string;
+};
 
 /**
  * Ответ с access/refresh токенами.
@@ -85,251 +85,251 @@ export type AuthCodeRequest = {
  *
  */
 export type TokenResponse = {
-   /**
-    * Тип токена для заголовка Authorization.
-    */
-   token_type: string
-   /**
-    * JWT access token.
-    */
-   access_token: string
-   /**
-    * Refresh token (хранить безопасно, не логировать).
-    */
-   refresh_token: string
-   /**
-    * Время жизни access token в секундах.
-    */
-   expires_in: number
-   /**
-    * Scope строкой (через пробел).
-    */
-   scope: string
-}
+    /**
+     * Тип токена для заголовка Authorization.
+     */
+    token_type: string;
+    /**
+     * JWT access token.
+     */
+    access_token: string;
+    /**
+     * Refresh token (хранить безопасно, не логировать).
+     */
+    refresh_token: string;
+    /**
+     * Время жизни access token в секундах.
+     */
+    expires_in: number;
+    /**
+     * Scope строкой (через пробел).
+     */
+    scope: string;
+};
 
 /**
  * Public JWKS (набор публичных ключей) для проверки JWT другими сервисами.
  */
 export type JwksResponse = {
-   keys: Array<{
-      [key: string]: unknown
-   }>
-}
+    keys: Array<{
+        [key: string]: unknown;
+    }>;
+};
 
 export type GetHealthData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/health'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/health';
+};
 
 export type GetHealthResponses = {
-   /**
-    * Service alive
-    */
-   200: {
-      ok?: boolean
-   }
-}
+    /**
+     * Сервис работает
+     */
+    200: {
+        ok?: boolean;
+    };
+};
 
-export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses]
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
 
 export type GetLoginData = {
-   body?: never
-   path?: never
-   query?: {
-      return_to?: string
-   }
-   url: '/login'
-}
+    body?: never;
+    path?: never;
+    query?: {
+        return_to?: string;
+    };
+    url: '/login';
+};
 
 export type GetLoginResponses = {
-   /**
-    * HTML login page
-    */
-   200: string
-}
+    /**
+     * HTML-страница входа
+     */
+    200: string;
+};
 
-export type GetLoginResponse = GetLoginResponses[keyof GetLoginResponses]
+export type GetLoginResponse = GetLoginResponses[keyof GetLoginResponses];
 
 export type PostLoginData = {
-   body: {
-      username: string
-      password: string
-      return_to: string
-   }
-   path?: never
-   query?: never
-   url: '/login'
-}
+    body: {
+        username: string;
+        password: string;
+        return_to: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/login';
+};
 
 export type PostLoginErrors = {
-   /**
-    * Невалидный ввод
-    */
-   400: SimpleError
-   /**
-    * Пользователь заблокирован или требуется первичная установка пароля
-    */
-   403: PasswordSetupRequiredError | SimpleError
-}
+    /**
+     * Невалидный ввод
+     */
+    400: SimpleError;
+    /**
+     * Пользователь заблокирован или требуется первичная установка пароля
+     */
+    403: PasswordSetupRequiredError | SimpleError;
+};
 
-export type PostLoginError = PostLoginErrors[keyof PostLoginErrors]
+export type PostLoginError = PostLoginErrors[keyof PostLoginErrors];
 
 export type PostTokenData = {
-   body: AuthCodeRequest | RefreshTokenRequest
-   path?: never
-   query?: never
-   url: '/token'
-}
+    body: AuthCodeRequest | RefreshTokenRequest;
+    path?: never;
+    query?: never;
+    url: '/token';
+};
 
 export type PostTokenErrors = {
-   /**
-    * OAuth-like error
-    */
-   400: OAuthError
-}
+    /**
+     * Ошибка в формате OAuth
+     */
+    400: OAuthError;
+};
 
-export type PostTokenError = PostTokenErrors[keyof PostTokenErrors]
+export type PostTokenError = PostTokenErrors[keyof PostTokenErrors];
 
 export type PostTokenResponses = {
-   /**
-    * Tokens issued
-    */
-   200: TokenResponse
-}
+    /**
+     * Токены выданы
+     */
+    200: TokenResponse;
+};
 
-export type PostTokenResponse = PostTokenResponses[keyof PostTokenResponses]
+export type PostTokenResponse = PostTokenResponses[keyof PostTokenResponses];
 
 export type GetSetupPasswordData = {
-   body?: never
-   path?: never
-   query: {
-      token: string
-   }
-   url: '/setup-password'
-}
+    body?: never;
+    path?: never;
+    query: {
+        token: string;
+    };
+    url: '/setup-password';
+};
 
 export type GetSetupPasswordErrors = {
-   /**
-    * Token invalid or expired
-    */
-   400: string
-}
+    /**
+     * Токен недействителен или истёк
+     */
+    400: string;
+};
 
-export type GetSetupPasswordError = GetSetupPasswordErrors[keyof GetSetupPasswordErrors]
+export type GetSetupPasswordError = GetSetupPasswordErrors[keyof GetSetupPasswordErrors];
 
 export type GetSetupPasswordResponses = {
-   /**
-    * HTML page
-    */
-   200: string
-}
+    /**
+     * HTML-страница
+     */
+    200: string;
+};
 
-export type GetSetupPasswordResponse = GetSetupPasswordResponses[keyof GetSetupPasswordResponses]
+export type GetSetupPasswordResponse = GetSetupPasswordResponses[keyof GetSetupPasswordResponses];
 
 export type PostSetupPasswordData = {
-   body: {
-      token: string
-      password: string
-      passwordRepeat: string
-   }
-   path?: never
-   query?: never
-   url: '/setup-password'
-}
+    body: {
+        token: string;
+        password: string;
+        passwordRepeat: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/setup-password';
+};
 
 export type PostSetupPasswordErrors = {
-   /**
-    * Validation or token error
-    */
-   400: string
-}
+    /**
+     * Ошибка валидации или токена
+     */
+    400: string;
+};
 
-export type PostSetupPasswordError = PostSetupPasswordErrors[keyof PostSetupPasswordErrors]
+export type PostSetupPasswordError = PostSetupPasswordErrors[keyof PostSetupPasswordErrors];
 
 export type PostSetupPasswordResponses = {
-   /**
-    * Password set
-    */
-   200: string
-}
+    /**
+     * Пароль установлен
+     */
+    200: string;
+};
 
-export type PostSetupPasswordResponse = PostSetupPasswordResponses[keyof PostSetupPasswordResponses]
+export type PostSetupPasswordResponse = PostSetupPasswordResponses[keyof PostSetupPasswordResponses];
 
 export type PostLogoutData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/logout'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/logout';
+};
 
 export type PostLogoutResponses = {
-   /**
-    * Logged out
-    */
-   200: {
-      ok?: boolean
-   }
-}
+    /**
+     * Выход выполнен
+     */
+    200: {
+        ok?: boolean;
+    };
+};
 
-export type PostLogoutResponse = PostLogoutResponses[keyof PostLogoutResponses]
+export type PostLogoutResponse = PostLogoutResponses[keyof PostLogoutResponses];
 
 export type GetJwksData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/jwks'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/jwks';
+};
 
 export type GetJwksResponses = {
-   /**
-    * Public keys
-    */
-   200: JwksResponse
-}
+    /**
+     * Публичные ключи
+     */
+    200: JwksResponse;
+};
 
-export type GetJwksResponse = GetJwksResponses[keyof GetJwksResponses]
+export type GetJwksResponse = GetJwksResponses[keyof GetJwksResponses];
 
 export type PostInternalUsersData = {
-   body: {
-      username: string
-   }
-   path?: never
-   query?: never
-   url: '/internal/users'
-}
+    body: {
+        username: string;
+    };
+    path?: never;
+    query?: never;
+    url: '/internal/users';
+};
 
 export type PostInternalUsersErrors = {
-   /**
-    * Invalid input
-    */
-   400: SimpleError
-   /**
-    * Invalid internal token
-    */
-   401: SimpleError
-   /**
-    * Username already exists
-    */
-   409: SimpleError
-}
+    /**
+     * Некорректный ввод
+     */
+    400: SimpleError;
+    /**
+     * Некорректный внутренний токен
+     */
+    401: SimpleError;
+    /**
+     * Имя пользователя уже существует
+     */
+    409: SimpleError;
+};
 
-export type PostInternalUsersError = PostInternalUsersErrors[keyof PostInternalUsersErrors]
+export type PostInternalUsersError = PostInternalUsersErrors[keyof PostInternalUsersErrors];
 
 export type PostInternalUsersResponses = {
-   /**
-    * Auth user created, password setup link issued
-    */
-   201: {
-      id?: string
-      username?: string
-      setupUrl?: string
-   }
-}
+    /**
+     * Пользователь Auth создан, выдана ссылка на установку пароля
+     */
+    201: {
+        id?: string;
+        username?: string;
+        setupUrl?: string;
+    };
+};
 
-export type PostInternalUsersResponse = PostInternalUsersResponses[keyof PostInternalUsersResponses]
+export type PostInternalUsersResponse = PostInternalUsersResponses[keyof PostInternalUsersResponses];
 
 export type ClientOptions = {
-   baseUrl: 'http://localhost:4000' | (string & {})
-}
+    baseUrl: 'http://localhost:4000' | (string & {});
+};

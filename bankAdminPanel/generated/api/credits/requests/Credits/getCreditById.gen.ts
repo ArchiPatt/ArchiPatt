@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetCreditsByIdData, GetCreditsByIdResponse } from "..\\..\\types.gen";
+import type { GetCreditsByIdData, GetCreditsByIdResponse, GetCreditsByIdError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetCreditByIdRequestParams = AxiosRequestParams<GetCreditsByIdData>;
 
-export const getCreditById = ({ config, path }: GetCreditByIdRequestParams) => instance.request<GetCreditsByIdResponse>({
+export const getCreditById = ({ config, path }: GetCreditByIdRequestParams) => instance.request<GetCreditsByIdResponse | GetCreditsByIdError>({
     method: "GET",
     url: `/credits/${path.id}`,
     ...config

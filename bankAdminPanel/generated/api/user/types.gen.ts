@@ -4,11 +4,11 @@
  * Стандартный ответ healthcheck.
  */
 export type HealthResponse = {
-   /**
-    * Признак, что сервис жив.
-    */
-   ok: boolean
-}
+    /**
+     * Признак, что сервис жив.
+     */
+    ok: boolean;
+};
 
 /**
  * Единый формат ошибки в JSON.
@@ -17,8 +17,8 @@ export type HealthResponse = {
  *
  */
 export type ErrorResponse = {
-   error: string
-}
+    error: string;
+};
 
 /**
  * Создание пользователя (доступно только `employee/admin`).
@@ -28,342 +28,339 @@ export type ErrorResponse = {
  *
  */
 export type CreateUserRequest = {
-   /**
-    * Логин (уникальный, используется для входа в Auth).
-    */
-   username: string
-   /**
-    * Отображаемое имя (может быть `null`).
-    */
-   displayName?: string | null
-   /**
-    * Роли пользователя.
-    *
-    * Обычно используются:
-    * - `client` – клиент банка
-    * - `employee` – сотрудник
-    * - `admin` – админ (имеет права сотрудника)
-    *
-    */
-   roles: Array<string>
-}
+    /**
+     * Логин (уникальный, используется для входа в Auth).
+     */
+    username: string;
+    /**
+     * Отображаемое имя (может быть `null`).
+     */
+    displayName?: string | null;
+    /**
+     * Роли пользователя.
+     *
+     * Обычно используются:
+     * - `client` – клиент банка
+     * - `employee` – сотрудник
+     * - `admin` – админ (имеет права сотрудника)
+     *
+     */
+    roles: Array<string>;
+};
 
 /**
  * Профиль пользователя (без чувствительных данных, паролей тут нет).
  */
 export type UserProfileResponse = {
-   /**
-    * ID пользователя (используется как `sub` в JWT).
-    */
-   id: string
-   /**
-    * Логин.
-    */
-   username: string
-   /**
-    * Отображаемое имя (может быть `null`).
-    */
-   displayName?: string | null
-   /**
-    * Список ролей.
-    */
-   roles: Array<string>
-   /**
-    * Блокировка пользователя.
-    *
-    * Если `true`, Auth сервис не выдаёт токены/не пускает в систему.
-    *
-    */
-   isBlocked: boolean
-}
+    /**
+     * ID пользователя (используется как `sub` в JWT).
+     */
+    id: string;
+    /**
+     * Логин.
+     */
+    username: string;
+    /**
+     * Отображаемое имя (может быть `null`).
+     */
+    displayName?: string | null;
+    /**
+     * Список ролей.
+     */
+    roles: Array<string>;
+    /**
+     * Блокировка пользователя.
+     *
+     * Если `true`, Auth сервис не выдаёт токены/не пускает в систему.
+     *
+     */
+    isBlocked: boolean;
+};
 
 export type UserListItemResponse = UserProfileResponse & {
-   /**
-    * Дата создания профиля.
-    */
-   createdAt: string
-}
+    /**
+     * Дата создания профиля.
+     */
+    createdAt: string;
+};
 
 export type CreateUserResponse = UserProfileResponse & {
-   /**
-    * URL для первичной установки пароля в Auth сервисе.
-    *
-    * Может быть `null`, если Auth временно недоступен или не удалось создать учётные данные.
-    *
-    */
-   setupUrl: string | null
-}
+    /**
+     * URL для первичной установки пароля в Auth сервисе.
+     *
+     * Может быть `null`, если Auth временно недоступен или не удалось создать учётные данные.
+     *
+     */
+    setupUrl: string | null;
+};
 
 /**
  * Запрос на блокировку/разблокировку пользователя.
  */
 export type BlockUserRequest = {
-   /**
-    * `true` – заблокировать
-    * `false` – разблокировать
-    *
-    */
-   isBlocked: boolean
-}
+    /**
+     * `true` – заблокировать
+     * `false` – разблокировать
+     *
+     */
+    isBlocked: boolean;
+};
 
 /**
  * Короткий ответ после блокировки/разблокировки.
  */
 export type BlockUserResponse = {
-   id: string
-   username: string
-   isBlocked: boolean
-}
+    id: string;
+    username: string;
+    isBlocked: boolean;
+};
 
 /**
  * Ответ для интеграций (например, Auth ищет профиль по username).
  */
 export type InternalUserResponse = {
-   /**
-    * ID пользователя.
-    */
-   id: string
-   /**
-    * Логин.
-    */
-   username: string
-   /**
-    * Роли пользователя.
-    */
-   roles: Array<string>
-   /**
-    * Блокировка пользователя.
-    */
-   isBlocked: boolean
-}
+    /**
+     * ID пользователя.
+     */
+    id: string;
+    /**
+     * Логин.
+     */
+    username: string;
+    /**
+     * Роли пользователя.
+     */
+    roles: Array<string>;
+    /**
+     * Блокировка пользователя.
+     */
+    isBlocked: boolean;
+};
 
 export type GetHealthData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/health'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/health';
+};
 
 export type GetHealthResponses = {
-   /**
-    * OK
-    */
-   200: HealthResponse
-}
+    /**
+     * OK
+     */
+    200: HealthResponse;
+};
 
-export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses]
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
 
 export type GetMeData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/me'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/me';
+};
 
 export type GetMeErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Не найден
+     */
+    404: ErrorResponse;
+};
 
-export type GetMeError = GetMeErrors[keyof GetMeErrors]
+export type GetMeError = GetMeErrors[keyof GetMeErrors];
 
 export type GetMeResponses = {
-   /**
-    * User profile
-    */
-   200: UserProfileResponse
-}
+    /**
+     * Профиль пользователя
+     */
+    200: UserProfileResponse;
+};
 
-export type GetMeResponse = GetMeResponses[keyof GetMeResponses]
+export type GetMeResponse = GetMeResponses[keyof GetMeResponses];
 
 export type GetUsersData = {
-   body?: never
-   path?: never
-   query?: never
-   url: '/users'
-}
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/users';
+};
 
 export type GetUsersErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
 
-export type GetUsersError = GetUsersErrors[keyof GetUsersErrors]
+export type GetUsersError = GetUsersErrors[keyof GetUsersErrors];
 
 export type GetUsersResponses = {
-   /**
-    * Users list
-    */
-   200: Array<UserListItemResponse>
-}
+    /**
+     * Список пользователей
+     */
+    200: Array<UserListItemResponse>;
+};
 
-export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses]
+export type GetUsersResponse = GetUsersResponses[keyof GetUsersResponses];
 
 export type PostUsersData = {
-   body: CreateUserRequest
-   path?: never
-   query?: never
-   url: '/users'
-}
+    body: CreateUserRequest;
+    path?: never;
+    query?: never;
+    url: '/users';
+};
 
 export type PostUsersErrors = {
-   /**
-    * Invalid input
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Username already exists
-    */
-   409: ErrorResponse
-   /**
-    * Auth service unavailable
-    */
-   502: ErrorResponse
-}
+    /**
+     * Некорректный ввод
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Имя пользователя уже существует
+     */
+    409: ErrorResponse;
+    /**
+     * Сервис Auth недоступен
+     */
+    502: ErrorResponse;
+};
 
-export type PostUsersError = PostUsersErrors[keyof PostUsersErrors]
+export type PostUsersError = PostUsersErrors[keyof PostUsersErrors];
 
 export type PostUsersResponses = {
-   /**
-    * Created
-    */
-   201: CreateUserResponse
-}
+    /**
+     * Создано
+     */
+    201: CreateUserResponse;
+};
 
-export type PostUsersResponse = PostUsersResponses[keyof PostUsersResponses]
+export type PostUsersResponse = PostUsersResponses[keyof PostUsersResponses];
 
 export type GetUsersByIdData = {
-   body?: never
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/users/{id}'
-}
+    body?: never;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}';
+};
 
 export type GetUsersByIdErrors = {
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Не найден
+     */
+    404: ErrorResponse;
+};
 
-export type GetUsersByIdError = GetUsersByIdErrors[keyof GetUsersByIdErrors]
+export type GetUsersByIdError = GetUsersByIdErrors[keyof GetUsersByIdErrors];
 
 export type GetUsersByIdResponses = {
-   /**
-    * User
-    */
-   200: UserProfileResponse
-}
+    /**
+     * Пользователь
+     */
+    200: UserProfileResponse;
+};
 
-export type GetUsersByIdResponse = GetUsersByIdResponses[keyof GetUsersByIdResponses]
+export type GetUsersByIdResponse = GetUsersByIdResponses[keyof GetUsersByIdResponses];
 
 export type PatchUsersByIdBlockData = {
-   body: BlockUserRequest
-   path: {
-      id: string
-   }
-   query?: never
-   url: '/users/{id}/block'
-}
+    body: BlockUserRequest;
+    path: {
+        id: string;
+    };
+    query?: never;
+    url: '/users/{id}/block';
+};
 
 export type PatchUsersByIdBlockErrors = {
-   /**
-    * Invalid input
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized
-    */
-   401: ErrorResponse
-   /**
-    * Forbidden
-    */
-   403: ErrorResponse
-   /**
-    * Not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Некорректный ввод
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Не найден
+     */
+    404: ErrorResponse;
+};
 
-export type PatchUsersByIdBlockError = PatchUsersByIdBlockErrors[keyof PatchUsersByIdBlockErrors]
+export type PatchUsersByIdBlockError = PatchUsersByIdBlockErrors[keyof PatchUsersByIdBlockErrors];
 
 export type PatchUsersByIdBlockResponses = {
-   /**
-    * Updated
-    */
-   200: BlockUserResponse
-}
+    /**
+     * Обновлено
+     */
+    200: BlockUserResponse;
+};
 
-export type PatchUsersByIdBlockResponse =
-   PatchUsersByIdBlockResponses[keyof PatchUsersByIdBlockResponses]
+export type PatchUsersByIdBlockResponse = PatchUsersByIdBlockResponses[keyof PatchUsersByIdBlockResponses];
 
 export type GetInternalUsersByUsernameByUsernameData = {
-   body?: never
-   path: {
-      username: string
-   }
-   query?: never
-   url: '/internal/users/by-username/{username}'
-}
+    body?: never;
+    path: {
+        username: string;
+    };
+    query?: never;
+    url: '/internal/users/by-username/{username}';
+};
 
 export type GetInternalUsersByUsernameByUsernameErrors = {
-   /**
-    * Invalid username
-    */
-   400: ErrorResponse
-   /**
-    * Unauthorized internal token
-    */
-   401: ErrorResponse
-   /**
-    * Not found
-    */
-   404: ErrorResponse
-}
+    /**
+     * Некорректное имя пользователя
+     */
+    400: ErrorResponse;
+    /**
+     * Не авторизован internal token
+     */
+    401: ErrorResponse;
+    /**
+     * Не найден
+     */
+    404: ErrorResponse;
+};
 
-export type GetInternalUsersByUsernameByUsernameError =
-   GetInternalUsersByUsernameByUsernameErrors[keyof GetInternalUsersByUsernameByUsernameErrors]
+export type GetInternalUsersByUsernameByUsernameError = GetInternalUsersByUsernameByUsernameErrors[keyof GetInternalUsersByUsernameByUsernameErrors];
 
 export type GetInternalUsersByUsernameByUsernameResponses = {
-   /**
-    * User data
-    */
-   200: InternalUserResponse
-}
+    /**
+     * Данные пользователя
+     */
+    200: InternalUserResponse;
+};
 
-export type GetInternalUsersByUsernameByUsernameResponse =
-   GetInternalUsersByUsernameByUsernameResponses[keyof GetInternalUsersByUsernameByUsernameResponses]
+export type GetInternalUsersByUsernameByUsernameResponse = GetInternalUsersByUsernameByUsernameResponses[keyof GetInternalUsersByUsernameByUsernameResponses];
 
 export type ClientOptions = {
-   baseUrl: 'http://localhost:4001' | (string & {})
-}
+    baseUrl: 'http://localhost:4001' | (string & {});
+};
