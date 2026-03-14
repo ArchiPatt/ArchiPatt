@@ -899,7 +899,7 @@ paths:
     get:
       tags: [Core]
       summary: Проксирован на core /dashboard/clients-overview
-      description: Агрегированный обзор клиентов со счетами и кредитами (employee/admin).
+      description: Агрегированный обзор клиентов со счетами, кредитами и кредитным рейтингом (employee/admin).
       security:
         - bearerAuth: []
       parameters:
@@ -936,6 +936,17 @@ paths:
                           type: array
                         credits:
                           type: array
+                        creditRating:
+                          type: object
+                          properties:
+                            score:
+                              type: integer
+                            overdueCount:
+                              type: integer
+                            totalCredits:
+                              type: integer
+                            closedCount:
+                              type: integer
                   total:
                     type: integer
         "401":

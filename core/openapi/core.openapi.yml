@@ -54,7 +54,7 @@ paths:
                     type: array
                     items:
                       type: object
-                      required: [user, accounts, credits]
+                      required: [user, accounts, credits, creditRating]
                       properties:
                         user:
                           $ref: "#/components/schemas/UserOverview"
@@ -66,6 +66,8 @@ paths:
                           type: array
                           items:
                             $ref: "#/components/schemas/CreditOverview"
+                        creditRating:
+                          $ref: "#/components/schemas/CreditRating"
                   total:
                     type: integer
                     description: Общее количество пользователей
@@ -768,6 +770,28 @@ components:
           type: string
           format: date-time
           nullable: true
+
+    CreditRating:
+      type: object
+      description: Кредитный рейтинг клиента (0–100).
+      required: [score, overdueCount, totalCredits, closedCount]
+      properties:
+        score:
+          type: integer
+          description: Балл рейтинга (0–100).
+          example: 85
+        overdueCount:
+          type: integer
+          description: Количество просроченных кредитов.
+          example: 0
+        totalCredits:
+          type: integer
+          description: Всего кредитов у клиента.
+          example: 3
+        closedCount:
+          type: integer
+          description: Количество закрытых кредитов.
+          example: 2
 
     DepositWithdrawRequest:
       type: object

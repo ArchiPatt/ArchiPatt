@@ -46,17 +46,44 @@ export async function clientsOverviewController(
     creditsByClient.set(cr.clientId, list);
   }
 
-  const beforeFilter = users.map((user) => ({
-    user: {
-      id: user.id,
-      username: user.username,
-      displayName: user.displayName,
-      roles: user.roles,
-      isBlocked: user.isBlocked,
-    },
-    accounts: accountsByClient.get(user.id) ?? [],
-    credits: creditsByClient.get(user.id) ?? [],
-  }));
+  const now = Date.now();
+  function calculateRating(clientCredits: typeof credits) {
+    const overdueCount = clientCredits.filter(
+      (c) =>
+        c.status === "active" &&
+        c.nextPaymentDueAt &&
+        new Date(c.nextPaymentDueAt).getTime() <= now,
+    ).length;
+    const closedCount = clientCredits.filter(
+      (c) => c.status === "closed",
+    ).length;
+    const score = Math.max(
+      0,
+      Math.min(100, 100 - overdueCount * 20 + closedCount * 3),
+    );
+    return {
+      score: Math.round(score),
+      overdueCount,
+      totalCredits: clientCredits.length,
+      closedCount,
+    };
+  }
+
+  const beforeFilter = users.map((user) => {
+    const userCredits = creditsByClient.get(user.id) ?? [];
+    return {
+      user: {
+        id: user.id,
+        username: user.username,
+        displayName: user.displayName,
+        roles: user.roles,
+        isBlocked: user.isBlocked,
+      },
+      accounts: accountsByClient.get(user.id) ?? [],
+      credits: userCredits,
+      creditRating: calculateRating(userCredits),
+    };
+  });
 
   const filtered = beforeFilter.filter(
     (row) => row.accounts.length > 0 || row.credits.length > 0,
