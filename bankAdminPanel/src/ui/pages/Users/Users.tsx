@@ -12,10 +12,10 @@ import {
    Title
 } from '@mantine/core'
 import { modals } from '@mantine/modals'
-import { useUsersQuery } from '../../api/hooks/useUsersQuery'
-import { useBlockUserMutation } from '../../api/hooks/useBlockUserMutation'
-import { formatDate } from '../../utils/formatDate'
-import { useUserQuery } from '../../api/hooks/useUserQuery'
+import { useUsersQuery } from '../../../api/hooks/useUsersQuery'
+import { useBlockUserMutation } from '../../../api/hooks/useBlockUserMutation'
+import { formatDate } from '../../../utils/formatDate'
+import { useUserQuery } from '../../../api/hooks/useUserQuery'
 import classes from './Users.module.css'
 
 const getUserRoleLabel = (roles?: string[]) => {
@@ -33,7 +33,7 @@ export const Users = () => {
    const blockUser = useBlockUserMutation()
    const meQuery = useUserQuery()
 
-   const currentUserId = meQuery.data?.data?.id
+   const currentUserId = meQuery.data?.data.id
 
    const handleOpenCreateUserModal = () => {
       modals.openContextModal({ modal: 'createUser', title: 'Создать пользователя', innerProps: {} })

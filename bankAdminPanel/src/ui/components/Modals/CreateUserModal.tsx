@@ -3,7 +3,7 @@ import { type ContextModalProps } from '@mantine/modals'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { useCreateUserMutation } from '../../api/hooks/useCreateUserMutation'
+import { useCreateUserMutation } from '../../../api/hooks/useCreateUserMutation'
 
 const schema = yup.object({
    username: yup.string().required('Логин обязателен').min(3, 'Минимум 3 символа'),

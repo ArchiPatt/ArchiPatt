@@ -13,11 +13,11 @@ import {
    Title
 } from '@mantine/core'
 import { useParams } from 'react-router-dom'
-import { useCreditByIdQuery } from '../../api/hooks/useCreditByIdQuery'
-import { useCreditPaymentsQuery } from '../../api/hooks/useCreditPaymentsQuery'
-import { useTariffByIdQuery } from '../../api/hooks/useTariffByIdQuery'
-import { formatDate } from '../../utils/formatDate'
-import { formatMoney } from '../../utils/formatMoney'
+import { useCreditByIdQuery } from '../../../api/hooks/useCreditByIdQuery'
+import { useCreditPaymentsQuery } from '../../../api/hooks/useCreditPaymentsQuery'
+import { useTariffByIdQuery } from '../../../api/hooks/useTariffByIdQuery'
+import { formatDate } from '../../../utils/formatDate'
+import { formatMoney } from '../../../utils/formatMoney'
 
 const getStatusLabel = (status?: string) => {
    if (status === 'active') return 'Активен'

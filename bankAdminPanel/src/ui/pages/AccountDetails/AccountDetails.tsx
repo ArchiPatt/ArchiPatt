@@ -12,13 +12,9 @@ import {
    Text,
    Title
 } from '@mantine/core'
-import { useParams, useSearchParams } from 'react-router-dom'
-import { useAccountByIdQuery } from '../../api/hooks/useAccountByIdQuery'
-import { useAccountOperationsQuery } from '../../api/hooks/useAccountOperationsQuery'
-import { formatDate } from '../../utils/formatDate'
-import { formatMoney } from '../../utils/formatMoney'
-
-const DEFAULT_LIMIT = 10
+import { formatDate } from '../../../utils/formatDate'
+import { formatMoney } from '../../../utils/formatMoney'
+import { useAccountDetails } from '../../../useCases/pages/useAccountDetails'
 
 const getStatusLabel = (status?: string) => {
    if (status === 'open') return 'Открыт'
@@ -40,34 +36,9 @@ const getOperationTypeLabel = (type?: string | null) => {
 }
 
 export const AccountDetails = () => {
-   const { id } = useParams<{ id: string }>()
-   const [searchParams, setSearchParams] = useSearchParams()
+   const { state, functions } = useAccountDetails()
 
-   const pageParam = Number(searchParams.get('page') || '1')
-   const page = Number.isNaN(pageParam) || pageParam < 1 ? 1 : pageParam
-   const offset = (page - 1) * DEFAULT_LIMIT
-
-   const accountQuery = useAccountByIdQuery(id)
-   const operationsQuery = useAccountOperationsQuery(id, {
-      limit: DEFAULT_LIMIT,
-      offset
-   })
-
-   const isLoading = accountQuery.isLoading || operationsQuery.isLoading
-   const account = accountQuery.data?.data
-   const operations = operationsQuery.data?.data?.items ?? []
-   const total = operationsQuery.data?.data?.total ?? 0
-   const totalPages = total > 0 ? Math.ceil(total / DEFAULT_LIMIT) : 1
-
-   const handlePageChange = (nextPage: number) => {
-      setSearchParams((prev) => {
-         const next = new URLSearchParams(prev)
-         next.set('page', String(nextPage))
-         return next
-      })
-   }
-
-   if (isLoading) {
+   if (state.isLoading) {
       return (
          <Center h="100%">
             <Loader />
@@ -75,7 +46,7 @@ export const AccountDetails = () => {
       )
    }
 
-   if (!account) {
+   if (!state.account) {
       return (
          <Alert color="red" title="Ошибка">
             Счёт не найден
@@ -86,9 +57,9 @@ export const AccountDetails = () => {
    return (
       <Stack gap="lg">
          <Group justify="space-between">
-            <Title order={2}>Счёт № {account.id}</Title>
-            <Badge size="lg" color={getStatusColor(account.status)}>
-               {getStatusLabel(account.status)}
+            <Title order={2}>Счёт № {state.account.id}</Title>
+            <Badge size="lg" color={getStatusColor(state.account.status)}>
+               {getStatusLabel(state.account.status)}
             </Badge>
          </Group>
 
@@ -99,27 +70,29 @@ export const AccountDetails = () => {
             <Stack gap="sm">
                <Group justify="space-between">
                   <Text c="dimmed">ID счёта:</Text>
-                  <Text fw={500}>{account.id}</Text>
+                  <Text fw={500}>{state.account.id}</Text>
                </Group>
                <Group justify="space-between">
                   <Text c="dimmed">ID клиента:</Text>
-                  <Text fw={500}>{account.clientId}</Text>
+                  <Text fw={500}>{state.account.clientId}</Text>
                </Group>
                <Divider />
                <Group justify="space-between">
                   <Text c="dimmed">Баланс:</Text>
                   <Text fw={700} size="lg" c="blue">
-                     {formatMoney(account.balance)}
+                     {formatMoney(state.account.balance)}
                   </Text>
                </Group>
                <Divider />
                <Group justify="space-between">
                   <Text c="dimmed">Дата создания:</Text>
-                  <Text fw={500}>{formatDate(account.createdAt)}</Text>
+                  <Text fw={500}>{formatDate(state.account.createdAt)}</Text>
                </Group>
                <Group justify="space-between">
                   <Text c="dimmed">Статус:</Text>
-                  <Badge color={getStatusColor(account.status)}>{getStatusLabel(account.status)}</Badge>
+                  <Badge color={getStatusColor(state.account.status)}>
+                     {getStatusLabel(state.account.status)}
+                  </Badge>
                </Group>
             </Stack>
          </Card>
@@ -128,7 +101,7 @@ export const AccountDetails = () => {
             <Title order={4} mb="md">
                История операций
             </Title>
-            {operations.length === 0 ? (
+            {state.operations.length === 0 ? (
                <Text c="dimmed" ta="center" py="xl">
                   История операций пуста
                </Text>
@@ -143,7 +116,7 @@ export const AccountDetails = () => {
                      </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                     {operations.map((op) => (
+                     {state.operations.map((op) => (
                         <Table.Tr key={op.id}>
                            <Table.Td>
                               <Text size="sm">{op.id}</Text>
@@ -169,12 +142,16 @@ export const AccountDetails = () => {
                   </Table.Tbody>
                </Table>
             )}
-            {total > DEFAULT_LIMIT && (
+            {state.total > state.defaultLimit && (
                <Group justify="space-between" mt="md">
                   <Text size="sm" c="dimmed">
-                     Всего операций: {total}
+                     Всего операций: {state.total}
                   </Text>
-                  <Pagination value={page} onChange={handlePageChange} total={totalPages} />
+                  <Pagination
+                     value={state.page}
+                     onChange={functions.handlePageChange}
+                     total={state.totalPages}
+                  />
                </Group>
             )}
          </Card>

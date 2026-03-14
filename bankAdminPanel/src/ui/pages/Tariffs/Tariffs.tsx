@@ -1,5 +1,5 @@
 import { Alert, Badge, Button, Center, Group, Loader, Stack, Table, Title } from '@mantine/core'
-import { useTariffsQuery } from '../../api/hooks/useTariffsQuery'
+import { useTariffsQuery } from '../../../api/hooks/useTariffsQuery'
 import { modals } from '@mantine/modals'
 
 export const Tariffs = () => {

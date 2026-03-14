@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostTariffsData, PostTariffsResponse, PostTariffsError } from "..\\..\\types.gen";
+import type { PostTariffsData, PostTariffsResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostTariffsRequestParams = AxiosRequestParams<PostTariffsData>;
 
-export const postTariffs = ({ config, body }: PostTariffsRequestParams) => instance.request<PostTariffsResponse | PostTariffsError>({
+export const postTariffs = ({ config, body }: PostTariffsRequestParams) => instance.request<PostTariffsResponse>({
     method: "POST",
     url: "/tariffs",
     data: body,

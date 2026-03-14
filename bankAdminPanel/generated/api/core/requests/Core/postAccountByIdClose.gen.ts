@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAccountsByIdCloseData, PostAccountsByIdCloseResponse, PostAccountsByIdCloseError } from "..\\..\\types.gen";
+import type { PostAccountsByIdCloseData, PostAccountsByIdCloseResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostAccountByIdCloseRequestParams = AxiosRequestParams<PostAccountsByIdCloseData>;
 
-export const postAccountByIdClose = ({ config, path }: PostAccountByIdCloseRequestParams) => instance.request<PostAccountsByIdCloseResponse | PostAccountsByIdCloseError>({
+export const postAccountByIdClose = ({ config, path }: PostAccountByIdCloseRequestParams) => instance.request<PostAccountsByIdCloseResponse>({
     method: "POST",
     url: `/accounts/${path.id}/close`,
     ...config

@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAccountsData, PostAccountsResponse, PostAccountsError } from "..\\..\\types.gen";
+import type { PostAccountsData, PostAccountsResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostAccountsRequestParams = AxiosRequestParams<PostAccountsData>;
 
-export const postAccounts = ({ config, body }: PostAccountsRequestParams = {}) => instance.request<PostAccountsResponse | PostAccountsError>({
+export const postAccounts = ({ config, body }: PostAccountsRequestParams = {}) => instance.request<PostAccountsResponse>({
     method: "POST",
     url: "/accounts",
     data: body,

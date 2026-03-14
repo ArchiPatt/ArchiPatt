@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetUsersByIdData, GetUsersByIdResponse, GetUsersByIdError } from "..\\..\\types.gen";
+import type { GetUsersByIdData, GetUsersByIdResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetUserByIdRequestParams = AxiosRequestParams<GetUsersByIdData>;
 
-export const getUserById = ({ config, path }: GetUserByIdRequestParams) => instance.request<GetUsersByIdResponse | GetUsersByIdError>({
+export const getUserById = ({ config, path }: GetUserByIdRequestParams) => instance.request<GetUsersByIdResponse>({
     method: "GET",
     url: `/users/${path.id}`,
     ...config

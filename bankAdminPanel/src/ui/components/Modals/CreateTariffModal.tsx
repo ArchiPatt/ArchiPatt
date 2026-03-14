@@ -3,7 +3,7 @@ import type { ContextModalProps } from '@mantine/modals'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
-import { useCreateTariffMutation } from '../../api/hooks/useCreateTariffMutation'
+import { useCreateTariffMutation } from '../../../api/hooks/useCreateTariffMutation'
 
 const schema = yup.object({
    name: yup.string().required('Название тарифа обязательно'),

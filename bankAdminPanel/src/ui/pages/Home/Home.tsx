@@ -12,7 +12,7 @@ import {
    Title
 } from '@mantine/core'
 import { useSearchParams } from 'react-router-dom'
-import { useDashboardClientsOverviewQuery } from '../../api/hooks/useDashboardClientsOverviewQuery'
+import { useDashboardClientsOverviewQuery } from '../../../api/hooks/useDashboardClientsOverviewQuery'
 import { AccountCard } from '../../components/Dashboard/AccountCard'
 import { CreditCard } from '../../components/Dashboard/CreditCard'
 
