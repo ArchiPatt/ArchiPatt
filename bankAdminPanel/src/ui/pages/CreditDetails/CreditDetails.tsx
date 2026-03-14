@@ -12,12 +12,9 @@ import {
    Text,
    Title
 } from '@mantine/core'
-import { useParams } from 'react-router-dom'
-import { useCreditByIdQuery } from '../../../api/hooks/useCreditByIdQuery'
-import { useCreditPaymentsQuery } from '../../../api/hooks/useCreditPaymentsQuery'
-import { useTariffByIdQuery } from '../../../api/hooks/useTariffByIdQuery'
 import { formatDate } from '../../../utils/formatDate'
 import { formatMoney } from '../../../utils/formatMoney'
+import { useCreditDetails } from '../../../useCases/pages/useCreditDetails'
 
 const getStatusLabel = (status?: string) => {
    if (status === 'active') return 'Активен'
@@ -48,18 +45,9 @@ const getPaymentTypeColor = (type?: string) => {
 }
 
 export const CreditDetails = () => {
-   const { id } = useParams<{ id: string }>()
+   const { state } = useCreditDetails()
 
-   const creditQuery = useCreditByIdQuery(id)
-   const paymentsQuery = useCreditPaymentsQuery(id)
-   const tariffQuery = useTariffByIdQuery(creditQuery.data?.data?.tariffId)
-
-   const isLoading = creditQuery.isLoading || paymentsQuery.isLoading
-   const credit = creditQuery.data?.data
-   const payments = paymentsQuery.data?.data ?? []
-   const tariff = tariffQuery.data
-
-   if (isLoading) {
+   if (state.isLoading) {
       return (
          <Center h="100%">
             <Loader />
@@ -67,7 +55,7 @@ export const CreditDetails = () => {
       )
    }
 
-   if (!credit) {
+   if (!state.credit) {
       return (
          <Alert color="red" title="Ошибка">
             Кредит не найден
@@ -75,19 +63,12 @@ export const CreditDetails = () => {
       )
    }
 
-   const principalAmount = Number(credit.principalAmount)
-   const outstandingAmount = Number(credit.outstandingAmount)
-   const progressPercent =
-      principalAmount > 0
-         ? Math.max(0, Math.min(100, ((principalAmount - outstandingAmount) / principalAmount) * 100))
-         : 0
-
    return (
       <Stack gap="lg">
          <Group justify="space-between">
-            <Title order={2}>Кредит № {credit.id}</Title>
-            <Badge size="lg" color={getStatusColor(credit.status)}>
-               {getStatusLabel(credit.status)}
+            <Title order={2}>Кредит № {state.credit.id}</Title>
+            <Badge size="lg" color={getStatusColor(state.credit.status)}>
+               {getStatusLabel(state.credit.status)}
             </Badge>
          </Group>
 
@@ -100,56 +81,56 @@ export const CreditDetails = () => {
                   <Stack gap="sm">
                      <Group justify="space-between">
                         <Text c="dimmed">ID кредита:</Text>
-                        <Text fw={500}>{credit.id}</Text>
+                        <Text fw={500}>{state.credit.id}</Text>
                      </Group>
                      <Group justify="space-between">
                         <Text c="dimmed">ID клиента:</Text>
-                        <Text fw={500}>{credit.clientId}</Text>
+                        <Text fw={500}>{state.credit.clientId}</Text>
                      </Group>
                      <Group justify="space-between">
                         <Text c="dimmed">ID счёта:</Text>
-                        <Text fw={500}>{credit.accountId}</Text>
+                        <Text fw={500}>{state.credit.accountId}</Text>
                      </Group>
                      <Divider />
                      <Group justify="space-between">
                         <Text c="dimmed">Сумма кредита:</Text>
                         <Text fw={700} size="lg">
-                           {formatMoney(credit.principalAmount)}
+                           {formatMoney(state.credit.principalAmount)}
                         </Text>
                      </Group>
                      <Group justify="space-between">
                         <Text c="dimmed">Остаток долга:</Text>
                         <Text fw={700} size="lg" c="red">
-                           {formatMoney(credit.outstandingAmount)}
+                           {formatMoney(state.credit.outstandingAmount)}
                         </Text>
                      </Group>
                      <Group justify="space-between">
                         <Text c="dimmed">Погашено:</Text>
                         <Text fw={600} c="green">
-                           {progressPercent.toFixed(1)}%
+                           {state.progressPercent.toFixed(1)}%
                         </Text>
                      </Group>
                      <Divider />
                      <Group justify="space-between">
                         <Text c="dimmed">Дата выдачи:</Text>
-                        <Text fw={500}>{formatDate(credit.issuedAt)}</Text>
+                        <Text fw={500}>{formatDate(state.credit.issuedAt)}</Text>
                      </Group>
-                     {credit.nextPaymentDueAt && (
+                     {state.credit.nextPaymentDueAt && (
                         <Group justify="space-between">
                            <Text c="dimmed">След. платёж:</Text>
-                           <Text fw={500}>{formatDate(credit.nextPaymentDueAt)}</Text>
+                           <Text fw={500}>{formatDate(state.credit.nextPaymentDueAt)}</Text>
                         </Group>
                      )}
-                     {credit.closedAt && (
+                     {state.credit.closedAt && (
                         <Group justify="space-between">
                            <Text c="dimmed">Дата закрытия:</Text>
-                           <Text fw={500}>{formatDate(credit.closedAt)}</Text>
+                           <Text fw={500}>{formatDate(state.credit.closedAt)}</Text>
                         </Group>
                      )}
                      <Group justify="space-between">
                         <Text c="dimmed">Статус:</Text>
-                        <Badge color={getStatusColor(credit.status)}>
-                           {getStatusLabel(credit.status)}
+                        <Badge color={getStatusColor(state.credit.status)}>
+                           {getStatusLabel(state.credit.status)}
                         </Badge>
                      </Group>
                   </Stack>
@@ -161,33 +142,33 @@ export const CreditDetails = () => {
                   <Title order={4} mb="md">
                      Тариф
                   </Title>
-                  {tariff ? (
+                  {state.tariff ? (
                      <Stack gap="sm">
                         <Group justify="space-between">
                            <Text c="dimmed">Название:</Text>
-                           <Text fw={600}>{tariff.name}</Text>
+                           <Text fw={600}>{state.tariff.name}</Text>
                         </Group>
                         <Divider />
                         <Group justify="space-between">
                            <Text c="dimmed">Ставка:</Text>
                            <Text fw={700} size="lg" c="orange">
-                              {(Number(tariff.interestRate) * 100).toFixed(2)}%
+                              {(Number(state.tariff.interestRate) * 100).toFixed(2)}%
                            </Text>
                         </Group>
                         <Group justify="space-between">
                            <Text c="dimmed">Период:</Text>
-                           <Text fw={500}>{tariff.billingPeriodDays} дн.</Text>
+                           <Text fw={500}>{state.tariff.billingPeriodDays} дн.</Text>
                         </Group>
                         <Group justify="space-between">
                            <Text c="dimmed">Активен:</Text>
-                           <Badge color={tariff.isActive ? 'green' : 'gray'}>
-                              {tariff.isActive ? 'Да' : 'Нет'}
+                           <Badge color={state.tariff.isActive ? 'green' : 'gray'}>
+                              {state.tariff.isActive ? 'Да' : 'Нет'}
                            </Badge>
                         </Group>
                         <Divider />
                         <Text size="xs" c="dimmed">
-                           Ставка {tariff.interestRate} начисляется каждые {tariff.billingPeriodDays}{' '}
-                           дней
+                           Ставка {state.tariff.interestRate} начисляется каждые{' '}
+                           {state.tariff.billingPeriodDays} дней
                         </Text>
                      </Stack>
                   ) : (
@@ -203,7 +184,7 @@ export const CreditDetails = () => {
             <Title order={4} mb="md">
                История платежей
             </Title>
-            {payments.length === 0 ? (
+            {state.payments.length === 0 ? (
                <Text c="dimmed" ta="center" py="xl">
                   История платежей пуста
                </Text>
@@ -219,7 +200,7 @@ export const CreditDetails = () => {
                      </Table.Tr>
                   </Table.Thead>
                   <Table.Tbody>
-                     {payments.map((payment) => (
+                     {state.payments.map((payment) => (
                         <Table.Tr key={payment.id}>
                            <Table.Td>
                               <Text size="sm">{payment.id}</Text>
