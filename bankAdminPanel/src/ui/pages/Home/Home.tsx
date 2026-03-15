@@ -3,13 +3,16 @@ import {
    Badge,
    Card,
    Center,
+   Flex,
    Grid,
    Group,
    Loader,
    Pagination,
+   Progress,
    Stack,
    Text,
-   Title
+   Title,
+   Tooltip
 } from '@mantine/core'
 import { AccountCard } from '../../components/Dashboard/AccountCard'
 import { CreditCard } from '../../components/Dashboard/CreditCard'
@@ -58,17 +61,23 @@ export const Home = () => {
                <Card key={item.user.id} withBorder shadow="sm" radius="md" p="lg">
                   <Stack gap="md">
                      <Group justify="space-between" align="flex-start">
-                        <Stack gap={4}>
-                           <Group gap="xs">
-                              <Title order={3}>
-                                 {item.user.displayName || item.user.username || 'Без имени'}
-                              </Title>
-                              {item.user.isBlocked && (
-                                 <Badge color="red" variant="light">
-                                    Заблокирован
-                                 </Badge>
-                              )}
-                           </Group>
+                        <Stack gap={4} w="100%">
+                           <Flex justify="space-between" align="center" w="100%">
+                              <Group gap="xs">
+                                 <Title order={3}>
+                                    {item.user.displayName || item.user.username || 'Без имени'}
+                                 </Title>
+                                 {item.user.isBlocked && (
+                                    <Badge color="red" variant="light">
+                                       Заблокирован
+                                    </Badge>
+                                 )}
+                              </Group>
+                              <Tooltip label={`Кредитный рейтинг: ${item.creditRating.score}`} withArrow>
+                                 <Progress value={item.creditRating.score} w={100} />
+                              </Tooltip>
+                           </Flex>
+
                            <Group gap="sm">
                               <Badge color="blue" variant="light">
                                  {getUserRoleLabel(item.user.roles)}

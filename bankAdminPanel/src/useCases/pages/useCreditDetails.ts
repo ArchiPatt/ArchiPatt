@@ -15,8 +15,8 @@ export const useCreditDetails = () => {
    const payments = paymentsQuery.data?.data ?? []
    const tariff = tariffQuery.data
 
-   const principalAmount = Number(credit!.principalAmount)
-   const outstandingAmount = Number(credit!.outstandingAmount)
+   const principalAmount = Number(credit?.principalAmount)
+   const outstandingAmount = Number(credit?.outstandingAmount)
    const progressPercent =
       principalAmount > 0
          ? Math.max(0, Math.min(100, ((principalAmount - outstandingAmount) / principalAmount) * 100))
