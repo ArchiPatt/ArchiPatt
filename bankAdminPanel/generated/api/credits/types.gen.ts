@@ -505,6 +505,40 @@ export type GetCreditsByClientByClientIdResponses = {
 
 export type GetCreditsByClientByClientIdResponse = GetCreditsByClientByClientIdResponses[keyof GetCreditsByClientByClientIdResponses];
 
+export type GetCreditsOverdueData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Фильтр по клиенту (опционально).
+         */
+        clientId?: string;
+    };
+    url: '/credits/overdue';
+};
+
+export type GetCreditsOverdueErrors = {
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
+
+export type GetCreditsOverdueError = GetCreditsOverdueErrors[keyof GetCreditsOverdueErrors];
+
+export type GetCreditsOverdueResponses = {
+    /**
+     * Список просроченных кредитов
+     */
+    200: Array<CreditResponse>;
+};
+
+export type GetCreditsOverdueResponse = GetCreditsOverdueResponses[keyof GetCreditsOverdueResponses];
+
 export type GetCreditsByIdData = {
     body?: never;
     path: {

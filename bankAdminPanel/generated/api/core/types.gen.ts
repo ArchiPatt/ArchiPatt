@@ -636,6 +636,38 @@ export type GetAccountsByIdOperationsResponses = {
 
 export type GetAccountsByIdOperationsResponse = GetAccountsByIdOperationsResponses[keyof GetAccountsByIdOperationsResponses];
 
+export type GetWsAccountsByIdOperationsData = {
+    body?: never;
+    path: {
+        /**
+         * ID счёта
+         */
+        id: string;
+    };
+    query?: {
+        /**
+         * Bearer token (альтернатива заголовку)
+         */
+        authorization?: string;
+    };
+    url: '/ws/accounts/{id}/operations';
+};
+
+export type GetWsAccountsByIdOperationsErrors = {
+    /**
+     * Не авторизован
+     */
+    401: unknown;
+    /**
+     * Доступ запрещён
+     */
+    403: unknown;
+    /**
+     * Счёт не найден
+     */
+    404: unknown;
+};
+
 export type PostInternalAccountsByIdOperationsData = {
     body: InternalCreateAccountOperationRequest;
     path: {

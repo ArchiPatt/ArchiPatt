@@ -1,0 +1,262 @@
+openapi: 3.0.3
+info:
+  title: Admin Settings Service
+  version: 0.1.0
+  description: |
+    Микросервис пользовательских настроек панели администратора.
+    Хранит цветовую схему интерфейса и список скрытых счетов, привязанных к userId из JWT.
+
+servers:
+  - url: http://localhost:4005
+    description: Local development
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    ColorScheme:
+      type: string
+      enum: [dark, light, auto]
+      example: dark
+
+    ColorSchemeResponse:
+      type: object
+      required: [colorScheme]
+      properties:
+        colorScheme:
+          $ref: "#/components/schemas/ColorScheme"
+
+    SetColorSchemeRequest:
+      type: object
+      required: [colorScheme]
+      properties:
+        colorScheme:
+          $ref: "#/components/schemas/ColorScheme"
+
+    HiddenAccountsResponse:
+      type: object
+      required: [hiddenAccounts]
+      properties:
+        hiddenAccounts:
+          type: array
+          items:
+            type: string
+          description: Список идентификаторов скрытых счетов
+          example: ["acc-uuid-1", "acc-uuid-2"]
+
+    AddHiddenAccountRequest:
+      type: object
+      required: [accountId]
+      properties:
+        accountId:
+          type: string
+          description: Идентификатор счёта для добавления в список скрытых
+          example: "acc-uuid-1"
+
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+
+security:
+  - BearerAuth: []
+
+paths:
+  /health:
+    get:
+      summary: Health check
+      security: []
+      tags: [Technical]
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok:
+                    type: boolean
+
+  /admin-settings/color-scheme:
+    get:
+      summary: Получить цветовую схему пользователя
+      tags: [Settings]
+      description: |
+        Возвращает сохранённую цветовую схему для текущего пользователя.
+        Если запись отсутствует в БД — возвращает `auto`.
+      responses:
+        "200":
+          description: Текущая цветовая схема
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColorSchemeResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Пользователь заблокирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Установить цветовую схему пользователя
+      tags: [Settings]
+      description: |
+        Сохраняет выбранную цветовую схему для текущего пользователя.
+        Если запись уже существует — перезаписывает (upsert).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SetColorSchemeRequest"
+      responses:
+        "200":
+          description: Цветовая схема успешно сохранена
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ColorSchemeResponse"
+        "400":
+          description: Некорректное значение colorScheme
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Пользователь заблокирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /admin-settings/hidden-accounts:
+    get:
+      summary: Получить список скрытых счетов
+      tags: [Settings]
+      description: Возвращает массив идентификаторов счетов, скрытых текущим пользователем.
+      responses:
+        "200":
+          description: Список скрытых счетов
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HiddenAccountsResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Пользователь заблокирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      summary: Добавить счёт в список скрытых
+      tags: [Settings]
+      description: |
+        Добавляет accountId в список скрытых счетов текущего пользователя.
+        Если счёт уже скрыт — возвращает 200 без ошибки (идемпотентно).
+        Возвращает актуальный список после операции.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AddHiddenAccountRequest"
+      responses:
+        "201":
+          description: Счёт успешно добавлен в список скрытых
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HiddenAccountsResponse"
+        "200":
+          description: Счёт уже был в списке скрытых (идемпотентный ответ)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HiddenAccountsResponse"
+        "400":
+          description: accountId не передан
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Пользователь заблокирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /admin-settings/hidden-accounts/{accountId}:
+    delete:
+      summary: Убрать счёт из списка скрытых
+      tags: [Settings]
+      description: |
+        Удаляет указанный accountId из списка скрытых счетов текущего пользователя.
+        Возвращает актуальный список после удаления.
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          schema:
+            type: string
+          description: Идентификатор счёта для удаления из скрытых
+      responses:
+        "200":
+          description: Счёт успешно убран из списка скрытых
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HiddenAccountsResponse"
+        "404":
+          description: Счёт не найден в списке скрытых
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "403":
+          description: Пользователь заблокирован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"

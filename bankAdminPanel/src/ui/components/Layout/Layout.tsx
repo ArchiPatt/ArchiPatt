@@ -15,6 +15,7 @@ import {
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import classes from './Layout.module.css'
 import { useAuth } from './useAuth'
+import { getAdminSettingsColorScheme, getAdminSettingsHiddenAccounts } from '../../../../generated/api/adminSettings'
 
 const PROJECT_NAME = 'АРМ'
 
@@ -27,7 +28,8 @@ const NAV_ITEMS = [
 export const Layout = () => {
    const { pathname } = useLocation()
    const { logout, user } = useAuth()
-
+   getAdminSettingsColorScheme()
+   getAdminSettingsHiddenAccounts()
    const { colorScheme, toggleColorScheme } = useMantineColorScheme()
 
    const displayName = user.data?.data?.displayName ?? user.data?.data?.username ?? 'Пользователь'
