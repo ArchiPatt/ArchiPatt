@@ -9,7 +9,7 @@ import { CreateUserModal } from '../Modals/CreateUserModal'
 export const Providers = ({ children }: { children: React.ReactNode }) => {
    return (
       <QueryClientProvider client={queryClient}>
-         <MantineProvider defaultColorScheme="light">
+         <MantineProvider defaultColorScheme="auto">
             <ModalsProvider modals={{ createTariff: CreateTariffModal, createUser: CreateUserModal }}>
                {children}
                <Notifications />

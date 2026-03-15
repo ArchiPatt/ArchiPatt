@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostLoginData, GetLoginResponse } from "..\\..\\types.gen";
+import type { PostLoginData, PostLoginResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostLoginRequestParams = AxiosRequestParams<PostLoginData>;
 
-export const postLogin = ({ config, body }: PostLoginRequestParams) => instance.request<GetLoginResponse>({
+export const postLogin = ({ config, body }: PostLoginRequestParams) => instance.request<PostLoginResponse>({
     method: "POST",
     url: "/login",
     data: body,

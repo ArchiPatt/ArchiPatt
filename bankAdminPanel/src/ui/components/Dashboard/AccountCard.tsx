@@ -28,7 +28,7 @@ export const AccountCard = ({ account }: AccountCardProps) => {
             </Stack>
             <Stack gap={4} align="flex-end">
                <Text size="sm" fw={600}>
-                  {formatMoney(account.balance)}
+                  {formatMoney(account.balance, account.currency)}
                </Text>
                <Badge size="sm" color={account.status === 'open' ? 'green' : 'gray'}>
                   {account.status === 'open' ? 'Открыт' : 'Закрыт'}
