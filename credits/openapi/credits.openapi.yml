@@ -340,6 +340,50 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: forbidden
+  /credits/overdue:
+    get:
+      tags: [Credits]
+      summary: Просроченные кредиты
+      description: |
+        Возвращает кредиты со статусом Active, у которых `nextPaymentDueAt` < now (дата следующего платежа просрочена).
+
+        - Без `clientId` — все просроченные (только employee/admin).
+        - С `clientId` — просроченные кредиты клиента (employee/admin или владелец).
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по клиенту (опционально).
+      responses:
+        "200":
+          description: Список просроченных кредитов
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
   /credits/{id}:
     get:
       tags: [Credits]
