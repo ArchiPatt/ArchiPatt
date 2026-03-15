@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$services = @("users", "gateway", "credits", "core", "auth")
+$services = @("users", "gateway", "credits", "core", "auth", "adminSettings")
 
 foreach ($service in $services) {
   $servicePath = Join-Path $root $service
