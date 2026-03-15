@@ -43,6 +43,10 @@ export function registerCreditsRoutes(app: FastifyInstance) {
     "/credits/overdue",
     h.getOverdueCredits,
   );
+  app.get<{ Querystring: { clientId?: string } }>(
+    "/credits/overdue-payments",
+    h.getOverduePayments,
+  );
 
   app.get<{ Params: { clientId: string } }>(
     "/credits/rating/:clientId",

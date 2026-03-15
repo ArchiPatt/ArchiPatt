@@ -81,6 +81,27 @@ export async function getOverdueCreditsController(
   return { status: 200, body: credits };
 }
 
+export async function getOverduePaymentsController(
+  ds: DataSource,
+  payload: JWTPayload,
+  params: { clientId?: string },
+) {
+  if (params.clientId) {
+    const isOwner = String(payload.sub ?? "") === params.clientId;
+    const allowed = isEmployee(payload) || isOwner;
+    if (!allowed) return { status: 403, body: { error: "forbidden" } };
+  } else {
+    if (!isEmployee(payload))
+      return { status: 403, body: { error: "forbidden" } };
+  }
+
+  const payments = await creditsService.findOverduePayments(
+    ds,
+    params.clientId,
+  );
+  return { status: 200, body: payments };
+}
+
 export async function getCreditRatingController(
   ds: DataSource,
   payload: JWTPayload,

@@ -384,6 +384,51 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: forbidden
+  /credits/overdue-payments:
+    get:
+      tags: [Credits]
+      summary: Просроченные платежи по кредитам
+      description: |
+        Возвращает список **платежей, которые клиент просрочил** — по каждому кредиту со статусом Active,
+        у которого `nextPaymentDueAt` < now, одна запись: какой платёж был due и когда.
+
+        - Без `clientId` — все просроченные платежи (только employee/admin).
+        - С `clientId` — просроченные платежи клиента (employee/admin или владелец).
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по клиенту (опционально).
+      responses:
+        "200":
+          description: Список просроченных платежей
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OverduePaymentResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
   /credits/{id}:
     get:
       tags: [Credits]
@@ -715,6 +760,55 @@ components:
           nextPaymentDueAt,
           createdAt,
         ]
+    OverduePaymentResponse:
+      type: object
+      description: Просроченный платёж — платёж по кредиту, который клиент не внёс в срок.
+      required:
+        [
+          creditId,
+          clientId,
+          accountId,
+          tariffId,
+          principalAmount,
+          outstandingAmount,
+          dueDate,
+          daysOverdue,
+          issuedAt,
+        ]
+      properties:
+        creditId:
+          type: string
+          format: uuid
+          description: ID кредита.
+        clientId:
+          type: string
+          format: uuid
+          description: ID клиента.
+        accountId:
+          type: string
+          format: uuid
+          description: ID счёта.
+        tariffId:
+          type: string
+          format: uuid
+          description: ID тарифа.
+        principalAmount:
+          type: string
+          description: Первоначальная сумма кредита (decimal строкой).
+        outstandingAmount:
+          type: string
+          description: Текущий остаток долга (decimal строкой).
+        dueDate:
+          type: string
+          format: date-time
+          description: Дата, когда платёж был due и не был внесён.
+        daysOverdue:
+          type: integer
+          description: Сколько дней просрочено.
+        issuedAt:
+          type: string
+          format: date-time
+          description: Дата выдачи кредита.
     RepayCreditResponse:
       type: object
       description: Ответ после платежа по кредиту.

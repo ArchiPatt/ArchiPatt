@@ -473,6 +473,70 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /credits/overdue-payments:
+    get:
+      tags: [Credits]
+      summary: Проксирован на credits /credits/overdue-payments
+      description: |
+        Просроченные платежи — какие платежи по кредиту клиент просрочил.
+        Без clientId — все (employee/admin). С clientId — фильтр по клиенту.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по клиенту (опционально).
+      responses:
+        "200":
+          description: Ответ от Credits (проксирован)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    creditId:
+                      type: string
+                      format: uuid
+                    clientId:
+                      type: string
+                      format: uuid
+                    accountId:
+                      type: string
+                      format: uuid
+                    tariffId:
+                      type: string
+                      format: uuid
+                    principalAmount:
+                      type: string
+                    outstandingAmount:
+                      type: string
+                    dueDate:
+                      type: string
+                      format: date-time
+                    daysOverdue:
+                      type: integer
+                    issuedAt:
+                      type: string
+                      format: date-time
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /credits/{id}/payments:
     get:
       tags: [Credits]
