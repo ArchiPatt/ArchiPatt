@@ -1,5 +1,6 @@
 import { useParams } from 'react-router-dom'
 import { useCreditByIdQuery } from '../../api/hooks/useCreditByIdQuery'
+import { useCreditOverduePaymentsQuery } from '../../api/hooks/useCreditOverduePaymentsQuery'
 import { useCreditPaymentsQuery } from '../../api/hooks/useCreditPaymentsQuery'
 import { useTariffByIdQuery } from '../../api/hooks/useTariffByIdQuery'
 
@@ -8,11 +9,13 @@ export const useCreditDetails = () => {
 
    const creditQuery = useCreditByIdQuery(id)
    const paymentsQuery = useCreditPaymentsQuery(id)
+   const overdueQuery = useCreditOverduePaymentsQuery(id)
    const tariffQuery = useTariffByIdQuery(creditQuery.data?.data?.tariffId)
 
-   const isLoading = creditQuery.isLoading || paymentsQuery.isLoading
+   const isLoading = creditQuery.isLoading || paymentsQuery.isLoading || overdueQuery.isLoading
    const credit = creditQuery.data?.data
    const payments = paymentsQuery.data?.data ?? []
+   const overduePayments = overdueQuery.data ?? []
    const tariff = tariffQuery.data
 
    const principalAmount = Number(credit?.principalAmount)
@@ -27,6 +30,7 @@ export const useCreditDetails = () => {
          isLoading,
          credit,
          payments,
+         overduePayments,
          tariff,
          progressPercent
       }
