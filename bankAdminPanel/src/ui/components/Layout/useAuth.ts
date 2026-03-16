@@ -25,7 +25,7 @@ export const useAuth = () => {
 
    useEffect(() => {
       if (user.isError && !code) {
-         window.location.replace('http://localhost:4000/login?return_to=http://localhost:5173/')
+         window.location.replace('http://localhost:4000/login?return_to=http://localhost:5183/')
       }
    }, [user.isError])
 

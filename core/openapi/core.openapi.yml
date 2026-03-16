@@ -566,6 +566,38 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: account_not_found
+  /ws/accounts/{id}/operations:
+    get:
+      tags: [Core]
+      summary: WebSocket — операции по счёту в реальном времени
+      description: |
+        WebSocket-подключение. При подключении отправляется snapshot последних 50 операций,
+        затем при новых операциях по счёту — push-обновления в реальном времени.
+
+        Авторизация: заголовок `Authorization: Bearer <token>` или query `authorization=Bearer%20<token>`.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID счёта
+        - in: query
+          name: authorization
+          required: false
+          schema:
+            type: string
+          description: Bearer token (альтернатива заголовку)
+      responses:
+        "101":
+          description: Switching Protocols — WebSocket подключение установлено
+        "401":
+          description: Не авторизован
+        "403":
+          description: Доступ запрещён
+        "404":
+          description: Счёт не найден
   /internal/accounts/{id}/operations:
     post:
       tags: [Internal]

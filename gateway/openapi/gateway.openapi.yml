@@ -20,7 +20,40 @@ tags:
   - name: Users
   - name: Credits
   - name: Core
+  - name: WebSocket
 paths:
+  /ws/accounts/{id}/operations:
+    get:
+      tags: [WebSocket, Core]
+      summary: WebSocket — операции по счёту в реальном времени
+      description: |
+        Проксирован на Core. WebSocket-подключение для получения операций по счёту в реальном времени.
+        При подключении — snapshot последних 50 операций, затем push при новых операциях.
+        Авторизация: `Authorization: Bearer <token>` или query `authorization=Bearer%20<token>`.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: ID счёта
+        - in: query
+          name: authorization
+          required: false
+          schema:
+            type: string
+          description: Bearer token (альтернатива заголовку)
+      responses:
+        "101":
+          description: Switching Protocols — WebSocket подключение установлено
+        "401":
+          description: Не авторизован
+        "403":
+          description: Доступ запрещён
+        "404":
+          description: Счёт не найден
+
   /health:
     get:
       tags: [Gateway]
@@ -388,6 +421,109 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /credits/overdue:
+    get:
+      tags: [Credits]
+      summary: Проксирован на credits /credits/overdue
+      description: |
+        Просроченные кредиты (nextPaymentDueAt < now).
+        Без clientId — все (employee/admin). С clientId — фильтр по клиенту.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по клиенту (опционально).
+      responses:
+        "200":
+          description: Ответ от Credits (проксирован)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/CreditResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /credits/overdue-payments:
+    get:
+      tags: [Credits]
+      summary: Проксирован на credits /credits/overdue-payments
+      description: |
+        Просроченные платежи — какие платежи по кредиту клиент просрочил.
+        Без clientId — все (employee/admin). С clientId — фильтр по клиенту.
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          required: false
+          schema:
+            type: string
+            format: uuid
+          description: Фильтр по клиенту (опционально).
+      responses:
+        "200":
+          description: Ответ от Credits (проксирован)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    creditId:
+                      type: string
+                      format: uuid
+                    clientId:
+                      type: string
+                      format: uuid
+                    accountId:
+                      type: string
+                      format: uuid
+                    tariffId:
+                      type: string
+                      format: uuid
+                    principalAmount:
+                      type: string
+                    outstandingAmount:
+                      type: string
+                    dueDate:
+                      type: string
+                      format: date-time
+                    daysOverdue:
+                      type: integer
+                    issuedAt:
+                      type: string
+                      format: date-time
         "401":
           description: Не авторизован
           content:

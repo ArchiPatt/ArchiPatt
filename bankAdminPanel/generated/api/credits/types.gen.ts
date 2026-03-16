@@ -180,6 +180,48 @@ export type CreditResponse = {
 };
 
 /**
+ * Просроченный платёж — платёж по кредиту, который клиент не внёс в срок.
+ */
+export type OverduePaymentResponse = {
+    /**
+     * ID кредита.
+     */
+    creditId: string;
+    /**
+     * ID клиента.
+     */
+    clientId: string;
+    /**
+     * ID счёта.
+     */
+    accountId: string;
+    /**
+     * ID тарифа.
+     */
+    tariffId: string;
+    /**
+     * Первоначальная сумма кредита (decimal строкой).
+     */
+    principalAmount: string;
+    /**
+     * Текущий остаток долга (decimal строкой).
+     */
+    outstandingAmount: string;
+    /**
+     * Дата, когда платёж был due и не был внесён.
+     */
+    dueDate: string;
+    /**
+     * Сколько дней просрочено.
+     */
+    daysOverdue: number;
+    /**
+     * Дата выдачи кредита.
+     */
+    issuedAt: string;
+};
+
+/**
  * Ответ после платежа по кредиту.
  */
 export type RepayCreditResponse = {
@@ -504,6 +546,74 @@ export type GetCreditsByClientByClientIdResponses = {
 };
 
 export type GetCreditsByClientByClientIdResponse = GetCreditsByClientByClientIdResponses[keyof GetCreditsByClientByClientIdResponses];
+
+export type GetCreditsOverdueData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Фильтр по клиенту (опционально).
+         */
+        clientId?: string;
+    };
+    url: '/credits/overdue';
+};
+
+export type GetCreditsOverdueErrors = {
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
+
+export type GetCreditsOverdueError = GetCreditsOverdueErrors[keyof GetCreditsOverdueErrors];
+
+export type GetCreditsOverdueResponses = {
+    /**
+     * Список просроченных кредитов
+     */
+    200: Array<CreditResponse>;
+};
+
+export type GetCreditsOverdueResponse = GetCreditsOverdueResponses[keyof GetCreditsOverdueResponses];
+
+export type GetCreditsOverduePaymentsData = {
+    body?: never;
+    path?: never;
+    query?: {
+        /**
+         * Фильтр по клиенту (опционально).
+         */
+        clientId?: string;
+    };
+    url: '/credits/overdue-payments';
+};
+
+export type GetCreditsOverduePaymentsErrors = {
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
+
+export type GetCreditsOverduePaymentsError = GetCreditsOverduePaymentsErrors[keyof GetCreditsOverduePaymentsErrors];
+
+export type GetCreditsOverduePaymentsResponses = {
+    /**
+     * Список просроченных платежей
+     */
+    200: Array<OverduePaymentResponse>;
+};
+
+export type GetCreditsOverduePaymentsResponse = GetCreditsOverduePaymentsResponses[keyof GetCreditsOverduePaymentsResponses];
 
 export type GetCreditsByIdData = {
     body?: never;

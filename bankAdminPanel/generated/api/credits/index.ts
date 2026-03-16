@@ -8,6 +8,8 @@ export * from './requests/Credits/getCredits.gen';
 export * from './requests/Credits/postCreditsIssue.gen';
 export * from './requests/Credits/postCreditByIdRepay.gen';
 export * from './requests/Credits/getCreditsByClientByClientId.gen';
+export * from './requests/Credits/getCreditsOverdue.gen';
+export * from './requests/Credits/getCreditsOverduePayments.gen';
 export * from './requests/Credits/getCreditById.gen';
 export * from './requests/Credits/getCreditByIdPayments.gen';
 export * from './requests/Credits/postCreditsAccrueRun.gen';

@@ -11,4 +11,5 @@ export * from './requests/Core/postAccountByIdClose.gen';
 export * from './requests/Core/postAccountByIdDeposit.gen';
 export * from './requests/Core/postAccountByIdWithdraw.gen';
 export * from './requests/Core/getAccountByIdOperations.gen';
+export * from './requests/Core/getWsAccountByIdOperations.gen';
 export * from './requests/Internal/postInternalAccountByIdOperations.gen';

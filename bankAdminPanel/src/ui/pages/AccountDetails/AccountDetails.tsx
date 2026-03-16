@@ -80,7 +80,7 @@ export const AccountDetails = () => {
                <Group justify="space-between">
                   <Text c="dimmed">Баланс:</Text>
                   <Text fw={700} size="lg" c="blue">
-                     {formatMoney(state.account.balance)}
+                     {formatMoney(state.account.balance, state.account.currency)}
                   </Text>
                </Group>
                <Divider />

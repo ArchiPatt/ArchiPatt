@@ -1,4 +1,4 @@
-export const formatMoney = (value?: string | null) => {
+export const formatMoney = (value?: string | null, currency: string = 'RUB') => {
    if (!value) return '–'
 
    const number = Number(value)
@@ -7,7 +7,7 @@ export const formatMoney = (value?: string | null) => {
 
    return new Intl.NumberFormat('ru-RU', {
       style: 'currency',
-      currency: 'RUB',
+      currency: currency,
       maximumFractionDigits: 2
    }).format(number)
 }

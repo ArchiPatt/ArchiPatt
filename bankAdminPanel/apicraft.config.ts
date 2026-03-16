@@ -30,4 +30,11 @@ export default apicraft([
       nameBy: 'path',
       groupBy: 'tags',
    },
+      {
+      input: 'http://localhost:4005/swagger.yml' ,
+      output: 'generated/api/adminSettings',
+      instance: {name: 'axios', runtimeInstancePath: './src/api/instance.ts'},
+      nameBy: 'path',
+      groupBy: 'tags',
+   },
 ])

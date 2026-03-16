@@ -141,6 +141,17 @@ export async function buildApp(): Promise<FastifyInstance> {
     prefix: "/dashboard",
     rewritePrefix: "/dashboard",
   });
+  await app.register(proxy, {
+    upstream: env.coreServiceUrl,
+    prefix: "/ws",
+    rewritePrefix: "/ws",
+    websocket: true,
+  });
+    await app.register(proxy, {
+    upstream: env.adminSettingServiceUrl,
+    prefix: "/admin-settings",
+    rewritePrefix: "/admin-settings",
+  });
 
   return app;
 }

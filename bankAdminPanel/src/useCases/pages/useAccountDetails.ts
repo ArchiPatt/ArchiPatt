@@ -1,6 +1,7 @@
 import { useParams, useSearchParams } from 'react-router-dom'
 import { useAccountByIdQuery } from '../../api/hooks/useAccountByIdQuery'
 import { useAccountOperationsQuery } from '../../api/hooks/useAccountOperationsQuery'
+import { useAccountOperationsWS } from '../../api/hooks/useAccountOperationsWS'
 
 const defaultLimit = 10
 
@@ -13,11 +14,13 @@ export const useAccountDetails = () => {
    const offset = (page - 1) * defaultLimit
 
    const accountQuery = useAccountByIdQuery(id)
+
    const operationsQuery = useAccountOperationsQuery(id, {
       limit: defaultLimit,
       offset
    })
-
+   useAccountOperationsWS(id!)
+   
    const isLoading = accountQuery.isLoading || operationsQuery.isLoading
    const account = accountQuery.data?.data
    const operations = operationsQuery.data?.data?.items ?? []

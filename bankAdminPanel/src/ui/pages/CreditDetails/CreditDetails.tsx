@@ -180,6 +180,26 @@ export const CreditDetails = () => {
             </Grid.Col>
          </Grid>
 
+         {state.overduePayments.length > 0 && (
+            <Alert color="red" title="Просроченные платежи" icon={null}>
+               <Stack gap="xs">
+                  {state.overduePayments.map((overdue) => (
+                     <Group key={overdue.creditId + overdue.dueDate} justify="space-between">
+                        <Group gap="xs">
+                           <Badge color="red" variant="filled">
+                              {overdue.daysOverdue} дн. просрочки
+                           </Badge>
+                           <Text size="sm">Дата платежа: {formatDate(overdue.dueDate)}</Text>
+                        </Group>
+                        <Text fw={700} c="red">
+                           Остаток: {formatMoney(overdue.outstandingAmount)}
+                        </Text>
+                     </Group>
+                  ))}
+               </Stack>
+            </Alert>
+         )}
+
          <Card withBorder shadow="sm" radius="md" p="lg">
             <Title order={4} mb="md">
                История платежей

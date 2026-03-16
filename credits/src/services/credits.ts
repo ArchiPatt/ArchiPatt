@@ -95,6 +95,43 @@ export async function findOverdueCredits(
   return credits.filter((c) => c.nextPaymentDueAt.getTime() <= now.getTime());
 }
 
+export type OverduePaymentItem = {
+  creditId: string;
+  clientId: string;
+  accountId: string;
+  tariffId: string;
+  principalAmount: string;
+  outstandingAmount: string;
+  dueDate: string;
+  daysOverdue: number;
+  issuedAt: string;
+};
+
+export async function findOverduePayments(
+  ds: DataSource,
+  clientId?: string,
+  now: Date = new Date(),
+): Promise<OverduePaymentItem[]> {
+  const credits = await findOverdueCredits(ds, clientId, now);
+  return credits.map((c) => {
+    const dueDate = c.nextPaymentDueAt;
+    const daysOverdue = Math.floor(
+      (now.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000),
+    );
+    return {
+      creditId: c.id,
+      clientId: c.clientId,
+      accountId: c.accountId,
+      tariffId: c.tariffId,
+      principalAmount: c.principalAmount,
+      outstandingAmount: c.outstandingAmount,
+      dueDate: dueDate.toISOString(),
+      daysOverdue,
+      issuedAt: c.issuedAt.toISOString(),
+    };
+  });
+}
+
 export async function calculateCreditRating(
   ds: DataSource,
   clientId: string,
