@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAccountsTransferData, PostAccountsTransferResponse } from "..\\..\\types.gen";
+import type { PostAccountsTransferData, PostAccountsTransferResponse, PostAccountsTransferError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostAccountsTransferRequestParams = AxiosRequestParams<PostAccountsTransferData>;
 
-export const postAccountsTransfer = ({ config, body }: PostAccountsTransferRequestParams) => instance.request<PostAccountsTransferResponse>({
+export const postAccountsTransfer = ({ config, body }: PostAccountsTransferRequestParams): Promise<ApicraftAxiosResponse<PostAccountsTransferResponse, PostAccountsTransferError>> => instance.request({
     method: "POST",
     url: "/accounts/transfer",
     data: body,

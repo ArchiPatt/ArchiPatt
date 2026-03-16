@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetAdminSettingsColorSchemeData, GetAdminSettingsColorSchemeResponse } from "..\\..\\types.gen";
+import type { GetAdminSettingsColorSchemeData, GetAdminSettingsColorSchemeResponse, GetAdminSettingsColorSchemeError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetAdminSettingsColorSchemeRequestParams = AxiosRequestParams<GetAdminSettingsColorSchemeData>;
 
-export const getAdminSettingsColorScheme = ({ config }: GetAdminSettingsColorSchemeRequestParams = {}) => instance.request<GetAdminSettingsColorSchemeResponse>({
+export const getAdminSettingsColorScheme = ({ config }: GetAdminSettingsColorSchemeRequestParams = {}): Promise<ApicraftAxiosResponse<GetAdminSettingsColorSchemeResponse, GetAdminSettingsColorSchemeError>> => instance.request({
     method: "GET",
     url: "/admin-settings/color-scheme",
     ...config

@@ -8,7 +8,7 @@ import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetLoginRequestParams = AxiosRequestParams<GetLoginData>;
 
-export const getLogin = ({ config, query }: GetLoginRequestParams = {}) => instance.request<GetLoginResponse>({
+export const getLogin = ({ config, query }: GetLoginRequestParams = {}): Promise<ApicraftAxiosResponse<GetLoginResponse>> => instance.request({
     method: "GET",
     url: "/login",
     params: query,

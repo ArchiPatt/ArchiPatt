@@ -8,7 +8,7 @@ import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetCurrenciesRequestParams = AxiosRequestParams<GetCurrenciesData>;
 
-export const getCurrencies = ({ config }: GetCurrenciesRequestParams = {}) => instance.request<GetCurrenciesResponse>({
+export const getCurrencies = ({ config }: GetCurrenciesRequestParams = {}): Promise<ApicraftAxiosResponse<GetCurrenciesResponse>> => instance.request({
     method: "GET",
     url: "/currencies",
     ...config

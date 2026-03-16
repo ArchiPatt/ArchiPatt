@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostInternalUsersData, PostInternalUsersResponse } from "..\\..\\types.gen";
+import type { PostInternalUsersData, PostInternalUsersResponse, PostInternalUsersError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostInternalUsersRequestParams = AxiosRequestParams<PostInternalUsersData>;
 
-export const postInternalUsers = ({ config, body }: PostInternalUsersRequestParams) => instance.request<PostInternalUsersResponse>({
+export const postInternalUsers = ({ config, body }: PostInternalUsersRequestParams): Promise<ApicraftAxiosResponse<PostInternalUsersResponse, PostInternalUsersError>> => instance.request({
     method: "POST",
     url: "/internal/users",
     data: body,

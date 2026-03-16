@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetUsersData, GetUsersResponse } from "..\\..\\types.gen";
+import type { GetUsersData, GetUsersResponse, GetUsersError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetUsersRequestParams = AxiosRequestParams<GetUsersData>;
 
-export const getUsers = ({ config }: GetUsersRequestParams = {}) => instance.request<GetUsersResponse>({
+export const getUsers = ({ config }: GetUsersRequestParams = {}): Promise<ApicraftAxiosResponse<GetUsersResponse, GetUsersError>> => instance.request({
     method: "GET",
     url: "/users",
     ...config

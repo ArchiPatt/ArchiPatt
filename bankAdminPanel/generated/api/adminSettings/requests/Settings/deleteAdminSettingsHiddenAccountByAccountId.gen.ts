@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { DeleteAdminSettingsHiddenAccountsByAccountIdData, DeleteAdminSettingsHiddenAccountsByAccountIdResponse } from "..\\..\\types.gen";
+import type { DeleteAdminSettingsHiddenAccountsByAccountIdData, DeleteAdminSettingsHiddenAccountsByAccountIdResponse, DeleteAdminSettingsHiddenAccountsByAccountIdError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type DeleteAdminSettingsHiddenAccountByAccountIdRequestParams = AxiosRequestParams<DeleteAdminSettingsHiddenAccountsByAccountIdData>;
 
-export const deleteAdminSettingsHiddenAccountByAccountId = ({ config, path }: DeleteAdminSettingsHiddenAccountByAccountIdRequestParams) => instance.request<DeleteAdminSettingsHiddenAccountsByAccountIdResponse>({
+export const deleteAdminSettingsHiddenAccountByAccountId = ({ config, path }: DeleteAdminSettingsHiddenAccountByAccountIdRequestParams): Promise<ApicraftAxiosResponse<DeleteAdminSettingsHiddenAccountsByAccountIdResponse, DeleteAdminSettingsHiddenAccountsByAccountIdError>> => instance.request({
     method: "DELETE",
     url: `/admin-settings/hidden-accounts/${path.accountId}`,
     ...config

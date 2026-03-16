@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAdminSettingsHiddenAccountsData, PostAdminSettingsHiddenAccountsResponse } from "..\\..\\types.gen";
+import type { PostAdminSettingsHiddenAccountsData, PostAdminSettingsHiddenAccountsResponse, PostAdminSettingsHiddenAccountsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostAdminSettingsHiddenAccountsRequestParams = AxiosRequestParams<PostAdminSettingsHiddenAccountsData>;
 
-export const postAdminSettingsHiddenAccounts = ({ config, body }: PostAdminSettingsHiddenAccountsRequestParams) => instance.request<PostAdminSettingsHiddenAccountsResponse>({
+export const postAdminSettingsHiddenAccounts = ({ config, body }: PostAdminSettingsHiddenAccountsRequestParams): Promise<ApicraftAxiosResponse<PostAdminSettingsHiddenAccountsResponse, PostAdminSettingsHiddenAccountsError>> => instance.request({
     method: "POST",
     url: "/admin-settings/hidden-accounts",
     data: body,

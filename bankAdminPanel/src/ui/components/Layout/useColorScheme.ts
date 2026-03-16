@@ -8,7 +8,7 @@ export const useColorScheme = () => {
    const { setColorScheme: setMantineColorScheme, colorScheme } = useMantineColorScheme()
    const { data, isSuccess } = useColorSchemeQuery()
    const { mutate: setServerColorScheme } = useSetColorSchemeMutation()
-    console.log(colorScheme)
+
    useEffect(() => {
       if (isSuccess && data?.data?.colorScheme) {
          setMantineColorScheme(data.data.colorScheme)
