@@ -1,1 +1,0 @@
-export { CreditDetailPage } from "./core/CreditDetailPage.tsx"

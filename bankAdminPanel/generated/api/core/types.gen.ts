@@ -414,7 +414,7 @@ export type PostAccountsTransferErrors = {
      */
     403: ErrorResponse;
     /**
-     * Account not found
+     * account not found
      */
     404: ErrorResponse;
     /**

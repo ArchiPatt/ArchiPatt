@@ -1,1 +1,0 @@
-export { useGetPersonalProfile } from "./hooks/useGetPersonalProfile.ts"

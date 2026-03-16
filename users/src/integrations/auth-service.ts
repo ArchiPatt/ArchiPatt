@@ -11,7 +11,7 @@ export async function createAuthCredentials(input: { username: string }) {
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      "content-type": "application/json",
+      "content-type": "useCases/json",
       "x-internal-token": env.authService.internalToken,
     },
     body: JSON.stringify({

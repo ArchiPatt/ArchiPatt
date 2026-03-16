@@ -1,0 +1,1 @@
+export { useGetPersonalProfile } from "./requests/useGetPersonalProfile.ts"

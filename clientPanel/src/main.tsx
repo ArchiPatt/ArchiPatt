@@ -4,8 +4,9 @@ import "./styles/index.scss";
 import "@mantine/core/styles.css";
 import { MantineProvider } from "@mantine/core";
 import { BrowserRouter } from "react-router-dom";
-import { App } from "./app";
 import {QueryClient, QueryClientProvider} from "@tanstack/react-query";
+import {App} from "./App.tsx";
+
 
 const queryClient = new QueryClient({
     defaultOptions: {

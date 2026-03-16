@@ -34,7 +34,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       "gateway.openapi.yml",
     );
     const yml = await readFile(filePath, "utf-8");
-    reply.type("application/yaml; charset=utf-8");
+    reply.type("useCases/yaml; charset=utf-8");
     return yml;
   });
 

@@ -252,7 +252,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: Account not found
+          description: account not found
           content:
             application/json:
               schema:

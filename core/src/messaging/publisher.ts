@@ -8,6 +8,6 @@ export async function publishOperationCommand(
   const payload = Buffer.from(JSON.stringify(command), "utf8");
   ch.sendToQueue(QUEUE_NAME, payload, {
     persistent: true,
-    contentType: "application/json",
+    contentType: "useCases/json",
   });
 }

@@ -26,7 +26,7 @@ export async function postAccountOperation(input: {
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      "content-type": "application/json",
+      "content-type": "useCases/json",
       "x-internal-token": env.coreService.internalToken,
     },
     body: JSON.stringify({
@@ -59,7 +59,7 @@ export async function transferFromMaster(input: {
   }
 
   const headers: Record<string, string> = {
-    "content-type": "application/json",
+    "content-type": "useCases/json",
     "x-internal-token": env.coreService.internalToken,
   };
   if (input.authorization) headers["authorization"] = input.authorization;
@@ -98,7 +98,7 @@ export async function transferToMaster(input: {
   }
 
   const headers: Record<string, string> = {
-    "content-type": "application/json",
+    "content-type": "useCases/json",
     "x-internal-token": env.coreService.internalToken,
   };
   if (input.authorization) headers["authorization"] = input.authorization;

@@ -1,1 +1,0 @@
-export { ProfilePage } from "./core/ProfilePage.tsx"
