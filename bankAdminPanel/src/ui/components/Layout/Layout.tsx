@@ -6,7 +6,7 @@ import {
    UnstyledButton,
    ActionIcon,
    Tooltip,
-   useMantineColorScheme,
+   Menu,
    Container,
    Loader,
    Flex,
@@ -15,7 +15,7 @@ import {
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import classes from './Layout.module.css'
 import { useAuth } from './useAuth'
-import { getAdminSettingsColorScheme, getAdminSettingsHiddenAccounts } from '../../../../generated/api/adminSettings'
+import { useColorScheme } from './useColorScheme'
 
 const PROJECT_NAME = 'АРМ'
 
@@ -25,13 +25,16 @@ const NAV_ITEMS = [
    { to: '/users', label: 'Пользователи' }
 ] as const
 
+const colorSchemeIcon = {
+   light: '☀️',
+   dark: '🌙',
+   auto: '💻'
+}
+
 export const Layout = () => {
    const { pathname } = useLocation()
    const { logout, user } = useAuth()
-   getAdminSettingsColorScheme()
-   getAdminSettingsHiddenAccounts()
-   const { colorScheme, toggleColorScheme } = useMantineColorScheme()
-
+   const { colorScheme, setColorScheme } = useColorScheme()
    const displayName = user.data?.data?.displayName ?? user.data?.data?.username ?? 'Пользователь'
 
    if (user.isLoading) {
@@ -69,14 +72,18 @@ export const Layout = () => {
                   label={colorScheme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
                   position="bottom"
                >
-                  <ActionIcon
-                     variant="light"
-                     size="lg"
-                     aria-label="Сменить тему"
-                     onClick={() => toggleColorScheme()}
-                  >
-                     {colorScheme === 'light' ? '🌙' : '☀️'}
-                  </ActionIcon>
+                  <Menu position="bottom-end">
+                     <Menu.Target>
+                        <ActionIcon variant="light" size="lg" aria-label="Сменить тему">
+                           {colorSchemeIcon[colorScheme]}
+                        </ActionIcon>
+                     </Menu.Target>
+                     <Menu.Dropdown>
+                        <Menu.Item onClick={() => setColorScheme('light')}>☀️ Светлая</Menu.Item>
+                        <Menu.Item onClick={() => setColorScheme('dark')}>🌙 Тёмная</Menu.Item>
+                        <Menu.Item onClick={() => setColorScheme('auto')}>💻 Системная</Menu.Item>
+                     </Menu.Dropdown>
+                  </Menu>
                </Tooltip>
                <Button
                   variant="light"

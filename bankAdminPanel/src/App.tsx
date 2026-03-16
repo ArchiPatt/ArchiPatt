@@ -1,5 +1,5 @@
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
-import { Providers } from './ui/components/Providers/Providers'
+import { Providers } from './Providers'
 import { Layout } from './ui/components/Layout/Layout'
 import { Home } from './ui/pages/Home/Home'
 import { Tariffs } from './ui/pages/Tariffs/Tariffs'
