@@ -38,6 +38,9 @@ export class Credit {
   nextPaymentDueAt!: Date;
 
   @Column({ type: "timestamptz", nullable: true })
+  overdueSince!: Date | null;
+
+  @Column({ type: "timestamptz", nullable: true })
   closedAt!: Date | null;
 
   @CreateDateColumn({ type: "timestamptz" })

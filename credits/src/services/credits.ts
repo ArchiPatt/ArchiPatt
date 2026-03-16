@@ -92,7 +92,24 @@ export async function findOverdueCredits(
     where,
     order: { nextPaymentDueAt: "ASC" },
   });
-  return credits.filter((c) => c.nextPaymentDueAt.getTime() <= now.getTime());
+
+  const overdueCredits = credits.filter(
+    (c) =>
+      c.nextPaymentDueAt.getTime() <= now.getTime() ||
+      c.overdueSince != null,
+  );
+
+  for (const c of overdueCredits) {
+    if (
+      c.nextPaymentDueAt.getTime() <= now.getTime() &&
+      c.overdueSince == null
+    ) {
+      c.overdueSince = c.nextPaymentDueAt;
+      await repo.save(c);
+    }
+  }
+
+  return overdueCredits;
 }
 
 export type OverduePaymentItem = {
@@ -114,7 +131,7 @@ export async function findOverduePayments(
 ): Promise<OverduePaymentItem[]> {
   const credits = await findOverdueCredits(ds, clientId, now);
   return credits.map((c) => {
-    const dueDate = c.nextPaymentDueAt;
+    const dueDate = c.overdueSince ?? c.nextPaymentDueAt;
     const daysOverdue = Math.floor(
       (now.getTime() - dueDate.getTime()) / (24 * 60 * 60 * 1000),
     );
@@ -145,7 +162,7 @@ export async function calculateCreditRating(
   const overdueCredits = credits.filter(
     (c) =>
       c.status === CreditStatus.Active &&
-      c.nextPaymentDueAt.getTime() <= now.getTime(),
+      (c.nextPaymentDueAt.getTime() <= now.getTime() || c.overdueSince != null),
   );
   const closedCredits = credits.filter((c) => c.status === CreditStatus.Closed);
 

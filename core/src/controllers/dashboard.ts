@@ -51,8 +51,9 @@ export async function clientsOverviewController(
     const overdueCount = clientCredits.filter(
       (c) =>
         c.status === "active" &&
-        c.nextPaymentDueAt &&
-        new Date(c.nextPaymentDueAt).getTime() <= now,
+        ((c.nextPaymentDueAt &&
+          new Date(c.nextPaymentDueAt).getTime() <= now) ||
+          c.overdueSince != null),
     ).length;
     const closedCount = clientCredits.filter(
       (c) => c.status === "closed",

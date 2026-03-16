@@ -10,6 +10,7 @@ export type CreditItem = {
   status: string;
   issuedAt: string;
   nextPaymentDueAt: string | null;
+  overdueSince: string | null;
   closedAt: string | null;
 };
 
