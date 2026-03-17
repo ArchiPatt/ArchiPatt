@@ -11,7 +11,10 @@ async function isRevoked(jti: string): Promise<boolean> {
       "x-internal-token": env.authService.internalToken,
     },
   });
-  if (!res.ok) throw new Error("auth revoke check failed");
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`auth revoke check failed: ${res.status} ${text}`);
+  }
   const data = (await res.json()) as { revoked?: boolean };
   return Boolean(data.revoked);
 }

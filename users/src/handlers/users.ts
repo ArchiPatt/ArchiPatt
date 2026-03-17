@@ -97,7 +97,8 @@ export function createUsersHandlers(app: FastifyInstance) {
 async function safeVerify(req: FastifyRequest) {
   try {
     return await verifyBearerToken(req.headers.authorization);
-  } catch {
+  } catch (err) {
+    req.log.warn({ err, hasAuth: !!req.headers.authorization }, "token verify failed");
     return null;
   }
 }
