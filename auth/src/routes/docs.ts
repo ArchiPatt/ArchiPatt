@@ -4,7 +4,7 @@ import { readFile } from "fs/promises";
 
 export function registerDocsRoutes(app: FastifyInstance) {
   app.get("/swagger.yml", async (_req, reply) => {
-    const filePath = path.join(process.cwd(), "openapi", "auth.openapi.yml");
+    const filePath = path.join(__dirname, "..", "..", "openapi", "auth.openapi.yml");
     const yml = await readFile(filePath, "utf-8");
     reply.type("application/yaml; charset=utf-8");
     return yml;
