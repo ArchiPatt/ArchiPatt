@@ -33,7 +33,7 @@
 
 ```bash
 npm install
-cp .env.example .env
+cp env.example env
 # Создай БД: createdb admin_settings
 npm run migration:run
 npm run dev

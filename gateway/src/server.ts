@@ -110,48 +110,39 @@ export async function buildApp(): Promise<FastifyInstance> {
     rewritePrefix: "/jwks",
   });
 
-  await app.register(proxy, {
-    upstream: env.usersServiceUrl,
-    prefix: "/users",
-    rewritePrefix: "/users",
-  });
-  await app.register(proxy, {
-    upstream: env.usersServiceUrl,
-    prefix: "/me",
-    rewritePrefix: "/me",
-  });
+  const proxyWithAuth = (upstream: string, prefix: string) =>
+    app.register(proxy, {
+      upstream,
+      prefix,
+      rewritePrefix: prefix,
+      replyOptions: {
+        rewriteRequestHeaders(
+          req: { headers: Record<string, string | undefined> },
+          headers: Record<string, string>,
+        ) {
+          const auth = req.headers.authorization ?? req.headers.Authorization;
+          return auth ? { ...headers, authorization: auth } : headers;
+        },
+      },
+    });
 
-  await app.register(proxy, {
-    upstream: env.creditsServiceUrl,
-    prefix: "/credits",
-    rewritePrefix: "/credits",
-  });
-  await app.register(proxy, {
-    upstream: env.creditsServiceUrl,
-    prefix: "/tariffs",
-    rewritePrefix: "/tariffs",
-  });
-  await app.register(proxy, {
-    upstream: env.coreServiceUrl,
-    prefix: "/accounts",
-    rewritePrefix: "/accounts",
-  });
-  await app.register(proxy, {
-    upstream: env.coreServiceUrl,
-    prefix: "/dashboard",
-    rewritePrefix: "/dashboard",
-  });
+  await proxyWithAuth(env.usersServiceUrl, "/users");
+  await proxyWithAuth(env.usersServiceUrl, "/me");
+
+  await proxyWithAuth(env.creditsServiceUrl, "/credits");
+  await proxyWithAuth(env.creditsServiceUrl, "/tariffs");
+
+  await proxyWithAuth(env.coreServiceUrl, "/accounts");
+  await proxyWithAuth(env.coreServiceUrl, "/dashboard");
+
   await app.register(proxy, {
     upstream: env.coreServiceUrl,
     prefix: "/ws",
     rewritePrefix: "/ws",
     websocket: true,
   });
-    await app.register(proxy, {
-    upstream: env.adminSettingServiceUrl,
-    prefix: "/admin-settings",
-    rewritePrefix: "/admin-settings",
-  });
+
+  await proxyWithAuth(env.adminSettingServiceUrl, "/admin-settings");
 
   return app;
 }

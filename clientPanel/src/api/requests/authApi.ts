@@ -5,21 +5,24 @@ import type {TokenResponse} from "../../types/auth/TokenResponse.ts";
 
 const authApi = {
     accessToken: async (token: string) => {
-        const model: AccessTokenRequest = {
-            grant_type: "authorization_code",
-            code: token
-        }
+        const params = new URLSearchParams();
+        params.set('grant_type', 'authorization_code');
+        params.set('code', token);
 
-        const { data } = await instance.post<TokenResponse>("token", model);
+        const { data } = await instance.post<TokenResponse>("token", params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
 
         return data
     },
     refreshToken: async (token: string) => {
-        const model: RefreshTokenRequest = {
-            grant_type: "refresh_token",
-            refresh_token: token
-        }
-        const { data } = await instance.post<TokenResponse>("token", model);
+        const params = new URLSearchParams();
+        params.set('grant_type', 'refresh_token');
+        params.set('refresh_token', token);
+
+        const { data } = await instance.post<TokenResponse>("token", params, {
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        });
 
         return data
     },

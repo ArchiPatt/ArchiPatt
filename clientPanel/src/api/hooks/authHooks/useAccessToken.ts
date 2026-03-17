@@ -16,6 +16,11 @@ const useAccessToken = () => {
             tokenStorage.setItem(data.access_token)
             refreshStorage.setItem(data.refresh_token)
 
+            // Убираем code из URL после успешного обмена
+            const url = new URL(window.location.href);
+            url.searchParams.delete('code');
+            window.history.replaceState({}, '', url.toString());
+
             queryClient.invalidateQueries({ queryKey: ['user'] });
         },
         onError: (error) => {
