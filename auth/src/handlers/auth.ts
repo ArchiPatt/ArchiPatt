@@ -38,7 +38,9 @@ export function createAuthHandlers(app: FastifyInstance) {
     },
 
     loginGet: async (
-      req: FastifyRequest<{ Querystring: { return_to?: string; error?: string } }>,
+      req: FastifyRequest<{
+        Querystring: { return_to?: string; error?: string; prompt?: string };
+      }>,
       reply: FastifyReply,
     ) => {
       const sessionId = req.cookies?.[env.session.cookieName] as
@@ -48,6 +50,7 @@ export function createAuthHandlers(app: FastifyInstance) {
         sessionId,
         return_to: req.query.return_to,
         error: req.query.error,
+        prompt: req.query.prompt,
       });
 
       if (res.status === 302 && "redirect" in res) {

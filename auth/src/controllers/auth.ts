@@ -78,12 +78,14 @@ export async function loginGetController(
     sessionId?: string;
     return_to?: string;
     error?: string;
+    prompt?: string;
   },
 ) {
   const returnTo = params.return_to ?? "";
   const normalizedReturnTo = normalizeReturnTo(returnTo);
+  const forceLogin = params.prompt === "login";
 
-  if (params.sessionId && normalizedReturnTo) {
+  if (!forceLogin && params.sessionId && normalizedReturnTo) {
     const session = await authService.findSessionBySessionId(
       app.db,
       params.sessionId,

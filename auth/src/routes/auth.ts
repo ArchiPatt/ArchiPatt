@@ -11,10 +11,9 @@ export function registerAuthRoutes(app: FastifyInstance) {
 
   app.get("/jwks", h.jwks);
 
-  app.get<{ Querystring: { return_to?: string; error?: string } }>(
-    "/login",
-    h.loginGet,
-  );
+  app.get<{
+    Querystring: { return_to?: string; error?: string; prompt?: string };
+  }>("/login", h.loginGet);
 
   app.post<{
     Body: { username?: string; password?: string; return_to?: string };

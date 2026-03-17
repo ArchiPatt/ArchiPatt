@@ -4,6 +4,9 @@ import {tokenStorage} from "../storage/tokenStorage";
 import {refreshStorage} from "../storage/refreshStorage";
 import {authApi} from "../../entities/Auth/api/authApi.ts";
 
+const AUTH_LOGIN_URL = 'http://localhost:4004/login';
+const RETURN_TO = 'http://localhost:5173/';
+
 const instance = axios.create({ baseURL: 'http://localhost:4004/' })
 
 
@@ -43,6 +46,7 @@ instance.interceptors.response.use(
             if (!refreshToken) {
                 tokenStorage.setItem('');
                 refreshStorage.setItem('');
+                window.location.href = `${AUTH_LOGIN_URL}?return_to=${encodeURIComponent(RETURN_TO)}&prompt=login`;
                 return Promise.reject(error);
             }
 
@@ -79,7 +83,7 @@ instance.interceptors.response.use(
                 processQueue(err, null);
                 tokenStorage.setItem('');
                 refreshStorage.setItem('');
-                window.location.href = 'http://localhost:4000/login?return_to=http%3A%2F%2Flocalhost%3A5173%2F'
+                window.location.href = `${AUTH_LOGIN_URL}?return_to=${encodeURIComponent(RETURN_TO)}&prompt=login`;
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;

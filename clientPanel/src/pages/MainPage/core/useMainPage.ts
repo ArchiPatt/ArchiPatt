@@ -31,8 +31,10 @@ const useMainPage = () => {
     }
 
     useEffect(() => {
-        getAccessToken(code ?? "")
-    }, []);
+        if (code) {
+            getAccessToken(code);
+        }
+    }, [code]);
 
     useEffect(() => {
         if(userProfileData) {
