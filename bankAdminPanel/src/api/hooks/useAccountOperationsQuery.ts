@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getAccountByIdOperations } from '../../../generated/api/core/requests/Core/getAccountByIdOperations.gen'
+import { getAccountByIdOperations } from '../../../generated/api/core/requests/core/getAccountByIdOperations.gen'
 import type { GetAccountsByIdOperationsData } from '../../../generated/api/core/types.gen'
 
 export const useAccountOperationsQuery = (
