@@ -46,7 +46,7 @@ instance.interceptors.response.use(
             if (!refreshToken) {
                 tokenStorage.setItem('');
                 refreshStorage.setItem('');
-                window.location.href = `${AUTH_LOGIN_URL}?return_to=${encodeURIComponent(RETURN_TO)}&prompt=login`;
+                window.location.href = `${AUTH_LOGIN_URL}?return_to=${encodeURIComponent(RETURN_TO)}`;
                 return Promise.reject(error);
             }
 
@@ -83,7 +83,7 @@ instance.interceptors.response.use(
                 processQueue(err, null);
                 tokenStorage.setItem('');
                 refreshStorage.setItem('');
-                window.location.href = `${AUTH_LOGIN_URL}?return_to=${encodeURIComponent(RETURN_TO)}&prompt=login`;
+                window.location.href = `${AUTH_LOGIN_URL}?return_to=${encodeURIComponent(RETURN_TO)}`;
                 return Promise.reject(err);
             } finally {
                 isRefreshing = false;

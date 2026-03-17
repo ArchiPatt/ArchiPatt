@@ -14,7 +14,7 @@ const useLogout = () => {
             refreshStorage.removeItem()
             userStorage.removeItem()
             queryClient.invalidateQueries({ queryKey: ['user'] })
-            window.location.href = 'http://localhost:4004/login?return_to=' + encodeURIComponent('http://localhost:5173/') + '&prompt=login'
+            window.location.href = 'http://localhost:4004/login?return_to=' + encodeURIComponent('http://localhost:5173/')
         }
     })
 }
