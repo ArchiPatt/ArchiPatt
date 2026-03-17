@@ -26,6 +26,15 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   app.get("/health", async () => ({ ok: true }));
 
+  // Диагностика: проверка передачи Authorization (только для отладки)
+  app.get("/debug/headers", async (req) => ({
+    hasAuthorization: !!(
+      req.headers.authorization ?? req.headers.Authorization
+    ),
+    authPrefix: (req.headers.authorization ?? req.headers.Authorization ?? "")
+      .slice(0, 20),
+  }));
+
   app.get("/swagger.yml", async (_req, reply) => {
     const filePath = path.join(
       __dirname,
