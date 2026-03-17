@@ -107,7 +107,13 @@ export const Home = () => {
                               ) : (
                                  <Stack gap="xs">
                                     {item.accounts.map((account) => (
-                                       <AccountCard key={account.id} account={account} />
+                                       <AccountCard
+                                          key={account.id}
+                                          account={account}
+                                          isHidden={state.hiddenAccounts.has(account.id)}
+                                          onHide={functions.handleHideAccount}
+                                          onShow={functions.handleShowAccount}
+                                       />
                                     ))}
                                  </Stack>
                               )}

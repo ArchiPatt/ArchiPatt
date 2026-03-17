@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
-import { postUsers } from '../../../generated/api/user/requests/Users/postUsers.gen'
+import { postUsers } from '../../../generated/api/user/requests/users/postUsers.gen'
 import type { PostUsersData } from '../../../generated/api/user/types.gen'
 
 export const useCreateUserMutation = () => {

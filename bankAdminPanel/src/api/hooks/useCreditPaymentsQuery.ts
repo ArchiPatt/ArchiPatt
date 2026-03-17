@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getCreditByIdPayments } from '../../../generated/api/credits/requests/Credits/getCreditByIdPayments.gen'
+import { getCreditByIdPayments } from '../../../generated/api/credits/requests/credits/getCreditByIdPayments.gen'
 
 export const useCreditPaymentsQuery = (id: string | undefined) => {
    return useQuery({

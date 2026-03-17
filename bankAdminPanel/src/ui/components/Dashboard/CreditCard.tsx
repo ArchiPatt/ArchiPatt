@@ -1,8 +1,9 @@
-import { Badge, Card, Group, Stack, Text } from '@mantine/core'
+import { Badge, Card, Group, Stack, Text, Tooltip } from '@mantine/core'
 import { useNavigate } from 'react-router-dom'
 import type { CreditOverview } from '../../../../generated/api/core/types.gen'
 import { formatMoney } from '../../../utils/formatMoney'
 import { formatDate } from '../../../utils/formatDate'
+import { maskAccountId } from '../../../utils/maskAccountId'
 
 type CreditCardProps = {
    credit: CreditOverview
@@ -37,9 +38,12 @@ export const CreditCard = ({ credit }: CreditCardProps) => {
       <Card withBorder radius="md" padding="sm" style={{ cursor: 'pointer' }} onClick={handleClick}>
          <Group justify="space-between" align="flex-start">
             <Stack gap={2}>
+               <Tooltip label={`Кредит № ${credit.id}`} withArrow>
                <Text size="sm" fw={500}>
-                  Кредит № {credit.id}
+                  Кредит № {maskAccountId(credit.id!)}
                </Text>
+               </Tooltip>
+
                <Text size="xs" c="dimmed">
                   Выдан: {formatDate(credit.issuedAt)}
                </Text>

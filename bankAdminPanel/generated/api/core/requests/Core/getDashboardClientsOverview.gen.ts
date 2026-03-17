@@ -8,7 +8,7 @@ import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetDashboardClientsOverviewRequestParams = AxiosRequestParams<GetDashboardClientsOverviewData>;
 
-export const getDashboardClientsOverview = ({ config, query }: GetDashboardClientsOverviewRequestParams = {}) => instance.request<GetDashboardClientsOverviewResponse>({
+export const getDashboardClientsOverview = ({ config, query }: GetDashboardClientsOverviewRequestParams = {}): Promise<ApicraftAxiosResponse<GetDashboardClientsOverviewResponse>> => instance.request({
     method: "GET",
     url: "/dashboard/clients-overview",
     params: query,

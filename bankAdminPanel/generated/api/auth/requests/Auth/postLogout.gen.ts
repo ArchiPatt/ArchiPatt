@@ -8,7 +8,7 @@ import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostLogoutRequestParams = AxiosRequestParams<PostLogoutData>;
 
-export const postLogout = ({ config }: PostLogoutRequestParams = {}) => instance.request<PostLogoutResponse>({
+export const postLogout = ({ config }: PostLogoutRequestParams = {}): Promise<ApicraftAxiosResponse<PostLogoutResponse>> => instance.request({
     method: "POST",
     url: "/logout",
     ...config

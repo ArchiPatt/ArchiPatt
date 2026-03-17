@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostInternalAccountsByIdOperationsData, PostInternalAccountsByIdOperationsResponse } from "..\\..\\types.gen";
+import type { PostInternalAccountsByIdOperationsData, PostInternalAccountsByIdOperationsResponse, PostInternalAccountsByIdOperationsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostInternalAccountByIdOperationsRequestParams = AxiosRequestParams<PostInternalAccountsByIdOperationsData>;
 
-export const postInternalAccountByIdOperations = ({ config, body, path }: PostInternalAccountByIdOperationsRequestParams) => instance.request<PostInternalAccountsByIdOperationsResponse>({
+export const postInternalAccountByIdOperations = ({ config, body, path }: PostInternalAccountByIdOperationsRequestParams): Promise<ApicraftAxiosResponse<PostInternalAccountsByIdOperationsResponse, PostInternalAccountsByIdOperationsError>> => instance.request({
     method: "POST",
     url: `/internal/accounts/${path.id}/operations`,
     data: body,

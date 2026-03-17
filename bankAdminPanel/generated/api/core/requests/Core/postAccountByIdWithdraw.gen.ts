@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAccountsByIdWithdrawData, PostAccountsByIdWithdrawResponse } from "..\\..\\types.gen";
+import type { PostAccountsByIdWithdrawData, PostAccountsByIdWithdrawResponse, PostAccountsByIdWithdrawError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostAccountByIdWithdrawRequestParams = AxiosRequestParams<PostAccountsByIdWithdrawData>;
 
-export const postAccountByIdWithdraw = ({ config, body, path }: PostAccountByIdWithdrawRequestParams) => instance.request<PostAccountsByIdWithdrawResponse>({
+export const postAccountByIdWithdraw = ({ config, body, path }: PostAccountByIdWithdrawRequestParams): Promise<ApicraftAxiosResponse<PostAccountsByIdWithdrawResponse, PostAccountsByIdWithdrawError>> => instance.request({
     method: "POST",
     url: `/accounts/${path.id}/withdraw`,
     data: body,

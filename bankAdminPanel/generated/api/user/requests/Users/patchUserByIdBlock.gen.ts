@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PatchUsersByIdBlockData, PatchUsersByIdBlockResponse } from "..\\..\\types.gen";
+import type { PatchUsersByIdBlockData, PatchUsersByIdBlockResponse, PatchUsersByIdBlockError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PatchUserByIdBlockRequestParams = AxiosRequestParams<PatchUsersByIdBlockData>;
 
-export const patchUserByIdBlock = ({ config, body, path }: PatchUserByIdBlockRequestParams) => instance.request<PatchUsersByIdBlockResponse>({
+export const patchUserByIdBlock = ({ config, body, path }: PatchUserByIdBlockRequestParams): Promise<ApicraftAxiosResponse<PatchUsersByIdBlockResponse, PatchUsersByIdBlockError>> => instance.request({
     method: "PATCH",
     url: `/users/${path.id}/block`,
     data: body,

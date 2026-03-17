@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { getTariffs } from '../../../generated/api/credits/requests/Credits/getTariffs.gen'
+import { getTariffs } from '../../../generated/api/credits/requests/credits/getTariffs.gen'
 
 export const useTariffByIdQuery = (id: string | undefined) => {
    return useQuery({

@@ -8,7 +8,7 @@ import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetHealthRequestParams = AxiosRequestParams<GetHealthData>;
 
-export const getHealth = ({ config }: GetHealthRequestParams = {}) => instance.request<GetHealthResponse>({
+export const getHealth = ({ config }: GetHealthRequestParams = {}): Promise<ApicraftAxiosResponse<GetHealthResponse>> => instance.request({
     method: "GET",
     url: "/health",
     ...config

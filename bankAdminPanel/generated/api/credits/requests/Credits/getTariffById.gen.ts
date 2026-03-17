@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetTariffsByIdData, GetTariffsByIdResponse } from "..\\..\\types.gen";
+import type { GetTariffsByIdData, GetTariffsByIdResponse, GetTariffsByIdError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetTariffByIdRequestParams = AxiosRequestParams<GetTariffsByIdData>;
 
-export const getTariffById = ({ config, path }: GetTariffByIdRequestParams) => instance.request<GetTariffsByIdResponse>({
+export const getTariffById = ({ config, path }: GetTariffByIdRequestParams): Promise<ApicraftAxiosResponse<GetTariffsByIdResponse, GetTariffsByIdError>> => instance.request({
     method: "GET",
     url: `/tariffs/${path.id}`,
     ...config

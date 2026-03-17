@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetSetupPasswordData, GetSetupPasswordResponse } from "..\\..\\types.gen";
+import type { GetSetupPasswordData, GetSetupPasswordResponse, GetSetupPasswordError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetSetupPasswordRequestParams = AxiosRequestParams<GetSetupPasswordData>;
 
-export const getSetupPassword = ({ config, query }: GetSetupPasswordRequestParams) => instance.request<GetSetupPasswordResponse>({
+export const getSetupPassword = ({ config, query }: GetSetupPasswordRequestParams): Promise<ApicraftAxiosResponse<GetSetupPasswordResponse, GetSetupPasswordError>> => instance.request({
     method: "GET",
     url: "/setup-password",
     params: query,

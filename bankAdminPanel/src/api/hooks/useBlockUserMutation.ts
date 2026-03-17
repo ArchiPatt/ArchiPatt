@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { notifications } from '@mantine/notifications'
-import { patchUserByIdBlock } from '../../../generated/api/user/requests/Users/patchUserByIdBlock.gen'
+import { patchUserByIdBlock } from '../../../generated/api/user/requests/users/patchUserByIdBlock.gen'
 import type { PatchUsersByIdBlockData } from '../../../generated/api/user/types.gen'
 
 type BlockUserVariables = {

@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostTokenData, PostTokenResponse } from "..\\..\\types.gen";
+import type { PostTokenData, PostTokenResponse, PostTokenError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostTokenRequestParams = AxiosRequestParams<PostTokenData>;
 
-export const postToken = ({ config, body }: PostTokenRequestParams) => instance.request<PostTokenResponse>({
+export const postToken = ({ config, body }: PostTokenRequestParams): Promise<ApicraftAxiosResponse<PostTokenResponse, PostTokenError>> => instance.request({
     method: "POST",
     url: "/token",
     data: body,
