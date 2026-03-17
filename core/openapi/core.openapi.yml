@@ -798,6 +798,11 @@ components:
           type: string
           format: date-time
           nullable: true
+        overdueSince:
+          type: string
+          format: date-time
+          nullable: true
+          description: Дата начала просрочки (если клиент не внёс платёж в срок).
         closedAt:
           type: string
           format: date-time

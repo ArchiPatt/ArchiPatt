@@ -1,5 +1,8 @@
 import { useSearchParams } from 'react-router-dom'
 import { useDashboardClientsOverviewQuery } from '../../api/hooks/useDashboardClientsOverviewQuery'
+import { useHiddenAccountsQuery } from '../../api/hooks/useHiddenAccountsQuery'
+import { useAddHiddenAccountMutation } from '../../api/hooks/useAddHiddenAccountMutation'
+import { useRemoveHiddenAccountMutation } from '../../api/hooks/useRemoveHiddenAccountMutation'
 
 const defaultLimit = 10
 
@@ -15,10 +18,14 @@ export const useHome = () => {
    const offset = (page - 1) * limit
 
    const dashboardQuery = useDashboardClientsOverviewQuery({ limit, offset })
+   const hiddenAccountsQuery = useHiddenAccountsQuery()
+   const addHiddenAccountMutation = useAddHiddenAccountMutation()
+   const removeHiddenAccountMutation = useRemoveHiddenAccountMutation()
 
-   const isLoading = dashboardQuery.isLoading
+   const isLoading = dashboardQuery.isLoading || hiddenAccountsQuery.isLoading
 
    const dashboardData = dashboardQuery.data?.data
+   const hiddenAccounts = new Set(hiddenAccountsQuery.data?.data?.hiddenAccounts ?? [])
 
    const total = dashboardData?.total ?? 0
    const totalPages = total > 0 ? Math.ceil(total / limit) : 1
@@ -34,8 +41,16 @@ export const useHome = () => {
       })
    }
 
+   const handleHideAccount = (accountId: string) => {
+      addHiddenAccountMutation.mutate(accountId)
+   }
+
+   const handleShowAccount = (accountId: string) => {
+      removeHiddenAccountMutation.mutate(accountId)
+   }
+
    return {
-      state: { page, limit, total, totalPages, dashboardData, isLoading },
-      functions: { handlePageChange }
+      state: { page, limit, total, totalPages, dashboardData, isLoading, hiddenAccounts },
+      functions: { handlePageChange, handleHideAccount, handleShowAccount }
    }
 }

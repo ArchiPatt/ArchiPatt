@@ -8,7 +8,7 @@ import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetJwksRequestParams = AxiosRequestParams<GetJwksData>;
 
-export const getJwks = ({ config }: GetJwksRequestParams = {}) => instance.request<GetJwksResponse>({
+export const getJwks = ({ config }: GetJwksRequestParams = {}): Promise<ApicraftAxiosResponse<GetJwksResponse>> => instance.request({
     method: "GET",
     url: "/jwks",
     ...config

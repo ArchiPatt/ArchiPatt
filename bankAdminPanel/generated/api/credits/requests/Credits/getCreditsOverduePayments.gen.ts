@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetCreditsOverduePaymentsData, GetCreditsOverduePaymentsResponse } from "..\\..\\types.gen";
+import type { GetCreditsOverduePaymentsData, GetCreditsOverduePaymentsResponse, GetCreditsOverduePaymentsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetCreditsOverduePaymentsRequestParams = AxiosRequestParams<GetCreditsOverduePaymentsData>;
 
-export const getCreditsOverduePayments = ({ config, query }: GetCreditsOverduePaymentsRequestParams = {}) => instance.request<GetCreditsOverduePaymentsResponse>({
+export const getCreditsOverduePayments = ({ config, query }: GetCreditsOverduePaymentsRequestParams = {}): Promise<ApicraftAxiosResponse<GetCreditsOverduePaymentsResponse, GetCreditsOverduePaymentsError>> => instance.request({
     method: "GET",
     url: "/credits/overdue-payments",
     params: query,

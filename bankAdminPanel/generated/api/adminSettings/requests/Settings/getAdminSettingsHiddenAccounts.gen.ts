@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetAdminSettingsHiddenAccountsData, GetAdminSettingsHiddenAccountsResponse } from "..\\..\\types.gen";
+import type { GetAdminSettingsHiddenAccountsData, GetAdminSettingsHiddenAccountsResponse, GetAdminSettingsHiddenAccountsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type GetAdminSettingsHiddenAccountsRequestParams = AxiosRequestParams<GetAdminSettingsHiddenAccountsData>;
 
-export const getAdminSettingsHiddenAccounts = ({ config }: GetAdminSettingsHiddenAccountsRequestParams = {}) => instance.request<GetAdminSettingsHiddenAccountsResponse>({
+export const getAdminSettingsHiddenAccounts = ({ config }: GetAdminSettingsHiddenAccountsRequestParams = {}): Promise<ApicraftAxiosResponse<GetAdminSettingsHiddenAccountsResponse, GetAdminSettingsHiddenAccountsError>> => instance.request({
     method: "GET",
     url: "/admin-settings/hidden-accounts",
     ...config

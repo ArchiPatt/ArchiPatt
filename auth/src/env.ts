@@ -60,7 +60,15 @@ export const env = {
 
   usersService: {
     baseUrl: must("USERS_SERVICE_URL"),
-    internalToken: must("USERS_INTERNAL_TOKEN"),
+    internalToken: (() => {
+      const t =
+        process.env.USERS_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "";
+      if (!t)
+        throw new Error(
+          "Missing env: USERS_INTERNAL_TOKEN or INTERNAL_TOKEN (должен совпадать с INTERNAL_TOKEN в users)",
+        );
+      return t;
+    })(),
   },
   internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? process.env.USERS_INTERNAL_TOKEN ?? "",
 };

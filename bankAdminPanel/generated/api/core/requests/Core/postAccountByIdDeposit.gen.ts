@@ -2,13 +2,13 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAccountsByIdDepositData, PostAccountsByIdDepositResponse } from "..\\..\\types.gen";
+import type { PostAccountsByIdDepositData, PostAccountsByIdDepositResponse, PostAccountsByIdDepositError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
 export type PostAccountByIdDepositRequestParams = AxiosRequestParams<PostAccountsByIdDepositData>;
 
-export const postAccountByIdDeposit = ({ config, body, path }: PostAccountByIdDepositRequestParams) => instance.request<PostAccountsByIdDepositResponse>({
+export const postAccountByIdDeposit = ({ config, body, path }: PostAccountByIdDepositRequestParams): Promise<ApicraftAxiosResponse<PostAccountsByIdDepositResponse, PostAccountsByIdDepositError>> => instance.request({
     method: "POST",
     url: `/accounts/${path.id}/deposit`,
     data: body,
