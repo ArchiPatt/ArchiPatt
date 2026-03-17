@@ -1,7 +1,7 @@
-import {useCreateAccount} from "../../request/account";
 import type {CreateAccountRequest} from "../../types/account/CreateAccountRequest.ts";
 import {userStorage} from "../../shared/storage/userStorage";
-import {useLogout} from "../../request/auth";
+import {useCreateAccount} from "../../api/hooks/accountHooks/useCreateAccount.ts";
+import {useLogout} from "../../api/hooks/authHooks/useLogout.ts";
 
 const useNavbar = () => {
 

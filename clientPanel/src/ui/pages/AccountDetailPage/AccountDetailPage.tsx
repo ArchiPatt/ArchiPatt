@@ -17,7 +17,7 @@ import {
     IconTrash,
 } from '@tabler/icons-react';
 import { useAccountDetailPage } from "../../../useCases/pages/useAccountDetailPage.ts";
-import { Transaction } from "../../../request/transaction";
+import {Transaction} from "../../components/Transaction/core/Transaction.tsx";
 
 const AccountDetailPage = () => {
     const {

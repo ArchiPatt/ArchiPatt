@@ -1,4 +1,4 @@
-import {accountsApi} from "../../../api/repository/accountsApi.ts";
+import {accountsApi} from "../../requests/accountsApi.ts";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import type {DepositArgs} from "../../../types/account/DepositArgs.ts";
 

@@ -37,8 +37,8 @@ async function loadKeys(): Promise<{ privateKey: SigningKey; publicJwk: JWK }> {
   if (alg) publicJwk.alg = alg;
 
   if (!publicJwk.kid) {
-    // If user generated JWK without kid, set a stable kid
-    publicJwk.kid = "auth-default";
+    // If userHooks generated JWK without kid, set a stable kid
+    publicJwk.kid = "authHooks-default";
   }
   publicJwk.use = "sig";
   publicJwk.alg = "RS256";

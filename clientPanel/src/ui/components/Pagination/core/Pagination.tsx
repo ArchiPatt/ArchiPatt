@@ -1,7 +1,7 @@
 import { Group, Button } from "@mantine/core";
 import { IconChevronLeft, IconChevronRight } from "@tabler/icons-react";
-import type {PaginationProps} from "@/components/Pagination/types/PaginationProps.ts";
-import {usePagination} from "@/components/Pagination/core/usePagination.ts";
+import type {PaginationProps} from "../types/PaginationProps.ts";
+import {usePagination} from "../../../../useCases/components/usePagination.ts";
 
 const Pagination = (props: PaginationProps) => {
 

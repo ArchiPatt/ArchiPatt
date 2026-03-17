@@ -1,6 +1,5 @@
 import {
     Group,
-    Text,
     Button,
     Menu,
     Avatar,

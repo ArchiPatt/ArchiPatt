@@ -1,5 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {creditsApi} from "../../../api/repository/creditApi.ts";
+import {creditsApi} from "../../requests/creditApi.ts";
 import type {RepayArgs} from "../../../types/credit/RepayArgs.ts";
 
 const useCreditRepay = () => {

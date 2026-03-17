@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import type {TariffResponse} from "../../../types/tariff/TariffResponse.ts";
-import {tariffApi} from "../../../api/repository/tariffApi.ts";
+import {tariffApi} from "../../requests/tariffApi.ts";
 
 const useGetTariffById = (id: string | undefined) => {
     return useQuery<TariffResponse, Error, TariffResponse, ['tariff', string | undefined]>({

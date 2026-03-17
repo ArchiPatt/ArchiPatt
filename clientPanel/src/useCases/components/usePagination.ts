@@ -1,4 +1,4 @@
-import type {PaginationProps} from "@/components/Pagination/types/PaginationProps.ts";
+import type {PaginationProps} from "@mantine/core";
 
 const usePagination = (props: PaginationProps) => {
 

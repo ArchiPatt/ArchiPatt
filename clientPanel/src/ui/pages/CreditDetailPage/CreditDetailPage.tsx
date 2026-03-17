@@ -19,7 +19,7 @@ import {
 } from '@tabler/icons-react';
 import {useCreditDetailPage} from "../../../useCases/pages/useCreditDetailPage.ts";
 import {formatDate} from "../../../shared/utils/formatDate.ts";
-import {Transaction} from "../../../request/transaction";
+import {Transaction} from "../../components/Transaction/core/Transaction.tsx";
 
 const CreditDetailPage = () => {
 

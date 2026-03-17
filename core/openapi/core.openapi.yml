@@ -252,7 +252,7 @@ paths:
               example:
                 error: forbidden
         "404":
-          description: account not found
+          description: accountHooks not found
           content:
             application/json:
               schema:
@@ -726,7 +726,7 @@ components:
         clientId:
           type: string
           format: uuid
-          description: ID владельца счёта (это `user.id` из Users Service).
+          description: ID владельца счёта (это `userHooks.id` из Users Service).
           example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
         currency:
           type: string
@@ -965,7 +965,7 @@ components:
           type: string
           nullable: true
           description: Бизнес-тип операции (опционально).
-          example: credit
+          example: creditHooks
         correlationId:
           type: string
           format: uuid

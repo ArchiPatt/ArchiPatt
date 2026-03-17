@@ -1,4 +1,4 @@
-import {useGetPersonalProfile} from "../../request/user";
+import {useGetPersonalProfile} from "../../api/hooks/userHooks/useGetPersonalProfile.ts";
 
 const useProfilePage = () => {
 

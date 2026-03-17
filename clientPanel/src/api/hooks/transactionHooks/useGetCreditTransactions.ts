@@ -1,5 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
-import {creditTransactionApi} from "../../../api/repository/creditTransactionApi.ts";
+import {creditTransactionApi} from "../../requests/creditTransactionApi.ts";
 import type {CreditPaymentResponse} from "../../../types/transaction/CreditPaymentResponse.ts";
 
 const useGetCreditTransactions = (id: string | undefined) => {

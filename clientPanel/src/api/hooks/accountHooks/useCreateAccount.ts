@@ -1,6 +1,6 @@
 import type {CreateAccountRequest} from "../../../types/account/CreateAccountRequest.ts";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {accountsApi} from "../../../api/repository/accountsApi.ts";
+import {accountsApi} from "../../requests/accountsApi.ts";
 
 const useCreateAccount = () => {
     const queryClient = useQueryClient()

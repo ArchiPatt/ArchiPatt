@@ -1,5 +1,5 @@
 import {useQuery} from "@tanstack/react-query";
-import {creditsApi} from "../../../api/repository/creditApi.ts";
+import {creditsApi} from "../../requests/creditApi.ts";
 import type {CreditResponse} from "../../../types/credit/CreditResponse.ts";
 
 const useGetCreditById = (id: string | undefined) => {

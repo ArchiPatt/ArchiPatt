@@ -5,7 +5,7 @@ async function main() {
   const app = await buildApp();
 
   await app.listen({ port: env.port, host: "0.0.0.0" });
-  app.log.info({ port: env.port, issuer: env.issuer }, "auth service started");
+  app.log.info({ port: env.port, issuer: env.issuer }, "authHooks service started");
 }
 
 main().catch((err) => {

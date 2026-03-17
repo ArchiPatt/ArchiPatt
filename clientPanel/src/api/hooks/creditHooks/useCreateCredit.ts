@@ -1,6 +1,6 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import type {IssueCreditRequest} from "../../../types/credit/IssueCreditRequest.ts";
-import {creditsApi} from "../../../api/repository/creditApi.ts";
+import {creditsApi} from "../../requests/creditApi.ts";
 
 const useCreateCredit = () => {
     const queryClient = useQueryClient()

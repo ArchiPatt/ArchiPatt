@@ -4,14 +4,14 @@ import { apicraft } from '@siberiacancode/apicraft'
 export default apicraft([
    {
       input: 'http://localhost:4000/swagger.yml' ,
-      output: 'generated/api/auth',
+      output: 'generated/api/authHooks',
       instance: {name: 'axios', runtimeInstancePath: './src/api/instance.ts'},
       nameBy: 'path',
       groupBy: 'tags',
    },
    {
       input: 'http://localhost:4001/swagger.yml' ,
-      output: 'generated/api/user',
+      output: 'generated/api/userHooks',
       instance: {name: 'axios', runtimeInstancePath: './src/api/instance.ts'},
       nameBy: 'path',
       groupBy: 'tags',

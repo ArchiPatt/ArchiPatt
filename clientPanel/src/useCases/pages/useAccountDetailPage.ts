@@ -1,9 +1,12 @@
 import {useNavigate, useParams} from "react-router-dom";
-import {useCloseAccount, useDepositAccount, useGetAccountById, useWithdrawAccount} from "../../request/account";
-import {useGetAccountTransactions} from "../../request/transaction";
 import {LINK_PATHS} from "../../shared/constants/LINK_PATHS.ts";
 import {useState} from "react";
 import type {DepositArgs} from "../../types/account/DepositArgs.ts";
+import {useCloseAccount} from "../../api/hooks/accountHooks/useCloseAccount.ts";
+import {useWithdrawAccount} from "../../api/hooks/accountHooks/useWithdrawAccount.ts";
+import {useDepositAccount} from "../../api/hooks/accountHooks/useDepositAccount.ts";
+import {useGetAccountById} from "../../api/hooks/accountHooks/useGetAccountById.ts";
+import {useGetAccountTransactions} from "../../api/hooks/transactionHooks/useGetAccountTransactions.ts";
 
 const useAccountDetailPage = () => {
 

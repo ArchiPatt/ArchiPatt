@@ -37,7 +37,7 @@ export type Account = {
      */
     id: string;
     /**
-     * ID владельца счёта (это `user.id` из Users Service).
+     * ID владельца счёта (это `userHooks.id` из Users Service).
      */
     clientId: string;
     /**
@@ -414,7 +414,7 @@ export type PostAccountsTransferErrors = {
      */
     403: ErrorResponse;
     /**
-     * account not found
+     * accountHooks not found
      */
     404: ErrorResponse;
     /**

@@ -199,7 +199,7 @@ paths:
               example:
                 keys:
                   - kty: RSA
-                    kid: auth-default
+                    kid: authHooks-default
                     use: sig
                     alg: RS256
                     n: "<base64url>"

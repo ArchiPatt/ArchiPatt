@@ -22,7 +22,7 @@ async function fetchRates(base: Currency): Promise<Record<string, number>> {
     rates?: Record<string, number>;
   };
   if (data.result !== "success" || !data.rates) {
-    throw new Error("Invalid exchange rate API response");
+    throw new Error("Invalid exchange rate API requests");
   }
   return data.rates;
 }

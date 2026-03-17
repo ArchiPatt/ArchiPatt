@@ -1,12 +1,13 @@
 import {useLocation} from "react-router-dom";
 import {userStorage} from "../../shared/storage/userStorage";
 import {useEffect} from "react";
-import {useGetPersonalProfile} from "../../request/user";
-import {useCreateAccount, useGetAccountList} from "../../request/account";
-import {useGetCreditsByClientId} from "../../request/credit";
-import {useAccessToken} from "../../request/auth";
 import type {CreateAccountRequest} from "../../types/account/CreateAccountRequest.ts";
-import {useGetTariffList} from "../../request/tariff";
+import {useAccessToken} from "../../api/hooks/authHooks/useAccessToken.ts";
+import {useCreateAccount} from "../../api/hooks/accountHooks/useCreateAccount.ts";
+import {useGetPersonalProfile} from "../../api/hooks/userHooks/useGetPersonalProfile.ts";
+import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
+import {useGetCreditsByClientId} from "../../api/hooks/creditHooks/useGetCreditsByClientId.ts";
+import {useGetTariffList} from "../../api/hooks/tariffHooks/useGetTariffList.ts";
 
 
 const useMainPage = () => {

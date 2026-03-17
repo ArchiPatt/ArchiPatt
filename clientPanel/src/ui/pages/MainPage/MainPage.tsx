@@ -14,8 +14,8 @@ import { IconPlus } from "@tabler/icons-react";
 import {Link} from "react-router-dom";
 import {LINK_PATHS} from "../../../shared/constants/LINK_PATHS.ts";
 import {useMainPage} from "../../../useCases/pages/useMainPage.ts";
-import {AccountCard} from "../../../request/account";
-import {CreditCard} from "../../../request/credit";
+import {AccountCard} from "../../components/AccountCard/core/AccountCard.tsx";
+import {CreditCard} from "../../components/CreditCard/core/CreditCard.tsx";
 
 const MainPage = () => {
 

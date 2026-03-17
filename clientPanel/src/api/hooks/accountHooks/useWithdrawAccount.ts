@@ -1,11 +1,12 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import {accountsApi} from "../../../api/repository/accountsApi.ts";
+import {accountsApi} from "../../requests/accountsApi.ts";
+import type {DepositArgs} from "../../../types/account/DepositArgs.ts";
 
-const useCloseAccount = () => {
+const useWithdrawAccount = () => {
     const queryClient = useQueryClient();
 
     return useMutation({
-        mutationFn: (id: string) => accountsApi.closeAccount(id),
+        mutationFn: ({ model, id }: DepositArgs) => accountsApi.withdrawAccount(model, id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['accountList'] })
             queryClient.invalidateQueries({ queryKey: ['account'] })
@@ -13,4 +14,4 @@ const useCloseAccount = () => {
     })
 }
 
-export { useCloseAccount }
+export { useWithdrawAccount }

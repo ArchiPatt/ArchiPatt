@@ -10,7 +10,7 @@ async function run() {
   console.log(
     JSON.stringify({
       ...jwk,
-      kid: jwk.kid ?? "auth-default",
+      kid: jwk.kid ?? "authHooks-default",
       use: "sig",
       alg: "RS256",
     }),

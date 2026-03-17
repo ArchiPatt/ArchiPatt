@@ -69,7 +69,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 </html>`;
   });
 
-  // Пароль вводится только на auth-страницах, поэтому тут только redirect.
+  // Пароль вводится только на authHooks-страницах, поэтому тут только redirect.
   app.get("/login", async (req, reply) => {
     return reply.redirect(
       authRedirectUrl("/login", req.raw.url?.split("?")[1] ?? ""),
@@ -84,13 +84,13 @@ export async function buildApp(): Promise<FastifyInstance> {
   app.post("/login", async (_req, reply) => {
     return reply.code(400).send({
       error: "login_via_auth_only",
-      message: "Введите пароль только на странице auth (/login)",
+      message: "Введите пароль только на странице authHooks (/login)",
     });
   });
   app.post("/setup-password", async (_req, reply) => {
     return reply.code(400).send({
       error: "password_setup_via_auth_only",
-      message: "Установите пароль только на странице auth (/setup-password)",
+      message: "Установите пароль только на странице authHooks (/setup-password)",
     });
   });
 

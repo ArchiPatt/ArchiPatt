@@ -51,7 +51,7 @@ export const env = {
     cookieSecret:
       process.env.SESSION_COOKIE_SECRET ??
       process.env.AUTH_INTERNAL_TOKEN ??
-      "auth-session-secret-change-in-production",
+      "authHooks-session-secret-change-in-production",
   },
 
   keys: {

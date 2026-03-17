@@ -1,7 +1,6 @@
 import {Card, Table, Text, Title} from "@mantine/core";
 import type {AccountOperationsPage} from "../../../../types/transaction/AccountOperationsPage.ts";
 import {useTransaction} from "../../../../useCases/components/useTransaction.ts";
-import {useEffect} from "react";
 
 const Transaction = (props: AccountOperationsPage) => {
 
