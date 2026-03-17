@@ -1,3 +1,4 @@
+import { notifications } from '@mantine/notifications'
 import { QueryClient } from '@tanstack/react-query'
 
 export const queryClient = new QueryClient({
@@ -5,7 +6,16 @@ export const queryClient = new QueryClient({
       queries: {
          refetchOnWindowFocus: false,
          refetchOnReconnect: false,
-         retry: false
+         retry: false,
+      },
+      mutations: {
+         onError: (error) => {
+            notifications.show({
+               color: 'red',
+               title: 'Ошибка',
+               message: error instanceof Error ? error.message : 'Произошла ошибка'
+            })
+         }
       }
    }
 })
