@@ -18,9 +18,11 @@ export class Migration1771950402337 implements MigrationInterface {
         : null;
     const creditTable = (await queryRunner.hasTable("credits"))
       ? "credits"
-      : (await queryRunner.hasTable("creditHooks"))
-        ? "creditHooks"
-        : null;
+      : (await queryRunner.hasTable("credit"))
+        ? "credit"
+        : (await queryRunner.hasTable("creditHooks"))
+          ? "creditHooks"
+          : null;
     const paymentTable = (await queryRunner.hasTable("credit_payments"))
       ? "credit_payments"
       : (await queryRunner.hasTable("credit_payment"))
@@ -135,9 +137,11 @@ export class Migration1771950402337 implements MigrationInterface {
         : null;
     const creditTable = (await queryRunner.hasTable("credits"))
       ? "credits"
-      : (await queryRunner.hasTable("creditHooks"))
-        ? "creditHooks"
-        : null;
+      : (await queryRunner.hasTable("credit"))
+        ? "credit"
+        : (await queryRunner.hasTable("creditHooks"))
+          ? "creditHooks"
+          : null;
     const paymentTable = (await queryRunner.hasTable("credit_payments"))
       ? "credit_payments"
       : (await queryRunner.hasTable("credit_payment"))

@@ -28,6 +28,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   const ds = await initDataSource();
+  await ds.runMigrations();
   app.decorate("db", ds);
 
   registerDocsRoutes(app);
