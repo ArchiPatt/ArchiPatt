@@ -276,7 +276,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const internalOk =
         req.headers["x-internal-token"] === env.internalToken;
-      const authorization = req.headers.authorization as string | undefined;
+      if (!internalOk) return reply.code(401).send({ error: "unauthorized" });
       const amount =
         typeof req.body?.amount === "number"
           ? req.body.amount
@@ -301,8 +301,13 @@ export function createAccountsHandlers(app: FastifyInstance) {
         idempotencyKey: req.body.idempotencyKey,
         type: req.body.type,
         meta: req.body.meta,
-      }, authorization);
-      return reply.code(res.status).send(res.body);
+      });
+      try {
+        const result = await resultPromise;
+        sendOperationReply(reply, result);
+      } catch (err) {
+        reply.code(503).send({ error: "operation_timeout" });
+      }
     },
 
     internalTransferToMaster: async (
@@ -319,7 +324,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const internalOk =
         req.headers["x-internal-token"] === env.internalToken;
-      const authorization = req.headers.authorization as string | undefined;
+      if (!internalOk) return reply.code(401).send({ error: "unauthorized" });
       const amount =
         typeof req.body?.amount === "number"
           ? req.body.amount
@@ -344,8 +349,13 @@ export function createAccountsHandlers(app: FastifyInstance) {
         idempotencyKey: req.body.idempotencyKey,
         type: req.body.type,
         meta: req.body.meta,
-      }, authorization);
-      return reply.code(res.status).send(res.body);
+      });
+      try {
+        const result = await resultPromise;
+        sendOperationReply(reply, result);
+      } catch (err) {
+        reply.code(503).send({ error: "operation_timeout" });
+      }
     },
   };
 }
