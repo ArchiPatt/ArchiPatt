@@ -22,7 +22,7 @@ export async function issueAccessToken(
     roles: claims.roles,
     scope: claims.scope,
   })
-    .setProtectedHeader({ alg: "RS256", kid: "authHooks-default", typ: "JWT" })
+    .setProtectedHeader({ alg: "RS256", kid: "auth-default", typ: "JWT" })
     .setIssuer(env.issuer)
     .setAudience(claims.aud)
     .setSubject(claims.sub)

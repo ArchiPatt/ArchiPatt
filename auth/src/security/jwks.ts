@@ -15,14 +15,12 @@ async function loadKeys(): Promise<{ privateKey: SigningKey; publicJwk: JWK }> {
     n,
     e,
     kty,
-    kid,
     use,
     alg,
   } = privateJwk as JWK & {
     n?: string;
     e?: string;
     kty?: string;
-    kid?: string;
     use?: string;
     alg?: string;
   };
@@ -32,14 +30,11 @@ async function loadKeys(): Promise<{ privateKey: SigningKey; publicJwk: JWK }> {
   }
 
   const publicJwk: JWK = { kty, n, e };
-  if (kid) publicJwk.kid = kid;
   if (use) publicJwk.use = use;
   if (alg) publicJwk.alg = alg;
 
-  if (!publicJwk.kid) {
-    // If userHooks generated JWK without kid, set a stable kid
-    publicJwk.kid = "authHooks-default";
-  }
+
+  publicJwk.kid = "auth-default";
   publicJwk.use = "sig";
   publicJwk.alg = "RS256";
 

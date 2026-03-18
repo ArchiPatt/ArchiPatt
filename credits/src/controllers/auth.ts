@@ -57,8 +57,20 @@ export async function requireActiveAuth(payload: JWTPayload | null) {
 
 export async function safeVerify(req: FastifyRequest) {
   try {
-    return await verifyBearerToken(req.headers.authorization);
-  } catch {
+    const auth =
+      (req.headers.authorization ?? req.headers.Authorization) as
+        | string
+        | undefined;
+    return await verifyBearerToken(auth);
+  } catch (err) {
+    req.log.warn(
+      {
+        err: String(err),
+        hasAuth: !!(req.headers.authorization ?? req.headers.Authorization),
+        url: req.url,
+      },
+      "[Credits] token verify failed"
+    );
     return null;
   }
 }

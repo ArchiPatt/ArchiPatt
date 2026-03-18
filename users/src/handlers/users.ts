@@ -44,7 +44,24 @@ export function createUsersHandlers(app: FastifyInstance) {
     },
 
     me: async (req: FastifyRequest, reply: FastifyReply) => {
+      const auth =
+        (req.headers.authorization ?? req.headers.Authorization) as
+          | string
+          | undefined;
+      const hasAuth = !!auth;
+      req.log.info(
+        {
+          hasAuth,
+          url: req.url,
+          authPrefix: auth?.slice(0, 25) ?? "—",
+        },
+        "[Users] GET /me"
+      );
       const payload = await safeVerify(req);
+      req.log.info(
+        { payload: payload ? "ok" : "null", sub: payload?.sub },
+        "[Users] verify result"
+      );
       const res = await meController(app.db, payload);
       return reply.code(res.status).send(res.body);
     },
@@ -96,9 +113,17 @@ export function createUsersHandlers(app: FastifyInstance) {
 
 async function safeVerify(req: FastifyRequest) {
   try {
-    return await verifyBearerToken(req.headers.authorization);
+    const auth = req.headers.authorization ?? req.headers.Authorization;
+    return await verifyBearerToken(auth as string | undefined);
   } catch (err) {
-    req.log.warn({ err, hasAuth: !!req.headers.authorization }, "token verify failed");
+    req.log.warn(
+      {
+        err: String(err),
+        hasAuth: !!(req.headers.authorization ?? req.headers.Authorization),
+        url: req.url,
+      },
+      "[Users] token verify failed"
+    );
     return null;
   }
 }

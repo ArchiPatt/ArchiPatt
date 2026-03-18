@@ -24,6 +24,14 @@ export function createAuthHandlers(app: FastifyInstance) {
       const internalOk =
         !!env.internalToken &&
         req.headers["x-internal-token"] === env.internalToken;
+      req.log.info(
+        {
+          jti: req.params.jti,
+          internalOk,
+          hasXInternalToken: !!req.headers["x-internal-token"],
+        },
+        "[Auth] GET /internal/tokens/revoked/:jti"
+      );
       const res = await internalTokensRevokedController(
         app.db,
         internalOk,
@@ -32,7 +40,8 @@ export function createAuthHandlers(app: FastifyInstance) {
       return reply.code(res.status).send(res.body);
     },
 
-    jwks: async (_req: FastifyRequest, reply: FastifyReply) => {
+    jwks: async (req: FastifyRequest, reply: FastifyReply) => {
+      req.log.info({ issuer: env.issuer }, "[Auth] GET /jwks");
       const res = await jwksController();
       return reply.code(res.status).send(res.body);
     },

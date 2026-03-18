@@ -43,7 +43,7 @@ export async function buildApp(): Promise<FastifyInstance> {
       "gateway.openapi.yml",
     );
     const yml = await readFile(filePath, "utf-8");
-    reply.type("useCases/yaml; charset=utf-8");
+    reply.type("application/yaml; charset=utf-8");
     return yml;
   });
 
@@ -124,14 +124,17 @@ export async function buildApp(): Promise<FastifyInstance> {
       upstream,
       prefix,
       rewritePrefix: prefix,
-      replyOptions: {
-        rewriteRequestHeaders(
-          req: { headers: Record<string, string | undefined> },
-          headers: Record<string, string>,
-        ) {
-          const auth = req.headers.authorization ?? req.headers.Authorization;
-          return auth ? { ...headers, authorization: auth } : headers;
-        },
+      preHandler: async (req) => {
+        const auth = req.headers.authorization ?? req.headers.Authorization;
+        req.log.info(
+          {
+            prefix,
+            upstream,
+            hasAuth: !!auth,
+            authPrefix: (typeof auth === "string" ? auth : "")?.slice(0, 25) ?? "—",
+          },
+          "[Gateway] proxy request"
+        );
       },
     });
 
