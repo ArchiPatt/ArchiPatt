@@ -2,6 +2,9 @@ import type {Account} from "../../types/account/Account.ts";
 import type {CreateAccountRequest} from "../../types/account/CreateAccountRequest.ts";
 import type {DepositWithdrawRequest} from "../../types/account/DepositWithdrawRequest.ts";
 import {instance} from "../network/instance.ts";
+import type {TransferRequest} from "../../types/account/TransferRequest.ts";
+import type {AxiosResponse} from "axios";
+import type {CurrencyResponse} from "../../types/account/CurrencyResponse.ts";
 
 const accountsApi = {
     getAccountsList: async () => {
@@ -26,6 +29,14 @@ const accountsApi = {
     withdrawAccount: async (model: DepositWithdrawRequest, id: string) => {
         await instance.post(`accounts/${id}/withdraw`, model)
     },
+    transferAccount: async (model: TransferRequest) => {
+        await instance.post(`accounts/transfer`, model)
+    },
+    getCurrencies: async () => {
+        const response: AxiosResponse<CurrencyResponse> = await instance.get('currencies')
+
+        return response.data
+    }
 }
 
 export { accountsApi }

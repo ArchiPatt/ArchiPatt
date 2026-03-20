@@ -8,6 +8,7 @@ const AccountCard = (props: AccountProps) => {
     const {
         id,
         balance,
+        currency,
         status,
         openDetail
     } = useAccountCard(props)
@@ -31,7 +32,7 @@ const AccountCard = (props: AccountProps) => {
                 </Group>
 
                 <Badge variant={"light"}>
-                    RUB
+                    {currency}
                 </Badge>
             </Group>
 

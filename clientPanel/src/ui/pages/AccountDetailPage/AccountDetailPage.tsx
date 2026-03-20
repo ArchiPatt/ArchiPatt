@@ -9,7 +9,7 @@ import {
     Grid,
     Divider,
     Modal,
-    NumberInput
+    NumberInput, Badge, Flex, Select, Combobox, TextInput
 } from '@mantine/core';
 import {
     IconArrowUp,
@@ -39,9 +39,20 @@ const AccountDetailPage = () => {
         depositAccount,
         withdrawAccount,
         errorText,
+        transferModalOpened,
+        setTransferModalOpened,
+        transferAmount,
+        transferdAccount,
+        accountList,
+        accountListLoading,
+        accountListError,
+        onChangeTransferAmount,
+        onChangeTrasferdAccount,
+        combobox,
+        transfer
     } = useAccountDetailPage();
 
-    if (accountLoading || transactionLoading) return <div>Loading...</div>
+    if (accountLoading || transactionLoading || accountListLoading) return <div>Loading...</div>
 
     return (
         <Container size="lg" py="xl">
@@ -60,9 +71,14 @@ const AccountDetailPage = () => {
                                 <Divider />
 
                                 <div>
-                                    <Text size="sm" c="dimmed">
-                                        Баланс
-                                    </Text>
+                                    <Flex align='center' gap='4'>
+                                        <Text size="sm" c="dimmed">
+                                            Баланс
+                                        </Text>
+                                        <Badge variant={"light"}>
+                                            {account?.currency}
+                                        </Badge>
+                                    </Flex>
                                     <Title order={1}>{account?.balance}</Title>
                                 </div>
 
@@ -74,6 +90,13 @@ const AccountDetailPage = () => {
                                             onClick={() => setDepositModalOpened(true)}
                                         >
                                             Пополнить
+                                        </Button>
+
+                                        <Button
+                                            leftSection={<IconArrowDown size={16} />}
+                                            onClick={() => setTransferModalOpened(true)}
+                                        >
+                                            Перевести
                                         </Button>
 
                                         <Button
@@ -153,6 +176,60 @@ const AccountDetailPage = () => {
                 </Stack>
             </Modal>
 
+            <Modal
+                opened={transferModalOpened}
+                onClose={() => setTransferModalOpened(false)}
+                title="Перевод"
+            >
+                <Stack>
+                    <Combobox
+                        store={combobox}
+                        onOptionSubmit={(val) => {
+                            onChangeTrasferdAccount(val);
+                            combobox.closeDropdown();
+                        }}
+                    >
+                        <Combobox.Target>
+                            <TextInput
+                                label="Номер счета"
+                                placeholder="Введите или выберите счет"
+                                value={transferdAccount ?? ""}
+                                onChange={(event) => {
+                                    onChangeTrasferdAccount(event.currentTarget.value);
+                                    combobox.openDropdown();
+                                }}
+                                onFocus={() => combobox.openDropdown()}
+                                onBlur={() => combobox.closeDropdown()}
+                            />
+                        </Combobox.Target>
+
+                        <Combobox.Dropdown>
+                            <Combobox.Options>
+                                {(accountList ?? [])
+                                    .filter(a => a.status !== "closed" && a.id !== account?.id)
+                                    .map(a => (
+                                        <Combobox.Option key={a.id} value={a.id}>
+                                            {a.id}
+                                        </Combobox.Option>
+                                    ))}
+                            </Combobox.Options>
+                        </Combobox.Dropdown>
+                    </Combobox>
+                    <NumberInput
+                        label="Сумма"
+                        placeholder="Введите сумму"
+                        value={transferAmount}
+                        onChange={onChangeTransferAmount}
+                        min={0}
+                        precision={2}
+                        step={100}
+                    />
+                    <Text color='red'>{errorText}</Text>
+                    <Button color="green" onClick={transfer}>
+                        Перевести
+                    </Button>
+                </Stack>
+            </Modal>
 
         </Container>
     );

@@ -7,6 +7,7 @@ const useAccountCard = (props: AccountProps) => {
     const {
         id,
         balance,
+        currency,
         status,
     } = props
 
@@ -19,6 +20,7 @@ const useAccountCard = (props: AccountProps) => {
     return {
         id,
         balance,
+        currency,
         status,
         openDetail
     }

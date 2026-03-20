@@ -163,8 +163,14 @@ const CreditDetailPage = () => {
                                 <Stack spacing="sm">
                                     <Text size="xs" color="dimmed">Дата оформления</Text>
                                     <Text weight={600}>{formatDate(credit?.createdAt)}</Text>
+                                    {credit?.status === 'active' &&
+                                        <>
+                                            <Text size="xs" color="dimmed">Дата следующего платежа</Text>
+                                            <Text weight={600}>{formatDate(credit.nextPaymentDueAt)}</Text>
+                                        </>
+                                    }
                                     <Text size="xs" color="dimmed">Дата окончания</Text>
-                                    <Text weight={600}>{credit?.closedAt ? credit?.closedAt : '-'}</Text>
+                                    <Text weight={600}>{credit?.closedAt ? formatDate(credit?.closedAt) : '-'}</Text>
                                 </Stack>
                             </Card>
 
@@ -173,7 +179,7 @@ const CreditDetailPage = () => {
                                     <Text size="xs" color="dimmed">Сумма кредита</Text>
                                     <Text weight={600}>{credit?.principalAmount}</Text>
                                     <Text size="xs" color="dimmed">Общая сумма процентов</Text>
-                                    <Text weight={600} color="orange">{tariff?.interestRate * 100}</Text>
+                                    <Text weight={600} color="orange">{tariff?.interestRate * 100}%</Text>
                                 </Stack>
                             </Card>
                         </Stack>

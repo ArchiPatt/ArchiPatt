@@ -7,6 +7,7 @@ import {OpenCreditPage} from "./ui/pages/OpenCreditPage/OpenCreditPage.tsx";
 import {AccountDetailPage} from "./ui/pages/AccountDetailPage/AccountDetailPage.tsx";
 import {CreditDetailPage} from "./ui/pages/CreditDetailPage/CreditDetailPage.tsx";
 import {NotFoundPage} from "./ui/pages/NotFoundPage/NotFoundPage.tsx";
+import {OpenAccountPage} from "./ui/pages/OpenAccountPage/OpenAccountPage.tsx";
 
 
 
@@ -18,6 +19,7 @@ const RouteProvider = () => {
                 <Route path={LINK_PATHS.PROFILE} element={<ProfilePage />} />
                 <Route path={LINK_PATHS.OPEN_CREDIT} element={<OpenCreditPage />} />
                 <Route path={LINK_PATHS.ACCOUNT_DETAIL} element={<AccountDetailPage />} />
+                <Route path={LINK_PATHS.OPEN_ACCOUNT} element={<OpenAccountPage />} />
                 <Route path={LINK_PATHS.CREDIT_DETAIL} element={<CreditDetailPage />} />
             </Route>
             <Route path="*" element={<NotFoundPage />} />
