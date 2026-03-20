@@ -6,7 +6,7 @@ import type {CurrencyResponse} from "../../../types/account/CurrencyResponse.ts"
 
 const useGetCurrencies = () => {
 
-    return useQuery<CurrencyResponse[], Error, CurrencyResponse[], ['currencies', string]>({
+    return useQuery<CurrencyResponse, Error, CurrencyResponse, ['currencies', string]>({
         queryKey: ['currencies'],
         queryFn: () => accountsApi.getCurrencies()
     })

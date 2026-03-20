@@ -22,7 +22,7 @@ const OpenAccountPage = () => {
                             <Select
                                 label="Счет для зачисления"
                                 placeholder="Выберите счет"
-                                data={currencies}
+                                data={currencies?.currencies}
                                 // value={choosenAccount}
                                 // onChange={handleChooseAccount}
                             />
