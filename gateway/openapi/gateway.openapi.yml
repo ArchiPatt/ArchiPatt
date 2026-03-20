@@ -4,7 +4,7 @@ info:
   version: 1.0.0
   description: |
     Единая точка входа в систему.
-    Gateway проксирует запросы в auth/users/credits.
+    Gateway проксирует запросы в auth/users/credits/core.
     Ввод пароля допускается только на страницах auth.
 
     **Полезные ссылки на Swagger конкретных сервисов (для деталей)**
@@ -703,6 +703,17 @@ paths:
       summary: Проксирован на core /accounts
       security:
         - bearerAuth: []
+      parameters:
+        - in: query
+          name: clientId
+          schema:
+            type: string
+            format: uuid
+          description: |
+            Фильтр по владельцу счёта.
+
+            - **client**: параметр игнорируется, всегда вернутся только свои счета (`clientId = token.sub`)
+            - **employee/admin**: можно указать `clientId` и получить счета конкретного клиента, либо без фильтра – все счета
       responses:
         "200":
           description: Ответ от Core (проксирован)
@@ -1087,26 +1098,23 @@ paths:
                     type: array
                     items:
                       type: object
+                      required: [user, accounts, credits, creditRating]
                       properties:
                         user:
-                          type: object
+                          $ref: "#/components/schemas/UserOverview"
                         accounts:
                           type: array
+                          items:
+                            $ref: "#/components/schemas/Account"
                         credits:
                           type: array
+                          items:
+                            $ref: "#/components/schemas/CreditOverview"
                         creditRating:
-                          type: object
-                          properties:
-                            score:
-                              type: integer
-                            overdueCount:
-                              type: integer
-                            totalCredits:
-                              type: integer
-                            closedCount:
-                              type: integer
+                          $ref: "#/components/schemas/CreditRating"
                   total:
                     type: integer
+                    description: Общее количество пользователей
         "401":
           description: Не авторизован
         "403":
@@ -1469,13 +1477,70 @@ components:
 
     MoneyString:
       type: string
+      description: |
+        Денежное значение **строкой** с 2 знаками после точки (decimal).
+        Почему строкой: чтобы не ловить проблемы точности `number` (IEEE754) на фронте.
       pattern: "^-?\\d+(\\.\\d{2})$"
       examples: ["0.00", "10.50", "-3.20"]
 
     Account:
       type: object
-      description: Банковский счёт (Core).
-      required: [id, clientId, balance, status, createdAt]
+      description: Банковский счёт клиента.
+      required: [id, clientId, currency, balance, status, createdAt]
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: ID счёта.
+          example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+        clientId:
+          type: string
+          format: uuid
+          description: ID владельца счёта (это `user.id` из Users Service).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        currency:
+          type: string
+          description: Валюта счёта (ISO 4217). Поддерживаются USD, EUR, RUB.
+          enum: [USD, EUR, RUB]
+          example: RUB
+        balance:
+          $ref: "#/components/schemas/MoneyString"
+        status:
+          type: string
+          description: |
+            Статус счёта:
+            - `open` – активен
+            - `closed` – закрыт (операции списания/зачисления запрещены)
+          enum: [open, closed]
+          example: open
+        createdAt:
+          type: string
+          format: date-time
+          description: Дата создания счёта.
+          example: "2026-02-23T12:34:56.000Z"
+
+    UserOverview:
+      type: object
+      description: Краткая информация о пользователе (из Users Service).
+      properties:
+        id:
+          type: string
+          format: uuid
+        username:
+          type: string
+        displayName:
+          type: string
+          nullable: true
+        roles:
+          type: array
+          items:
+            type: string
+        isBlocked:
+          type: boolean
+
+    CreditOverview:
+      type: object
+      description: Краткая информация о кредите (из Credits Service).
       properties:
         id:
           type: string
@@ -1483,22 +1548,76 @@ components:
         clientId:
           type: string
           format: uuid
-        balance:
+        accountId:
+          type: string
+          format: uuid
+        tariffId:
+          type: string
+          format: uuid
+        principalAmount:
+          $ref: "#/components/schemas/MoneyString"
+        outstandingAmount:
           $ref: "#/components/schemas/MoneyString"
         status:
           type: string
-          enum: [open, closed]
-          description: Статус счёта.
-        createdAt:
+          enum: [active, closed, defaulted]
+        issuedAt:
           type: string
           format: date-time
+        nextPaymentDueAt:
+          type: string
+          format: date-time
+          nullable: true
+        overdueSince:
+          type: string
+          format: date-time
+          nullable: true
+          description: Дата начала просрочки (если клиент не внёс платёж в срок).
+        closedAt:
+          type: string
+          format: date-time
+          nullable: true
+
+    CreditRating:
+      type: object
+      description: Кредитный рейтинг клиента (0–100).
+      required: [score, overdueCount, totalCredits, closedCount]
+      properties:
+        score:
+          type: integer
+          description: Балл рейтинга (0–100).
+          example: 85
+        overdueCount:
+          type: integer
+          description: Количество просроченных кредитов.
+          example: 0
+        totalCredits:
+          type: integer
+          description: Всего кредитов у клиента.
+          example: 3
+        closedCount:
+          type: integer
+          description: Количество закрытых кредитов.
+          example: 2
 
     CreateAccountRequest:
       type: object
+      description: |
+        Создание счёта.
+
+        - **client**: тело можно не передавать – счёт создаётся на `token.sub` в валюте RUB по умолчанию
+        - **employee/admin**: можно указать `clientId` и `currency`
       properties:
         clientId:
           type: string
           format: uuid
+          description: ID клиента, для которого создаём счёт (только employee/admin).
+          example: 9c1e7e2b-79f3-4a74-8d7f-0b7f2a7a2b11
+        currency:
+          type: string
+          description: Валюта счёта. По умолчанию RUB.
+          enum: [USD, EUR, RUB]
+          example: RUB
 
     TransferRequest:
       type: object
