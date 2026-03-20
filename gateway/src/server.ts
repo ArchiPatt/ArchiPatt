@@ -1,4 +1,11 @@
-import Fastify, { FastifyInstance } from "fastify";
+import Fastify, {
+  FastifyInstance,
+  FastifyRequest,
+  RawServerBase,
+  RequestGenericInterface,
+} from "fastify";
+import type { IncomingHttpHeaders, IncomingMessage } from "http";
+import type { Http2ServerRequest } from "http2";
 import proxy from "@fastify/http-proxy";
 import cors from "@fastify/cors";
 import path from "path";
@@ -31,8 +38,11 @@ export async function buildApp(): Promise<FastifyInstance> {
     hasAuthorization: !!(
       req.headers.authorization ?? req.headers.Authorization
     ),
-    authPrefix: (req.headers.authorization ?? req.headers.Authorization ?? "")
-      .slice(0, 20),
+    authPrefix: (
+      req.headers.authorization ??
+      req.headers.Authorization ??
+      ""
+    ).slice(0, 20),
   }));
 
   app.get("/swagger.yml", async (_req, reply) => {
@@ -126,10 +136,16 @@ export async function buildApp(): Promise<FastifyInstance> {
       rewritePrefix: prefix,
       replyOptions: {
         rewriteRequestHeaders(
-          req: { headers: Record<string, string | undefined> },
-          headers: Record<string, string>,
-        ) {
-          const auth = req.headers.authorization ?? req.headers.Authorization;
+          req: FastifyRequest<
+            RequestGenericInterface,
+            RawServerBase,
+            IncomingMessage | Http2ServerRequest
+          >,
+          headers: IncomingHttpHeaders,
+        ): IncomingHttpHeaders {
+          const h = req.headers;
+          const raw = h.authorization ?? h.Authorization;
+          const auth = Array.isArray(raw) ? raw[0] : raw;
           return auth ? { ...headers, authorization: auth } : headers;
         },
       },
@@ -141,6 +157,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await proxyWithAuth(env.creditsServiceUrl, "/credits");
   await proxyWithAuth(env.creditsServiceUrl, "/tariffs");
 
+  await proxyWithAuth(env.coreServiceUrl, "/currencies");
   await proxyWithAuth(env.coreServiceUrl, "/accounts");
   await proxyWithAuth(env.coreServiceUrl, "/dashboard");
 
