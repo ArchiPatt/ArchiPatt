@@ -340,6 +340,48 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: forbidden
+  /credits/rating/{clientId}:
+    get:
+      tags: [Credits]
+      summary: Кредитный рейтинг клиента
+      description: |
+        Возвращает кредитный рейтинг клиента (0–100).
+
+        Доступ:
+        - `client` только для себя (`clientId = token.sub`)
+        - `employee/admin` для любого клиента
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Кредитный рейтинг
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditRatingResponse"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
   /credits/overdue:
     get:
       tags: [Credits]
@@ -582,6 +624,27 @@ components:
           type: string
           example: unauthorized
       required: [error]
+    CreditRatingResponse:
+      type: object
+      description: Кредитный рейтинг клиента (0–100).
+      properties:
+        score:
+          type: integer
+          description: Балл рейтинга (0–100).
+          example: 85
+        overdueCount:
+          type: integer
+          description: Количество просроченных кредитов.
+          example: 0
+        totalCredits:
+          type: integer
+          description: Всего кредитов у клиента.
+          example: 3
+        closedCount:
+          type: integer
+          description: Количество закрытых кредитов.
+          example: 2
+      required: [score, overdueCount, totalCredits, closedCount]
     CreateTariffRequest:
       type: object
       description: |

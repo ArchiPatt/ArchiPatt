@@ -434,6 +434,40 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /credits/rating/{clientId}:
+    get:
+      tags: [Credits]
+      summary: Кредитный рейтинг клиента
+      description: Проксирован на credits /credits/rating/{clientId}
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: clientId
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Кредитный рейтинг (score, overdueCount, totalCredits, closedCount)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CreditRating"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
   /credits/overdue:
     get:
       tags: [Credits]
