@@ -113,18 +113,31 @@ export async function buildApp(): Promise<FastifyInstance> {
     });
   });
 
-  await app.register(proxy, {
+  const authProxyOptions = {
     upstream: env.authServiceUrl,
+    replyOptions: {
+      rewriteRequestHeaders(
+        req: FastifyRequest,
+        headers: IncomingHttpHeaders,
+      ): IncomingHttpHeaders {
+        const cookie = req.headers.cookie;
+        return cookie ? { ...headers, cookie } : headers;
+      },
+    },
+  };
+
+  await app.register(proxy, {
+    ...authProxyOptions,
     prefix: "/token",
     rewritePrefix: "/token",
   });
   await app.register(proxy, {
-    upstream: env.authServiceUrl,
+    ...authProxyOptions,
     prefix: "/logout",
     rewritePrefix: "/logout",
   });
   await app.register(proxy, {
-    upstream: env.authServiceUrl,
+    ...authProxyOptions,
     prefix: "/logout-session",
     rewritePrefix: "/logout-session",
   });

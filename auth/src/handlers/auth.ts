@@ -103,7 +103,7 @@ export function createAuthHandlers(app: FastifyInstance) {
         if ("sessionId" in res && res.sessionId) {
           reply.setCookie(env.session.cookieName, res.sessionId, {
             path: "/",
-            httpOnly: true,
+            httpOnly: false,
             secure: env.nodeEnv === "production",
             sameSite: "lax",
             maxAge: res.sessionMaxAge ?? env.session.ttlSeconds,
