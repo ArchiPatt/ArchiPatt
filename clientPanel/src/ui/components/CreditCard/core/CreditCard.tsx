@@ -3,6 +3,8 @@ import {IconArrowRight, IconCalendar, IconCreditCard, IconPercentage, IconTrendi
 import type {CreditCardProps} from "../types/CreditCardProps.ts";
 import {useCreditCard} from "../../../../useCases/components/useCreditCard.ts";
 import {formatDate} from "../../../../shared/utils/formatDate.ts";
+import {getCreditStatusLabel} from "../../../../useCases/shared/credit/getCreditStatusLabel.ts";
+import {getCreditStatusColor} from "../../../../useCases/shared/credit/getCreditStatusColor.ts";
 
 const CreditCard = (props: CreditCardProps) => {
 
@@ -10,7 +12,7 @@ const CreditCard = (props: CreditCardProps) => {
         creditInformation,
         percantage,
         interestRate,
-        openDetail
+        openDetail,
     } = useCreditCard(props);
 
     return (
@@ -42,8 +44,8 @@ const CreditCard = (props: CreditCardProps) => {
                     </div>
                 </Group>
 
-                <Badge variant="light">
-                    {creditInformation.status === 'active' ? 'Активный' : 'Закрыт'}
+                <Badge variant="light" color={getCreditStatusColor(creditInformation.status)}>
+                    {getCreditStatusLabel(creditInformation.status)}
                 </Badge>
             </Group>
 

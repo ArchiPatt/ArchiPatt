@@ -20,6 +20,8 @@ import {
 import {useCreditDetailPage} from "../../../useCases/pages/useCreditDetailPage.ts";
 import {formatDate} from "../../../shared/utils/formatDate.ts";
 import {Transaction} from "../../components/Transaction/core/Transaction.tsx";
+import {getCreditStatusColor} from "../../../useCases/shared/credit/getCreditStatusColor.ts";
+import {getCreditStatusLabel} from "../../../useCases/shared/credit/getCreditStatusLabel.ts";
 
 const CreditDetailPage = () => {
 
@@ -53,6 +55,7 @@ const CreditDetailPage = () => {
         || accountLoading
         || tariffLoading
         || transactionLoading
+        || !credit
     ) {
         return <div>Loading...</div>
     }
@@ -84,8 +87,8 @@ const CreditDetailPage = () => {
                                             <Title order={3}>{credit?.principalAmount}</Title>
                                         </Stack>
                                     </Group>
-                                    <Badge color={credit?.status === 'active' ? 'orange' : 'gray'}>
-                                        {credit?.status === 'active' ? 'Активный' : 'Закрыт'}
+                                    <Badge variant="light" color={getCreditStatusColor(credit.status)}>
+                                        {getCreditStatusLabel(credit.status)}
                                     </Badge>
                                 </Group>
 
