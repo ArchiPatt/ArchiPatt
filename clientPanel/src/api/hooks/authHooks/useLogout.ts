@@ -14,9 +14,9 @@ const useLogout = () => {
             tokenStorage.removeItem()
             refreshStorage.removeItem()
             userStorage.removeItem()
-            Cookies.remove('auth_session')
             queryClient.invalidateQueries({ queryKey: ['user'] })
-            window.location.replace('http://localhost:4000/login?return_to=http://localhost:5173/')
+            Cookies.remove('auth_session')
+            window.location.replace('http://localhost:4000/login?return_to=http%3A%2F%2Flocalhost%3A5173%2F')
         }
     })
 }

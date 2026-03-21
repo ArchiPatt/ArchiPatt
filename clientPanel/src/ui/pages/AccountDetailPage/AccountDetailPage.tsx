@@ -9,7 +9,7 @@ import {
     Grid,
     Divider,
     Modal,
-    NumberInput, Badge, Flex, Select, Combobox, TextInput
+    NumberInput, Badge, Flex, Select, Combobox, TextInput, Center, Loader
 } from '@mantine/core';
 import {
     IconArrowUp,
@@ -24,9 +24,8 @@ const AccountDetailPage = () => {
         account,
         accountLoading,
         accountError,
-        transaction,
-        transactionLoading,
-        transactionError,
+        operations,
+        operationsLoading,
         closeAccount,
         depositModalOpened,
         setDepositModalOpened,
@@ -52,7 +51,17 @@ const AccountDetailPage = () => {
         transfer
     } = useAccountDetailPage();
 
-    if (accountLoading || transactionLoading || accountListLoading) return <div>Loading...</div>
+    if (accountLoading || accountListLoading) return <div>Loading...</div>
+
+    console.log(operations)
+
+    if (operationsLoading) {
+        return (
+            <Center h="100%">
+                <Loader />
+            </Center>
+        )
+    }
 
     return (
         <Container size="lg" py="xl">
@@ -124,10 +133,9 @@ const AccountDetailPage = () => {
                 <div>Не удалось загрузить информацию о счете</div>
             }
 
-            {!transactionError ?
-                transaction ?
-                    <Transaction items={transaction.items} total={transaction.total} /> :
-                    <div>Операций нет</div>
+            {
+                operations && operations.length ?
+                    <Transaction />
                 :
                 <div>Не удалось загрузить список операций</div>
             }

@@ -22,7 +22,7 @@ const useCreditCard = (props: CreditCardProps) => {
         creditInformation,
         percantage,
         interestRate,
-        openDetail
+        openDetail,
     }
 }
 

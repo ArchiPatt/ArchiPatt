@@ -5,7 +5,10 @@ import {useOpenAccountPage} from "../../../useCases/pages/useOpenAccountPage.ts"
 const OpenAccountPage = () => {
 
     const {
-        currencies
+        currencyList,
+        currency,
+        setCurrency,
+        createAccount
     } = useOpenAccountPage()
 
     return (
@@ -20,15 +23,17 @@ const OpenAccountPage = () => {
 
                         <Stack spacing="md">
                             <Select
-                                label="Счет для зачисления"
-                                placeholder="Выберите счет"
-                                data={currencies?.currencies}
-                                // value={choosenAccount}
-                                // onChange={handleChooseAccount}
+                                label="Валюта"
+                                placeholder="Выберите валюту"
+                                data={currencyList?.currencies}
+                                value={currency}
+                                onChange={setCurrency}
                             />
-                            <Text color="red">ошибка</Text>
+                            {!currency &&
+                                <Text color="red">Выберите валюту</Text>
+                            }
                             <Group spacing="md">
-                                <Button style={{ flex: 1 }} color="blue" onClick={() => console.log(1)}>
+                                <Button style={{ flex: 1 }} color="blue" onClick={createAccount}  disabled={!currency}>
                                     Открыть счет
                                 </Button>
                                 <Link to="/" style={{ flex: 1 }}>

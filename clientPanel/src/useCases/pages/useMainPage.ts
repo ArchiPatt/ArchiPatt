@@ -26,12 +26,12 @@ const useMainPage = () => {
     const { data: credits, isLoading: creditLoading, error: creditError } = useGetCreditsByClientId(userStorage.getItem())
     const { data: tariffs, isLoading: tariffsLoading, error: tariffError } = useGetTariffList()
 
-    const createAccount = () => {
-        const model: CreateAccountRequest = {
-            clientId: userStorage.getItem()
-        }
-        newAccount(model)
-    }
+    // const createAccount = () => {
+    //     const model: CreateAccountRequest = {
+    //         clientId: userStorage.getItem()
+    //     }
+    //     newAccount(model)
+    // }
 
     useEffect(() => {
         if (code) {
@@ -56,7 +56,7 @@ const useMainPage = () => {
         tariffs,
         tariffsLoading,
         tariffError,
-        createAccount,
+        // createAccount,
     }
 }
 

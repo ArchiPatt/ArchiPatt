@@ -1,16 +1,16 @@
 import {useNavigate, useParams} from "react-router-dom";
 import {LINK_PATHS} from "../../shared/constants/LINK_PATHS.ts";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import type {DepositArgs} from "../../types/account/DepositArgs.ts";
 import {useCloseAccount} from "../../api/hooks/accountHooks/useCloseAccount.ts";
 import {useWithdrawAccount} from "../../api/hooks/accountHooks/useWithdrawAccount.ts";
 import {useDepositAccount} from "../../api/hooks/accountHooks/useDepositAccount.ts";
 import {useGetAccountById} from "../../api/hooks/accountHooks/useGetAccountById.ts";
-import {useGetAccountTransactions} from "../../api/hooks/transactionHooks/useGetAccountTransactions.ts";
 import type {TransferRequest} from "../../types/account/TransferRequest.ts";
 import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
 import {useCombobox} from "@mantine/core";
 import {useTransferAccount} from "../../api/hooks/accountHooks/useTransferAccount.ts";
+import {useAccountOperationsWS} from "../../api/hooks/accountHooks/useAccountOperationsWS.ts";
 
 const useAccountDetailPage = () => {
 
@@ -39,7 +39,8 @@ const useAccountDetailPage = () => {
 
     const { data: account, isLoading: accountLoading, error: accountError } = useGetAccountById(id ?? "")
     const { data: accountList, isLoading: accountListLoading, error: accountListError } = useGetAccountList()
-    const { data: transaction, isLoading: transactionLoading, error: transactionError } = useGetAccountTransactions({ id: account?.id ?? '' })
+    // const { data: transaction, isLoading: transactionLoading, error: transactionError } = useGetAccountTransactions({ id: account?.id ?? '' })
+    const { operations, operationsLoading } = useAccountOperationsWS(account?.id ?? '')
 
     const closeAccount = () => {
         close(id);
@@ -131,9 +132,8 @@ const useAccountDetailPage = () => {
         account,
         accountLoading,
         accountError,
-        transaction,
-        transactionLoading,
-        transactionError,
+        operations,
+        operationsLoading,
         closeAccount,
         depositModalOpened,
         setDepositModalOpened,
