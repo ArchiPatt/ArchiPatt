@@ -3,6 +3,7 @@ import {authApi} from "../../requests/authApi.ts";
 import {tokenStorage} from "../../../shared/storage/tokenStorage";
 import {userStorage} from "../../../shared/storage/userStorage";
 import {refreshStorage} from "../../../shared/storage/refreshStorage";
+import Cookies from 'js-cookie'
 
 const useLogout = () => {
     const queryClient = useQueryClient()
@@ -13,6 +14,7 @@ const useLogout = () => {
             tokenStorage.removeItem()
             refreshStorage.removeItem()
             userStorage.removeItem()
+            Cookies.remove('auth_session')
             queryClient.invalidateQueries({ queryKey: ['user'] })
             window.location.replace('http://localhost:4000/login?return_to=http://localhost:5173/')
         }

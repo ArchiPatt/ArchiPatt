@@ -6,7 +6,6 @@ import {
    Divider,
    Group,
    Loader,
-   Pagination,
    Stack,
    Table,
    Text,
@@ -36,7 +35,7 @@ const getOperationTypeLabel = (type?: string | null) => {
 }
 
 export const AccountDetails = () => {
-   const { state, functions } = useAccountDetails()
+   const { state } = useAccountDetails()
 
    if (state.isLoading) {
       return (
@@ -141,18 +140,6 @@ export const AccountDetails = () => {
                      ))}
                   </Table.Tbody>
                </Table>
-            )}
-            {state.total > state.defaultLimit && (
-               <Group justify="space-between" mt="md">
-                  <Text size="sm" c="dimmed">
-                     Всего операций: {state.total}
-                  </Text>
-                  <Pagination
-                     value={state.page}
-                     onChange={functions.handlePageChange}
-                     total={state.totalPages}
-                  />
-               </Group>
             )}
          </Card>
       </Stack>

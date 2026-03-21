@@ -31,13 +31,14 @@ const Navbar = () => {
                 </Button>
             </Link>
 
-            <Button
-                variant="outline"
-                leftSection={<IconPlus size={16} />}
-                onClick={createAccount}
-            >
-                Открыть счет
-            </Button>
+            <Link to={LINK_PATHS.OPEN_ACCOUNT}>
+                <Button
+                    variant="outline"
+                    leftSection={<IconPlus size={16} />}
+                >
+                    Открыть счет
+                </Button>
+            </Link>
 
             <Link
                 to={LINK_PATHS.OPEN_CREDIT}

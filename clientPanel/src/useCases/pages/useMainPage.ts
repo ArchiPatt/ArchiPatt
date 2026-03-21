@@ -1,6 +1,6 @@
 import {useLocation} from "react-router-dom";
 import {userStorage} from "../../shared/storage/userStorage";
-import {useEffect} from "react";
+import {useEffect, useMemo, useState} from "react";
 import type {CreateAccountRequest} from "../../types/account/CreateAccountRequest.ts";
 import {useAccessToken} from "../../api/hooks/authHooks/useAccessToken.ts";
 import {useCreateAccount} from "../../api/hooks/accountHooks/useCreateAccount.ts";
@@ -8,6 +8,8 @@ import {useGetPersonalProfile} from "../../api/hooks/userHooks/useGetPersonalPro
 import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
 import {useGetCreditsByClientId} from "../../api/hooks/creditHooks/useGetCreditsByClientId.ts";
 import {useGetTariffList} from "../../api/hooks/tariffHooks/useGetTariffList.ts";
+import type {Account} from "../../types/account/Account.ts";
+import {MASTER_ACCOUNT_ID} from "../../shared/constants/MASTER_ACCOUNT_ID.ts";
 
 
 const useMainPage = () => {

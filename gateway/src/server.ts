@@ -1,4 +1,11 @@
-import Fastify, { FastifyInstance } from "fastify";
+import Fastify, {
+  FastifyInstance,
+  FastifyRequest,
+  RawServerBase,
+  RequestGenericInterface,
+} from "fastify";
+import type { IncomingHttpHeaders, IncomingMessage } from "http";
+import type { Http2ServerRequest } from "http2";
 import proxy from "@fastify/http-proxy";
 import cors from "@fastify/cors";
 import path from "path";
@@ -31,8 +38,11 @@ export async function buildApp(): Promise<FastifyInstance> {
     hasAuthorization: !!(
       req.headers.authorization ?? req.headers.Authorization
     ),
-    authPrefix: (req.headers.authorization ?? req.headers.Authorization ?? "")
-      .slice(0, 20),
+    authPrefix: (
+      req.headers.authorization ??
+      req.headers.Authorization ??
+      ""
+    ).slice(0, 20),
   }));
 
   app.get("/swagger.yml", async (_req, reply) => {
@@ -78,7 +88,7 @@ export async function buildApp(): Promise<FastifyInstance> {
 </html>`;
   });
 
-  // Пароль вводится только на authHooks-страницах, поэтому тут только redirect.
+  // Пароль вводится только на auth-страницах, поэтому тут только redirect.
   app.get("/login", async (req, reply) => {
     return reply.redirect(
       authRedirectUrl("/login", req.raw.url?.split("?")[1] ?? ""),
@@ -93,13 +103,13 @@ export async function buildApp(): Promise<FastifyInstance> {
   app.post("/login", async (_req, reply) => {
     return reply.code(400).send({
       error: "login_via_auth_only",
-      message: "Введите пароль только на странице authHooks (/login)",
+      message: "Введите пароль только на странице auth (/login)",
     });
   });
   app.post("/setup-password", async (_req, reply) => {
     return reply.code(400).send({
       error: "password_setup_via_auth_only",
-      message: "Установите пароль только на странице authHooks (/setup-password)",
+      message: "Установите пароль только на странице auth (/setup-password)",
     });
   });
 
@@ -129,17 +139,20 @@ export async function buildApp(): Promise<FastifyInstance> {
       upstream,
       prefix,
       rewritePrefix: prefix,
-      preHandler: async (req) => {
-        const auth = req.headers.authorization ?? req.headers.Authorization;
-        req.log.info(
-          {
-            prefix,
-            upstream,
-            hasAuth: !!auth,
-            authPrefix: (typeof auth === "string" ? auth : "")?.slice(0, 25) ?? "—",
-          },
-          "[Gateway] proxy request"
-        );
+      replyOptions: {
+        rewriteRequestHeaders(
+          req: FastifyRequest<
+            RequestGenericInterface,
+            RawServerBase,
+            IncomingMessage | Http2ServerRequest
+          >,
+          headers: IncomingHttpHeaders,
+        ): IncomingHttpHeaders {
+          const h = req.headers;
+          const raw = h.authorization ?? h.Authorization;
+          const auth = Array.isArray(raw) ? raw[0] : raw;
+          return auth ? { ...headers, authorization: auth } : headers;
+        },
       },
     });
 
@@ -149,6 +162,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   await proxyWithAuth(env.creditsServiceUrl, "/credits");
   await proxyWithAuth(env.creditsServiceUrl, "/tariffs");
 
+  await proxyWithAuth(env.coreServiceUrl, "/currencies");
   await proxyWithAuth(env.coreServiceUrl, "/accounts");
   await proxyWithAuth(env.coreServiceUrl, "/dashboard");
 
