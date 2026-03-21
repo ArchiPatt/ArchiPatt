@@ -13,7 +13,7 @@ export const useColorScheme = () => {
       if (isSuccess && data?.data?.colorScheme) {
          setMantineColorScheme(data.data.colorScheme)
       }
-   }, [isSuccess, data, setMantineColorScheme])
+   }, [isSuccess, data])
 
    const setColorScheme = (colorScheme: ColorScheme) => {
       setMantineColorScheme(colorScheme)
