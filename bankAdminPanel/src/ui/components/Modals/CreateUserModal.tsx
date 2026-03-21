@@ -1,19 +1,7 @@
 import { Alert, Button, CopyButton, Group, MultiSelect, Stack, TextInput } from '@mantine/core'
 import { type ContextModalProps } from '@mantine/modals'
-import { useForm, Controller } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
-import { useCreateUserMutation } from '../../../api/hooks/useCreateUserMutation'
-
-const schema = yup.object({
-   username: yup.string().required('Логин обязателен').min(3, 'Минимум 3 символа'),
-   displayName: yup.string().optional(),
-   roles: yup
-      .array()
-      .of(yup.string())
-      .required('Выберите хотя бы одну роль')
-      .min(1, 'Выберите хотя бы одну роль')
-})
+import { Controller } from 'react-hook-form'
+import { useUserModal } from '../../../useCases/modals/useUserModal'
 
 const ROLE_OPTIONS = [
    { value: 'client', label: 'Клиент' },
@@ -22,36 +10,16 @@ const ROLE_OPTIONS = [
 ]
 
 export const CreateUserModal = ({ context, id }: ContextModalProps) => {
-   const createUser = useCreateUserMutation()
-   const {
-      control,
-      handleSubmit,
-      formState: { errors }
-   } = useForm({
-      resolver: yupResolver(schema),
-      defaultValues: {
-         username: '',
-         displayName: '',
-         roles: ['client']
-      }
-   })
+   const { state, functions } = useUserModal()
 
-   const onSubmit = handleSubmit((values) => {
-      createUser.mutate({
-         username: values.username,
-         displayName: values.displayName || null,
-         roles: values.roles as string[]
-      })
-   })
-
-   if (createUser.data?.data.setupUrl) {
+   if (state.createUser.data?.data.setupUrl) {
       return (
          <Stack>
             <Alert>
-               Пользователь {createUser.data.data.username} успешно создан. Используйте ссылку ниже для
-               настройки пароля.
+               Пользователь {state.createUser.data.data.username} успешно создан. Используйте ссылку ниже
+               для настройки пароля.
             </Alert>
-            <CopyButton value={createUser.data?.data.setupUrl}>
+            <CopyButton value={state.createUser.data?.data.setupUrl}>
                {({ copied, copy }) => (
                   <Button color={copied ? 'teal' : 'blue'} onClick={copy}>
                      {copied ? 'Скопировано' : 'Копировать ссылку'}
@@ -63,38 +31,38 @@ export const CreateUserModal = ({ context, id }: ContextModalProps) => {
    }
 
    return (
-      <form onSubmit={onSubmit}>
+      <form onSubmit={functions.onSubmit}>
          <Stack gap="md">
             <Controller
                name="username"
-               control={control}
+               control={state.control}
                render={({ field }) => (
                   <TextInput
                      label="Логин"
                      placeholder="Введите логин"
                      withAsterisk
                      {...field}
-                     error={errors.username?.message}
+                     error={state.errors.username?.message}
                   />
                )}
             />
 
             <Controller
                name="displayName"
-               control={control}
+               control={state.control}
                render={({ field }) => (
                   <TextInput
                      label="Отображаемое имя"
                      placeholder="Введите имя (необязательно)"
                      {...field}
-                     error={errors.displayName?.message}
+                     error={state.errors.displayName?.message}
                   />
                )}
             />
 
             <Controller
                name="roles"
-               control={control}
+               control={state.control}
                render={({ field }) => (
                   <MultiSelect
                      label="Роли"
@@ -103,7 +71,7 @@ export const CreateUserModal = ({ context, id }: ContextModalProps) => {
                      withAsterisk
                      {...field}
                      value={(field.value ?? []) as string[]}
-                     error={errors.roles?.message}
+                     error={state.errors.roles?.message}
                   />
                )}
             />
@@ -112,11 +80,11 @@ export const CreateUserModal = ({ context, id }: ContextModalProps) => {
                <Button
                   variant="default"
                   onClick={() => context.closeModal(id)}
-                  disabled={createUser.isPending}
+                  disabled={state.createUser.isPending}
                >
                   Отмена
                </Button>
-               <Button type="submit" loading={createUser.isPending}>
+               <Button type="submit" loading={state.createUser.isPending}>
                   Создать
                </Button>
             </Group>
