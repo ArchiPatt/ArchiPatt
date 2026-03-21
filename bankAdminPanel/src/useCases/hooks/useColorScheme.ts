@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useMantineColorScheme } from '@mantine/core'
-import { useColorSchemeQuery } from '../../../api/hooks/useColorSchemeQuery'
-import { useSetColorSchemeMutation } from '../../../api/hooks/useSetColorSchemeMutation'
-import type { ColorScheme } from '../../../../generated/api/adminSettings'
+import { useColorSchemeQuery } from '../../api/hooks/useColorSchemeQuery'
+import { useSetColorSchemeMutation } from '../../api/hooks/useSetColorSchemeMutation'
+import type { ColorScheme } from '../../../generated/api/adminSettings'
 
 export const useColorScheme = () => {
    const { setColorScheme: setMantineColorScheme, colorScheme } = useMantineColorScheme()

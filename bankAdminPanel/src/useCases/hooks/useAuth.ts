@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { useTokenMutation } from '../../../api/hooks/useTokenMutation'
-import { useLogoutMutation } from '../../../api/hooks/useLogoutMutation'
-import { useUserQuery } from '../../../api/hooks/useUserQuery'
+import { useTokenMutation } from '../../api/hooks/useTokenMutation'
+import { useLogoutMutation } from '../../api/hooks/useLogoutMutation'
+import { useUserQuery } from '../../api/hooks/useUserQuery'
 import Cookies from 'js-cookie'
 
 export const useAuth = () => {

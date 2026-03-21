@@ -14,8 +14,8 @@ import {
 } from '@mantine/core'
 import { Outlet, useLocation, Link } from 'react-router-dom'
 import classes from './Layout.module.css'
-import { useAuth } from './useAuth'
-import { useColorScheme } from './useColorScheme'
+import { useAuth } from '../../../useCases/hooks/useAuth'
+import { useColorScheme } from '../../../useCases/hooks/useColorScheme'
 
 const PROJECT_NAME = 'АРМ'
 
