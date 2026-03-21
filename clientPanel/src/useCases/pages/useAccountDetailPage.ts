@@ -11,6 +11,9 @@ import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.
 import {useCombobox} from "@mantine/core";
 import {useTransferAccount} from "../../api/hooks/accountHooks/useTransferAccount.ts";
 import {useAccountOperationsWS} from "../../api/hooks/accountHooks/useAccountOperationsWS.ts";
+import {useSetHiddenAccount} from "../../api/hooks/settingsHooks/useSetHiddenAccount.ts";
+import {useDeleteHiddenAccount} from "../../api/hooks/settingsHooks/useDeleteHiddenAccount.ts";
+import {useGetHiddenAccounts} from "../../api/hooks/settingsHooks/useGetHiddenAccount.ts";
 
 const useAccountDetailPage = () => {
 
@@ -36,11 +39,16 @@ const useAccountDetailPage = () => {
     const { mutate: deposit } = useDepositAccount()
     const { mutate: withdraw } = useWithdrawAccount()
     const { mutate: transferAccount } = useTransferAccount()
+    const { mutate: hiddenAccount } = useSetHiddenAccount()
+    const { mutate: showAccount } = useDeleteHiddenAccount()
+
 
     const { data: account, isLoading: accountLoading, error: accountError } = useGetAccountById(id ?? "")
     const { data: accountList, isLoading: accountListLoading, error: accountListError } = useGetAccountList()
-    // const { data: transaction, isLoading: transactionLoading, error: transactionError } = useGetAccountTransactions({ id: account?.id ?? '' })
+    const { data: hiddenAccounts } = useGetHiddenAccounts()
     const { operations, operationsLoading } = useAccountOperationsWS(account?.id ?? '')
+
+    const isHidden = hiddenAccounts?.hiddenAccounts.includes(id ?? '')
 
     const closeAccount = () => {
         close(id);
@@ -128,6 +136,14 @@ const useAccountDetailPage = () => {
         navigate(LINK_PATHS.MAIN)
     }
 
+    const setHiddenAccount = () => {
+        if (isHidden) {
+            showAccount(id)
+            return
+        }
+        hiddenAccount(id)
+    }
+
     return {
         account,
         accountLoading,
@@ -156,7 +172,10 @@ const useAccountDetailPage = () => {
         onChangeTransferAmount,
         onChangeTrasferdAccount,
         combobox,
-        transfer
+        transfer,
+        isHidden,
+        hiddenAccounts,
+        setHiddenAccount
     }
 }
 

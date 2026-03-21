@@ -18,7 +18,7 @@ function num(name: string, fallback: number): number {
 
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
-  port: num("PORT", 4005),
+  port: num("PORT", 4006),
   authIssuer: must("AUTH_ISSUER"),
   internalToken: must("INTERNAL_TOKEN"),
   authService: {
@@ -43,7 +43,7 @@ export const env = {
     host: process.env.DB_HOST ?? "localhost",
     port: num("DB_PORT", 5432),
     user: process.env.DB_USER ?? "postgres",
-    password: process.env.DB_PASSWORD ?? "1234",
-    name: process.env.DB_NAME ?? "admin_settings",
+    password: process.env.DB_PASSWORD ?? "12345",
+    name: process.env.DB_NAME ?? "client_settings",
   },
 };

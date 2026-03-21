@@ -4,6 +4,8 @@ import {useTransaction} from "../../../../useCases/components/useTransaction.ts"
 import type {AccountOperation} from "../../../../types/transaction/AccountOperation.ts";
 import type {CreditPaymentResponse} from "../../../../types/transaction/CreditPaymentResponse.ts";
 import type {TransactionProps} from "../../../../types/transaction/TransactionProps.ts";
+import {getTransactionStatus} from "../../../../useCases/shared/transaction/getTransactionStatus.ts";
+import {getTransactionStatusColor} from "../../../../useCases/shared/transaction/getTransactionStatusColor.ts";
 
 const Transaction = (props: TransactionProps) => {
 
@@ -35,20 +37,12 @@ const Transaction = (props: TransactionProps) => {
                                     {new Date(t.createdAt).toLocaleString('ru-RU')}
                                 </Table.Td>
                                 <Table.Td>
-                                    {t.type === 'deposit'
-                                        ? 'Пополнение'
-                                        : t.type === 'credit'
-                                        ? 'Начисление кредита'
-                                        : 'Снятие'}
+                                    {getTransactionStatus(t.type)}
                                 </Table.Td>
                                 <Table.Td
                                     style={{
                                         color:
-                                            t.type === 'deposit'
-                                                ? 'green'
-                                                : t.type === 'credit'
-                                                ? 'orange'
-                                                : 'red',
+                                        getTransactionStatusColor(t.type),
                                     }}
                                 >
                                     {t.type === 'deposit' ? '+' : ''}

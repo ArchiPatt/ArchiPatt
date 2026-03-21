@@ -9,6 +9,8 @@ const useTransaction = (props: TransactionProps) => {
         items
     } = props
 
+
+
     // const normalizedType: TransactionType[] = slicedArray.map((item) => {
     //     if (isAccountOperation(item)) {
     //         return {
