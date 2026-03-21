@@ -115,6 +115,11 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
   await app.register(proxy, {
     upstream: env.authServiceUrl,
+    prefix: "/logout-session",
+    rewritePrefix: "/logout-session",
+  });
+  await app.register(proxy, {
+    upstream: env.authServiceUrl,
     prefix: "/jwks",
     rewritePrefix: "/jwks",
   });
