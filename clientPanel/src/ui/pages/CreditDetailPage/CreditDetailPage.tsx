@@ -190,13 +190,13 @@ const CreditDetailPage = () => {
                 </Grid>:
                 <div>Не получилось загрузить данные</div>
             }
-            {!transactionError ?
-                transaction ?
-                    <Transaction items={transaction} total={0} /> :
-                    <div>Операций нет</div>
-                :
-                <div>Не удалось загрузить список операций</div>
-            }
+            {/*{!transactionError ?*/}
+            {/*    transaction ?*/}
+            {/*        <Transaction items={transaction} total={0} /> :*/}
+            {/*        <div>Операций нет</div>*/}
+            {/*    :*/}
+            {/*    <div>Не удалось загрузить список операций</div>*/}
+            {/*}*/}
         </Stack>
     );
 }

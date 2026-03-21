@@ -53,7 +53,6 @@ const AccountDetailPage = () => {
 
     if (accountLoading || accountListLoading) return <div>Loading...</div>
 
-    console.log(operations)
 
     if (operationsLoading) {
         return (
@@ -135,7 +134,7 @@ const AccountDetailPage = () => {
 
             {
                 operations && operations.length ?
-                    <Transaction />
+                    <Transaction items={operations}/>
                 :
                 <div>Не удалось загрузить список операций</div>
             }

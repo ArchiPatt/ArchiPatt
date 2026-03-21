@@ -3,12 +3,13 @@ import type {AccountOperationsPage} from "../../../../types/transaction/AccountO
 import {useTransaction} from "../../../../useCases/components/useTransaction.ts";
 import type {AccountOperation} from "../../../../types/transaction/AccountOperation.ts";
 import type {CreditPaymentResponse} from "../../../../types/transaction/CreditPaymentResponse.ts";
+import type {TransactionProps} from "../../../../types/transaction/TransactionProps.ts";
 
-const Transaction = (props: AccountOperation[]) => {
+const Transaction = (props: TransactionProps) => {
 
-    // const {
-    //     slicedArray,
-    // } = useTransaction(props)
+    const {
+        items
+    } = useTransaction(props)
 
     return (
         <Card shadow="sm" padding="lg" radius="md" withBorder mt="xl">
@@ -16,7 +17,7 @@ const Transaction = (props: AccountOperation[]) => {
                 История операций
             </Title>
 
-            {props.length === 0 ?
+            {items.length === 0 ?
                 <Text>Операции не проводились</Text> :
                 <Table>
                     <Table.Thead>
@@ -28,7 +29,7 @@ const Transaction = (props: AccountOperation[]) => {
                     </Table.Thead>
 
                     <Table.Tbody>
-                        {props.map((t) => (
+                        {items.map((t) => (
                             <Table.Tr key={t.id}>
                                 <Table.Td>
                                     {new Date(t.createdAt).toLocaleString('ru-RU')}
