@@ -185,6 +185,47 @@ paths:
                 $ref: "#/components/schemas/ErrorResponse"
               example:
                 error: forbidden
+  /accounts/master:
+    get:
+      tags: [Core]
+      summary: Мастер-счёт
+      description: |
+        Возвращает мастер-счёт банка (источник средств для выдачи кредитов).
+
+        Доступно только `employee` и `admin`.
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Мастер-счёт и его баланс
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: unauthorized
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: forbidden
+        "404":
+          description: Мастер-счёт не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+              example:
+                error: account_not_found
   /accounts/transfer:
     post:
       tags: [Core]

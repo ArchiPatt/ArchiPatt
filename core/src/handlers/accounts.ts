@@ -4,6 +4,7 @@ import { authPayloadOrNull } from "../controllers/auth";
 import {
   listAccountsController,
   getAccountController,
+  getMasterAccountController,
   getOperationsController,
   createAccountController,
   closeAccountController,
@@ -43,6 +44,13 @@ export function createAccountsHandlers(app: FastifyInstance) {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
       const res = await getAccountController(app.db, auth.payload, req.params);
+      return reply.code(res.status).send(res.body);
+    },
+
+    getMaster: async (req: FastifyRequest, reply: FastifyReply) => {
+      const auth = await authPayloadOrNull(req);
+      if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
+      const res = await getMasterAccountController(app.db, auth.payload);
       return reply.code(res.status).send(res.body);
     },
 

@@ -799,6 +799,38 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
+  /accounts/master:
+    get:
+      tags: [Core]
+      summary: Мастер-счёт
+      description: Проксирован на core /accounts/master. Мастер-счёт банка и его баланс (employee/admin).
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Мастер-счёт и баланс
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Account"
+        "401":
+          description: Не авторизован
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: Доступ запрещён
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: Мастер-счёт не найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /accounts/transfer:
     post:
       tags: [Core]

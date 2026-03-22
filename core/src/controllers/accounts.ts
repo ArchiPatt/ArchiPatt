@@ -45,6 +45,30 @@ export async function getAccountController(
   return { status: 200, body: account };
 }
 
+export async function getMasterAccountController(
+  ds: DataSource,
+  payload: JWTPayload,
+) {
+  if (!canManageAll(payload)) {
+    return { status: 403, body: { error: "forbidden" } };
+  }
+
+  const account = await accountsService.findAccountById(ds, env.masterAccountId);
+  if (!account) return { status: 404, body: { error: "account_not_found" } };
+
+  return {
+    status: 200,
+    body: {
+      id: account.id,
+      clientId: account.clientId,
+      currency: account.currency,
+      balance: account.balance,
+      status: account.status,
+      createdAt: account.createdAt,
+    },
+  };
+}
+
 export async function getOperationsController(
   ds: DataSource,
   payload: JWTPayload,

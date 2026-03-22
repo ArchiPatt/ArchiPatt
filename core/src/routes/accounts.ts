@@ -6,6 +6,7 @@ export function registerAccountsRoutes(app: FastifyInstance) {
 
   app.get("/currencies", h.listCurrencies);
   app.get<{ Querystring: { clientId?: string } }>("/accounts", h.list);
+  app.get("/accounts/master", h.getMaster);
   app.get<{ Params: { id: string } }>("/accounts/:id", h.get);
   app.get<{
     Params: { id: string };
