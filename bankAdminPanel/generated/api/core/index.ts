@@ -5,6 +5,7 @@ export * from './requests/core/getHealth.gen';
 export * from './requests/core/getCurrencies.gen';
 export * from './requests/core/getAccounts.gen';
 export * from './requests/core/postAccounts.gen';
+export * from './requests/core/getAccountsMaster.gen';
 export * from './requests/core/postAccountsTransfer.gen';
 export * from './requests/core/getAccountById.gen';
 export * from './requests/core/postAccountByIdClose.gen';
