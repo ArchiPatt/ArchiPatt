@@ -8,6 +8,8 @@ import type {Account} from "../../types/account/Account.ts";
 import {useCreateCredit} from "../../api/hooks/creditHooks/useCreateCredit.ts";
 import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
 import {useGetTariffList} from "../../api/hooks/tariffHooks/useGetTariffList.ts";
+import {useGetCurrencies} from "../../api/hooks/accountHooks/useGetCurrencies.ts";
+import {useGetMasterAccount} from "../../api/hooks/accountHooks/useGetMasterAccount.ts";
 
 const useOpenCreditPage = () => {
 
@@ -21,6 +23,7 @@ const useOpenCreditPage = () => {
 
     const { data: account, isLoading: accountLoading, error: accountError } = useGetAccountList()
     const { data: tariff, isLoading: tariffLoading, error: tariffError } = useGetTariffList()
+    const { data: masterAccount } = useGetMasterAccount()
 
     const filteredTariff: TariffResponse[] = useMemo(() => {
         if (!tariff) return []
@@ -61,7 +64,11 @@ const useOpenCreditPage = () => {
             return
         }
         else if (model.amount < 1000) {
-            setErrorText("минимальная сумма кредита 1000")
+            setErrorText("Минимальная сумма кредита 1000")
+            return
+        }
+        else if (model.amount > masterAccount?.balance) {
+            setErrorText("Банк не может выдать данную сумму в кредит")
             return
         }
         setErrorText(undefined)
@@ -83,7 +90,7 @@ const useOpenCreditPage = () => {
         handleChooseAccount,
         onChangeAmount,
         takeCredit,
-        errorText
+        errorText,
     }
 }
 

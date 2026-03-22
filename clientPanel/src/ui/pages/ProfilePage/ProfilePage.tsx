@@ -8,15 +8,16 @@ import {
     Divider,
     Avatar,
     Grid,
+    Badge
 } from '@mantine/core';
 import {useProfilePage} from "../../../useCases/pages/useProfilePage.ts";
 import {ROLES} from "../../../shared/constants/ROLES.ts";
 
 const ProfilePage = () => {
 
-    const { userData, isLoading } = useProfilePage()
+    const { userData, isLoading, creditRating, creditLoading } = useProfilePage()
 
-    if (isLoading) return <div>Loading...</div>
+    if (isLoading || creditLoading) return <div>Loading...</div>
     if (!userData) return null
 
     return (
@@ -32,6 +33,7 @@ const ProfilePage = () => {
                             <Avatar color="blue" size={80} radius="xl">
                                 {userData.displayName[0] + userData.displayName[0]}
                             </Avatar>
+
                             <div>
                                 <Title order={3}>
                                     {userData.displayName}
@@ -43,18 +45,68 @@ const ProfilePage = () => {
                     <Divider my="sm" />
 
                     <Grid>
-
                         <Grid.Col span={6}>
                             <Group spacing={5} align="center">
-                                <Text>Роли:</Text>
+                                <Text fw={500}>Роли:</Text>
                                 {userData.roles.map((item, index) => (
-                                    <Text key={index}>{`${ROLES[item]} ${index !== userData.roles.length - 1 ? "," : ""}`}</Text>
+                                    <Text key={index}>
+                                        {`${ROLES[item]}${index !== userData.roles.length - 1 ? "," : ""}`}
+                                    </Text>
                                 ))}
                             </Group>
                         </Grid.Col>
                     </Grid>
-                </Card>
 
+                    {creditRating ? (
+                        <>
+                            <Divider my="md" />
+
+                            <Stack spacing="xs">
+                                <Title order={4}>Кредитный рейтинг</Title>
+
+                                <Grid>
+                                    <Grid.Col span={3}>
+                                        <Text c="dimmed">Балл рейтинга</Text>
+                                        <Badge
+                                            size="lg"
+                                            color={
+                                                creditRating.score >= 80
+                                                    ? "green"
+                                                    : creditRating.score >= 50
+                                                        ? "yellow"
+                                                        : "red"
+                                            }
+                                        >
+                                            {creditRating.score}
+                                        </Badge>
+                                    </Grid.Col>
+
+                                    <Grid.Col span={3}>
+                                        <Text c="dimmed">Просроченные кредиты</Text>
+                                        <Text fw={500}>
+                                            {creditRating.overdueCount}
+                                        </Text>
+                                    </Grid.Col>
+
+                                    <Grid.Col span={3}>
+                                        <Text c="dimmed">Всего кредитов</Text>
+                                        <Text fw={500}>
+                                            {creditRating.totalCredits}
+                                        </Text>
+                                    </Grid.Col>
+
+                                    <Grid.Col span={3}>
+                                        <Text c="dimmed">Закрытые кредиты</Text>
+                                        <Text fw={500}>
+                                            {creditRating.closedCount}
+                                        </Text>
+                                    </Grid.Col>
+                                </Grid>
+                            </Stack>
+                        </>
+                    ):<div>Не удалось загрузить кредитный рейтинг</div>
+                    }
+                </Card>
             </Stack>
         </Container>
     );
