@@ -720,6 +720,38 @@ export type PostCreditsAccrueRunResponses = {
 
 export type PostCreditsAccrueRunResponse = PostCreditsAccrueRunResponses[keyof PostCreditsAccrueRunResponses];
 
+/**
+ * Кредитный рейтинг клиента (0–100).
+ */
+export type CreditRatingResponse = {
+    score: number;
+    overdueCount: number;
+    totalCredits: number;
+    closedCount: number;
+};
+
+export type GetCreditsRatingByClientIdData = {
+    body?: never;
+    path: {
+        clientId: string;
+    };
+    query?: never;
+    url: '/credits/rating/{clientId}';
+};
+
+export type GetCreditsRatingByClientIdErrors = {
+    401: ErrorResponse;
+    403: ErrorResponse;
+};
+
+export type GetCreditsRatingByClientIdError = GetCreditsRatingByClientIdErrors[keyof GetCreditsRatingByClientIdErrors];
+
+export type GetCreditsRatingByClientIdResponses = {
+    200: CreditRatingResponse;
+};
+
+export type GetCreditsRatingByClientIdResponse = GetCreditsRatingByClientIdResponses[keyof GetCreditsRatingByClientIdResponses];
+
 export type ClientOptions = {
     baseUrl: 'http://localhost:4002' | (string & {});
 };

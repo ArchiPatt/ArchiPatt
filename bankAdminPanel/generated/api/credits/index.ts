@@ -13,3 +13,4 @@ export * from './requests/credits/getCreditsOverduePayments.gen';
 export * from './requests/credits/getCreditById.gen';
 export * from './requests/credits/getCreditByIdPayments.gen';
 export * from './requests/credits/postCreditsAccrueRun.gen';
+export * from './requests/credits/getCreditsRatingByClientId.gen';
