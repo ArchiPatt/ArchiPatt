@@ -44,15 +44,15 @@ const OpenCreditPage = () => {
 
   return (
     <Container size="lg" py="xl">
-      <Stack spacing="xl">
-        <Group spacing="lg" align="flex-start">
+      <Stack gap="xl">
+        <Group gap="lg" align="flex-start">
           <Card shadow="sm" padding="lg" radius="md" style={{ flex: 2 }}>
             <Title order={3}>Оформление кредита</Title>
             <Text color="dimmed" size="sm" mb="md">
               Заполните форму для получения кредита
             </Text>
 
-            <Stack spacing="md">
+            <Stack gap="md">
               <Select
                 label="Счет для зачисления"
                 placeholder="Выберите счет"
@@ -81,7 +81,7 @@ const OpenCreditPage = () => {
                 step={1000}
               />
               <Text color="red">{errorText}</Text>
-              <Group spacing="md">
+              <Group gap="md">
                 <Button style={{ flex: 1 }} color="blue" onClick={takeCredit}>
                   Оформить кредит
                 </Button>
@@ -100,12 +100,12 @@ const OpenCreditPage = () => {
               <Title order={4}>Расчет платежа</Title>
             </Group>
 
-            <Stack spacing="sm">
+            <Stack gap="sm">
               <Box>
                 <Text size="sm" color="dimmed">
                   Сумма кредита
                 </Text>
-                <Text size="lg" weight={700}>
+                <Text size="lg" fw={700}>
                   {amount}
                 </Text>
               </Box>
@@ -114,7 +114,7 @@ const OpenCreditPage = () => {
                 <Text size="sm" color="dimmed">
                   Процентная ставка
                 </Text>
-                <Text size="lg" weight={500}>
+                <Text size="lg" fw={500}>
                   {choosenTariff &&
                     filteredTariff.find((item) => item.id === choosenTariff)
                       ?.interestRate * 100}

@@ -85,7 +85,7 @@ const MainPage = () => {
                                     </Stack>
                                 </Paper>
                             ) : (
-                                <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
+                                <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} gap="lg">
                                     {accounts?.map((item) => (
                                         <AccountCard key={item.id} isHidden={hiddenAccounts?.hiddenAccounts.includes(item.id)} {...item} />
                                     ))}
@@ -143,7 +143,7 @@ const MainPage = () => {
                                     </Stack>
                                 </Paper>
                             ) : (
-                                <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
+                                <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} gap="lg">
                                     {credits?.map((item) => (
                                         <CreditCard
                                             creditInformation={{

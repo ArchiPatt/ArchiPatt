@@ -27,7 +27,7 @@ const ProfilePage = () => {
 
     return (
         <Container size="lg" py="xl">
-            <Stack spacing="xl">
+            <Stack gap="xl">
                 <div>
                     <Title order={1}>Мой профиль</Title>
                 </div>
@@ -51,7 +51,7 @@ const ProfilePage = () => {
 
                     <Grid>
                         <Grid.Col span={6}>
-                            <Group spacing={5} align="center">
+                            <Group gap='5' align="center">
                                 <Text fw={500}>Роли:</Text>
                                 {userData.roles.map((item, index) => (
                                     <Text key={index}>
@@ -66,7 +66,7 @@ const ProfilePage = () => {
                         <>
                             <Divider my="md" />
 
-                            <Stack spacing="xs">
+                            <Stack gap="xs">
                                 <Title order={4}>Кредитный рейтинг</Title>
 
                                 <Grid>

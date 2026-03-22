@@ -12,7 +12,7 @@ const useCreditCard = (props: CreditCardProps) => {
     const navigate = useNavigate();
 
     const percantage = remainsPercantage(Number(creditInformation.principalAmount), Number(creditInformation.outstandingAmount))
-    const interestRate = percent * 100
+    const interestRate = Number(percent) * 100
 
     const openDetail = () => {
         navigate(LINK_PATHS.CREDIT_DETAIL.replace(':id', String(creditInformation.id)))

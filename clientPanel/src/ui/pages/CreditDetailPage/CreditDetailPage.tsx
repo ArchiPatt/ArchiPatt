@@ -59,12 +59,12 @@ const CreditDetailPage = () => {
     }
 
     return (
-        <Stack spacing="xl" p="xl">
+        <Stack gap="xl" p="xl">
             {!creditError && !accountError && !tariffError ?
                 <Grid>
                     <Grid.Col span={8}>
                         <Card shadow="sm" padding="lg">
-                            <Stack spacing="md">
+                            <Stack gap="md">
                                 <Group position="apart">
                                     <Group>
                                         <div
@@ -80,7 +80,7 @@ const CreditDetailPage = () => {
                                         >
                                             <IconCreditCard size={32} color={credit?.status === 'active' ? '#FF9F1C' : '#B0B0B0'} />
                                         </div>
-                                        <Stack spacing={0}>
+                                        <Stack gap={0}>
                                             <Text size="sm" color="dimmed">Кредит</Text>
                                             <Title order={3}>{credit?.principalAmount}</Title>
                                         </Stack>
@@ -92,7 +92,7 @@ const CreditDetailPage = () => {
 
                                 <Divider />
 
-                                <Stack spacing={4}>
+                                <Stack gap={4}>
                                     <Group position="apart">
                                         <Text size="sm" color="dimmed">Прогресс погашения</Text>
                                         <Text size="sm">{percantage}% погашено</Text>
@@ -111,8 +111,8 @@ const CreditDetailPage = () => {
                                             <Text fw={600}>{tariff?.interestRate * 100}%</Text>
                                         </Flex>
                                         <Flex align="center" gap="xs">
-                                            <Group spacing={4}><IconCalendar size={16} /><Text size="xs">Следующий платеж</Text></Group>
-                                            <Text weight={600}>{credit?.status === 'active' ? formatDate(credit.nextPaymentDueAt) : '-'}</Text>
+                                            <Group gap={4}><IconCalendar size={16} /><Text size="xs">Следующий платеж</Text></Group>
+                                            <Text fw={600}>{credit?.status === 'active' ? formatDate(credit.nextPaymentDueAt) : '-'}</Text>
                                         </Flex>
                                     </Grid.Col>
                                 </Grid>
@@ -122,7 +122,7 @@ const CreditDetailPage = () => {
                                     onClose={() => setModalState(false)}
                                     title="Погашение кредита"
                                 >
-                                    <Stack spacing="md">
+                                    <Stack gap="md">
                                         <NumberInput
                                             label="Сумма"
                                             placeholder="0"
@@ -150,37 +150,37 @@ const CreditDetailPage = () => {
                     </Grid.Col>
 
                     <Grid.Col span={4}>
-                        <Stack spacing="md">
+                        <Stack gap="md">
                             <Card shadow="sm" padding="md">
-                                <Stack spacing="sm">
+                                <Stack gap="sm">
                                     <Text size="xs" color="dimmed">Номер счета</Text>
-                                    <Text weight={600} style={{ fontFamily: 'monospace' }}>{credit?.accountId}</Text>
+                                    <Text fw={600} style={{ fontFamily: 'monospace' }}>{credit?.accountId}</Text>
                                     <Text size="xs" color="dimmed">Баланс</Text>
-                                    <Text weight={600}>{account?.balance}</Text>
+                                    <Text fw={600}>{account?.balance}</Text>
                                 </Stack>
                             </Card>
 
                             <Card shadow="sm" padding="md">
-                                <Stack spacing="sm">
+                                <Stack gap="sm">
                                     <Text size="xs" color="dimmed">Дата оформления</Text>
-                                    <Text weight='600'>{formatDate(credit?.createdAt)}</Text>
+                                    <Text fw='600'>{formatDate(credit?.createdAt)}</Text>
                                     {credit?.status === 'active' &&
                                         <>
                                             <Text size="xs" color="dimmed">Дата следующего платежа</Text>
-                                            <Text weight={600}>{formatDate(credit.nextPaymentDueAt)}</Text>
+                                            <Text fw={600}>{formatDate(credit.nextPaymentDueAt)}</Text>
                                         </>
                                     }
                                     <Text size="xs" color="dimmed">Дата окончания</Text>
-                                    <Text weight={600}>{credit?.closedAt ? formatDate(credit?.closedAt) : '-'}</Text>
+                                    <Text fw={600}>{credit?.closedAt ? formatDate(credit?.closedAt) : '-'}</Text>
                                 </Stack>
                             </Card>
 
                             <Card shadow="sm" padding="md">
-                                <Stack spacing="sm">
+                                <Stack gap="sm">
                                     <Text size="xs" color="dimmed">Сумма кредита</Text>
-                                    <Text weight={600}>{credit?.principalAmount}</Text>
+                                    <Text fw={600}>{credit?.principalAmount}</Text>
                                     <Text size="xs" color="dimmed">Общая сумма процентов</Text>
-                                    <Text weight={600} color="orange">{tariff?.interestRate * 100}%</Text>
+                                    <Text fw={600} color="orange">{tariff?.interestRate * 100}%</Text>
                                 </Stack>
                             </Card>
                         </Stack>

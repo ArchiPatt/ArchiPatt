@@ -1,4 +1,5 @@
-import type {AccountOperation} from "./AccountOperation.ts";
+import type {AccountOperation} from "../../../generated/api/core";
+
 
 interface TransactionProps {
     items: AccountOperation[]

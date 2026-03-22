@@ -12,13 +12,13 @@ const useOpenAccountPage = () => {
     const [currency, setCurrency] = useState<Currency>('RUB');
     const navigate = useNavigate();
 
-    const { data: currencyList, isLoading: currenciesLoading, error: currenciesError } = useGetCurrencies()
+    const { data: currencyList, isLoading: currenciesLoading } = useGetCurrencies()
 
     const { mutate: newAccount } = useCreateAccount()
 
     const createAccount = () => {
         const model: CreateAccountRequest = {
-            clientId: userStorage.getItem(),
+            clientId: userStorage.getItem() ?? '',
             currency: currency
         }
         newAccount(model)
@@ -29,7 +29,8 @@ const useOpenAccountPage = () => {
         currencyList,
         currency,
         setCurrency,
-        createAccount
+        createAccount,
+        currenciesLoading,
     }
 }
 
