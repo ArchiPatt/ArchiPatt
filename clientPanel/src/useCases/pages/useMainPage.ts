@@ -1,15 +1,11 @@
 import {useLocation} from "react-router-dom";
 import {userStorage} from "../../shared/storage/userStorage";
-import {useEffect, useMemo, useState} from "react";
-import type {CreateAccountRequest} from "../../types/account/CreateAccountRequest.ts";
+import {useEffect} from "react";
 import {useAccessToken} from "../../api/hooks/authHooks/useAccessToken.ts";
-import {useCreateAccount} from "../../api/hooks/accountHooks/useCreateAccount.ts";
 import {useGetPersonalProfile} from "../../api/hooks/userHooks/useGetPersonalProfile.ts";
 import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
 import {useGetCreditsByClientId} from "../../api/hooks/creditHooks/useGetCreditsByClientId.ts";
 import {useGetTariffList} from "../../api/hooks/tariffHooks/useGetTariffList.ts";
-import type {Account} from "../../types/account/Account.ts";
-import {MASTER_ACCOUNT_ID} from "../../shared/constants/MASTER_ACCOUNT_ID.ts";
 import {useGetHiddenAccounts} from "../../api/hooks/settingsHooks/useGetHiddenAccount.ts";
 
 

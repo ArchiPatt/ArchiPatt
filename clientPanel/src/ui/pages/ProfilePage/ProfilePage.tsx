@@ -12,12 +12,17 @@ import {
 } from '@mantine/core';
 import {useProfilePage} from "../../../useCases/pages/useProfilePage.ts";
 import {ROLES} from "../../../shared/constants/ROLES.ts";
+import {Loading} from "../../components/Loading";
 
 const ProfilePage = () => {
 
     const { userData, isLoading, creditRating, creditLoading } = useProfilePage()
 
-    if (isLoading || creditLoading) return <div>Loading...</div>
+    if (isLoading || creditLoading) {
+        return (
+            <Loading/>
+        )
+    }
     if (!userData) return null
 
     return (

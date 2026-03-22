@@ -1,8 +1,5 @@
 import {Card, Table, Text, Title} from "@mantine/core";
-import type {AccountOperationsPage} from "../../../../types/transaction/AccountOperationsPage.ts";
 import {useTransaction} from "../../../../useCases/components/useTransaction.ts";
-import type {AccountOperation} from "../../../../types/transaction/AccountOperation.ts";
-import type {CreditPaymentResponse} from "../../../../types/transaction/CreditPaymentResponse.ts";
 import type {TransactionProps} from "../../../../types/transaction/TransactionProps.ts";
 import {getTransactionStatus} from "../../../../useCases/shared/transaction/getTransactionStatus.ts";
 import {getTransactionStatusColor} from "../../../../useCases/shared/transaction/getTransactionStatusColor.ts";

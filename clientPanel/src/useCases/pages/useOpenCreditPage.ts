@@ -1,15 +1,13 @@
 import {useMemo, useState} from "react";
-import type {TariffResponse} from "../../types/tariff/TariffResponse.ts";
-import type {IssueCreditRequest} from "../../types/credit/IssueCreditRequest.ts";
 import {userStorage} from "../../shared/storage/userStorage";
 import {useNavigate} from "react-router-dom";
 import {LINK_PATHS} from "../../shared/constants/LINK_PATHS.ts";
-import type {Account} from "../../types/account/Account.ts";
 import {useCreateCredit} from "../../api/hooks/creditHooks/useCreateCredit.ts";
 import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
 import {useGetTariffList} from "../../api/hooks/tariffHooks/useGetTariffList.ts";
-import {useGetCurrencies} from "../../api/hooks/accountHooks/useGetCurrencies.ts";
 import {useGetMasterAccount} from "../../api/hooks/accountHooks/useGetMasterAccount.ts";
+import type {IssueCreditRequest, TariffResponse} from "../../../generated/api/credits";
+import type {Account} from "../../../generated/api/core";
 
 const useOpenCreditPage = () => {
 

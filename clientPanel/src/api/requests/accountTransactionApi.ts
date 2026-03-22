@@ -1,5 +1,5 @@
 import {instance} from "../network/instance.ts";
-import type {AccountOperationsPage} from "../../types/transaction/AccountOperationsPage.ts";
+import type {AccountOperationsPage} from "../../../generated/api/core";
 import type {AccountTransactionRequest} from "../../types/transaction/accountTransactionRequest.ts";
 
 const accountTransactionApi = {

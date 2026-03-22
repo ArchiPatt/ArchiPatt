@@ -19,9 +19,9 @@ import {
 } from '@tabler/icons-react';
 import {useCreditDetailPage} from "../../../useCases/pages/useCreditDetailPage.ts";
 import {formatDate} from "../../../shared/utils/formatDate.ts";
-import {Transaction} from "../../components/Transaction/core/Transaction.tsx";
 import {getCreditStatusColor} from "../../../useCases/shared/credit/getCreditStatusColor.ts";
 import {getCreditStatusLabel} from "../../../useCases/shared/credit/getCreditStatusLabel.ts";
+import {Loading} from "../../components/Loading";
 
 const CreditDetailPage = () => {
 
@@ -29,9 +29,6 @@ const CreditDetailPage = () => {
         credit,
         creditLoading,
         creditError,
-        transaction,
-        transactionLoading,
-        transactionError,
         tariff,
         tariffLoading,
         tariffError,
@@ -54,10 +51,11 @@ const CreditDetailPage = () => {
         creditLoading
         || accountLoading
         || tariffLoading
-        || transactionLoading
         || !credit
     ) {
-        return <div>Loading...</div>
+        return (
+            <Loading/>
+        )
     }
 
     return (
@@ -165,7 +163,7 @@ const CreditDetailPage = () => {
                             <Card shadow="sm" padding="md">
                                 <Stack spacing="sm">
                                     <Text size="xs" color="dimmed">Дата оформления</Text>
-                                    <Text weight={600}>{formatDate(credit?.createdAt)}</Text>
+                                    <Text weight='600'>{formatDate(credit?.createdAt)}</Text>
                                     {credit?.status === 'active' &&
                                         <>
                                             <Text size="xs" color="dimmed">Дата следующего платежа</Text>
@@ -190,13 +188,6 @@ const CreditDetailPage = () => {
                 </Grid>:
                 <div>Не получилось загрузить данные</div>
             }
-            {/*{!transactionError ?*/}
-            {/*    transaction ?*/}
-            {/*        <Transaction items={transaction} total={0} /> :*/}
-            {/*        <div>Операций нет</div>*/}
-            {/*    :*/}
-            {/*    <div>Не удалось загрузить список операций</div>*/}
-            {/*}*/}
         </Stack>
     );
 }

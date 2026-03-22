@@ -1,7 +1,5 @@
 import {instance} from "../network/instance.ts";
-import type {AccessTokenRequest} from "../../types/auth/AccessTokenRequest.ts";
-import type {RefreshTokenRequest} from "../../types/auth/RefreshTokenRequest.ts";
-import type {TokenResponse} from "../../types/auth/TokenResponse.ts";
+import type {TokenResponse} from "../../../generated/api/authHooks";
 
 const authApi = {
     accessToken: async (token: string) => {

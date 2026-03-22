@@ -14,7 +14,6 @@ import {
     Combobox,
     TextInput,
     Center,
-    Loader,
 } from "@mantine/core";
 
 import {
@@ -27,6 +26,7 @@ import {
 
 import { useAccountDetailPage } from "../../../useCases/pages/useAccountDetailPage.ts";
 import { Transaction } from "../../components/Transaction/core/Transaction.tsx";
+import {Loading} from "../../components/Loading";
 
 const AccountDetailPage = () => {
     const {
@@ -69,13 +69,8 @@ const AccountDetailPage = () => {
 
     if (operationsLoading || accountLoading || accountListLoading) {
         return (
-            <Center h="70vh">
-                <Stack align="center">
-                    <Loader size="lg" />
-                    <Text c="dimmed">Загрузка счета...</Text>
-                </Stack>
-            </Center>
-        );
+            <Loading/>
+        )
     }
 
     if (accountError) {

@@ -13,6 +13,7 @@ import {
 import { IconCalculator } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
 import { useOpenCreditPage } from "../../../useCases/pages/useOpenCreditPage.ts";
+import {Loading} from "../../components/Loading";
 
 const OpenCreditPage = () => {
   const {
@@ -32,7 +33,11 @@ const OpenCreditPage = () => {
     errorText,
   } = useOpenCreditPage();
 
-  if (accountLoading || tariffLoading) return <div>Loading...</div>;
+  if (accountLoading || tariffLoading) {
+    return (
+        <Loading/>
+    )
+  }
 
   if (accountError || tariffError)
     return <div>Не удалось загрузить данные! Попробуйте позже</div>;

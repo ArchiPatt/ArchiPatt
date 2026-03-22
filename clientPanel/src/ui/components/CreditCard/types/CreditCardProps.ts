@@ -1,4 +1,4 @@
-import type {CreditResponse} from "../../../../types/credit/CreditResponse.ts";
+import type {CreditResponse} from "../../../../../generated/api/credits";
 
 type CreditCardInforamation = Omit<CreditResponse, 'clientId' | 'accountId' | 'closedAt' | 'tariffId'>
 

@@ -16,6 +16,7 @@ import {LINK_PATHS} from "../../../shared/constants/LINK_PATHS.ts";
 import {useMainPage} from "../../../useCases/pages/useMainPage.ts";
 import {AccountCard} from "../../components/AccountCard/core/AccountCard.tsx";
 import {CreditCard} from "../../components/CreditCard/core/CreditCard.tsx";
+import {Loading} from "../../components/Loading";
 
 const MainPage = () => {
 
@@ -32,7 +33,11 @@ const MainPage = () => {
         hiddenAccounts
     } = useMainPage();
 
-    if (accountLoading || creditLoading || tariffsLoading) return <div>Loading...</div>;
+    if (accountLoading || creditLoading || tariffsLoading) {
+        return (
+            <Loading/>
+        )
+    }
 
     return (
         <>

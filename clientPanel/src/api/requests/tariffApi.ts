@@ -1,5 +1,5 @@
 import {instance} from "../network/instance.ts";
-import type {TariffResponse} from "../../types/tariff/TariffResponse.ts";
+import type {TariffResponse} from "../../../generated/api/credits";
 
 const tariffApi = {
     getTariffList: async () => {

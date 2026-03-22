@@ -2,12 +2,12 @@ import {useNavigate, useParams} from "react-router-dom";
 import {remainsPercantage} from "../../shared/utils/remainsPercantage.ts";
 import {useState} from "react";
 import {LINK_PATHS} from "../../shared/constants/LINK_PATHS.ts";
-import type {RepayArgs} from "../../types/credit/RepayArgs.ts";
 import {useCreditRepay} from "../../api/hooks/creditHooks/useCreditRepay.ts";
 import {useGetCreditById} from "../../api/hooks/creditHooks/useGetCreditById.ts";
 import {useGetCreditTransactions} from "../../api/hooks/transactionHooks/useGetCreditTransactions.ts";
 import {useGetTariffById} from "../../api/hooks/tariffHooks/useGetTariffById.ts";
 import {useGetAccountById} from "../../api/hooks/accountHooks/useGetAccountById.ts";
+import type {RepayArgs} from "../../types/credit/RepayArgs.ts";
 
 const useCreditDetailPage = () => {
 

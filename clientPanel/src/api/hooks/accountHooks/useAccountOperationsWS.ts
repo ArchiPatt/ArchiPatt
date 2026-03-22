@@ -1,8 +1,7 @@
 import {useEffect, useState} from "react";
 import {useQueryClient} from "@tanstack/react-query";
-import {userStorage} from "../../../shared/storage/userStorage";
-import type {AccountOperation} from "../../../types/transaction/AccountOperation.ts";
 import {tokenStorage} from "../../../shared/storage/tokenStorage";
+import type {AccountOperation} from "../../../../generated/api/core";
 
 const useAccountOperationsWS = (id: string) => {
     const [operations, setOperations] = useState<AccountOperation[]>([])
