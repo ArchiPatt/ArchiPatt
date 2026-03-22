@@ -10,6 +10,7 @@ import {useGetCreditsByClientId} from "../../api/hooks/creditHooks/useGetCredits
 import {useGetTariffList} from "../../api/hooks/tariffHooks/useGetTariffList.ts";
 import type {Account} from "../../types/account/Account.ts";
 import {MASTER_ACCOUNT_ID} from "../../shared/constants/MASTER_ACCOUNT_ID.ts";
+import {useGetHiddenAccounts} from "../../api/hooks/settingsHooks/useGetHiddenAccount.ts";
 
 
 const useMainPage = () => {
@@ -19,19 +20,12 @@ const useMainPage = () => {
     const code = params.get('code');
 
     const { mutate: getAccessToken } = useAccessToken();
-    const { mutate: newAccount } = useCreateAccount();
 
     const { data: userProfileData } = useGetPersonalProfile()
     const { data: accounts, isLoading: accountLoading, error: accountError } = useGetAccountList()
     const { data: credits, isLoading: creditLoading, error: creditError } = useGetCreditsByClientId(userStorage.getItem())
     const { data: tariffs, isLoading: tariffsLoading, error: tariffError } = useGetTariffList()
-
-    // const createAccount = () => {
-    //     const model: CreateAccountRequest = {
-    //         clientId: userStorage.getItem()
-    //     }
-    //     newAccount(model)
-    // }
+    const { data: hiddenAccounts } = useGetHiddenAccounts()
 
     useEffect(() => {
         if (code) {
@@ -56,7 +50,7 @@ const useMainPage = () => {
         tariffs,
         tariffsLoading,
         tariffError,
-        // createAccount,
+        hiddenAccounts
     }
 }
 

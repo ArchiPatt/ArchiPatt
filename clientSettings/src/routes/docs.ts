@@ -7,7 +7,7 @@ export function registerDocsRoutes(app: FastifyInstance) {
     const filePath = path.join(
       process.cwd(),
       "openapi",
-      "admin-settings.openapi.yml",
+      "client-settings.openapi.yml",
     );
     const yml = await readFile(filePath, "utf-8");
     reply.type("useCases/yaml; charset=utf-8");
@@ -21,7 +21,7 @@ export function registerDocsRoutes(app: FastifyInstance) {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Admin Settings Swagger</title>
+    <title>Client Settings Swagger</title>
     <link rel="stylesheet" href="/swagger-static/swagger-ui.css" />
     <style>
       body { margin: 0; background: #f0f4ff; }

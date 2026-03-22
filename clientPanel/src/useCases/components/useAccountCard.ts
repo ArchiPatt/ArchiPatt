@@ -9,6 +9,7 @@ const useAccountCard = (props: AccountProps) => {
         balance,
         currency,
         status,
+        isHidden = false
     } = props
 
     const navigate = useNavigate()
@@ -22,7 +23,8 @@ const useAccountCard = (props: AccountProps) => {
         balance,
         currency,
         status,
-        openDetail
+        openDetail,
+        isHidden
     }
 }
 

@@ -9,15 +9,24 @@ import {
     Grid,
     Divider,
     Modal,
-    NumberInput, Badge, Flex, Select, Combobox, TextInput, Center, Loader
-} from '@mantine/core';
+    NumberInput,
+    Badge,
+    Combobox,
+    TextInput,
+    Center,
+    Loader,
+} from "@mantine/core";
+
 import {
     IconArrowUp,
     IconArrowDown,
     IconTrash,
-} from '@tabler/icons-react';
+    IconEye,
+    IconEyeOff,
+} from "@tabler/icons-react";
+
 import { useAccountDetailPage } from "../../../useCases/pages/useAccountDetailPage.ts";
-import {Transaction} from "../../components/Transaction/core/Transaction.tsx";
+import { Transaction } from "../../components/Transaction/core/Transaction.tsx";
 
 const AccountDetailPage = () => {
     const {
@@ -27,169 +36,248 @@ const AccountDetailPage = () => {
         operations,
         operationsLoading,
         closeAccount,
+
         depositModalOpened,
         setDepositModalOpened,
         withdrawModalOpened,
         setWithdrawModalOpened,
-        amount,
-        onChangeAmount,
-        withdrawAmount,
-        onChangeWithdrawAmount,
-        depositAccount,
-        withdrawAccount,
-        errorText,
         transferModalOpened,
         setTransferModalOpened,
+
+        amount,
+        withdrawAmount,
         transferAmount,
         transferdAccount,
-        accountList,
-        accountListLoading,
-        accountListError,
+
+        onChangeAmount,
+        onChangeWithdrawAmount,
         onChangeTransferAmount,
         onChangeTrasferdAccount,
+
+        depositAccount,
+        withdrawAccount,
+        transfer,
+
+        errorText,
+        accountList,
+        accountListLoading,
         combobox,
-        transfer
+
+        isHidden,
+        setHiddenAccount
     } = useAccountDetailPage();
 
-    if (accountLoading || accountListLoading) return <div>Loading...</div>
-
-    console.log(operations)
-
-    if (operationsLoading) {
+    if (operationsLoading || accountLoading || accountListLoading) {
         return (
-            <Center h="100%">
-                <Loader />
+            <Center h="70vh">
+                <Stack align="center">
+                    <Loader size="lg" />
+                    <Text c="dimmed">Загрузка счета...</Text>
+                </Stack>
             </Center>
-        )
+        );
+    }
+
+    if (accountError) {
+        return <Center>Не удалось загрузить информацию о счете</Center>;
     }
 
     return (
         <Container size="lg" py="xl">
-            {!accountError ?
-                <Grid>
-                    <Grid.Col span={{ base: 12, md: 8 }}>
-                        <Card shadow="sm" padding="lg" radius="md" withBorder>
-                            <Stack gap="md">
+            <Grid gutter="lg">
+                <Grid.Col span={{ base: 12, md: 8 }}>
+                    <Card
+                        shadow="sm"
+                        padding="xl"
+                        radius="lg"
+                        withBorder
+                        style={{
+                            background:
+                                "linear-gradient(135deg,#1e293b 0%,#0f172a 100%)",
+                            color: "white",
+                            opacity: isHidden ? 0.5 : 1,
+                            transition: "0.25s ease",
+                        }}
+                    >
+                        <Stack gap="md">
+
+                            {/* HEADER */}
+                            <Group justify="space-between" align="flex-start">
                                 <div>
-                                    <Text size="sm" c="dimmed">
+                                    <Text size="sm" c="gray.4">
                                         Текущий счет
                                     </Text>
-                                    <Title order={2}>{account?.id}</Title>
+
+                                    <Title order={2} ff="monospace">
+                                        {account?.id}
+                                    </Title>
                                 </div>
 
-                                <Divider />
+                                <Group gap="xs">
+                                    <Badge variant="light" color="blue">
+                                        {account?.currency}
+                                    </Badge>
 
-                                <div>
-                                    <Flex align='center' gap='4'>
-                                        <Text size="sm" c="dimmed">
-                                            Баланс
-                                        </Text>
-                                        <Badge variant={"light"}>
-                                            {account?.currency}
-                                        </Badge>
-                                    </Flex>
-                                    <Title order={1}>{account?.balance}</Title>
-                                </div>
+                                    {isHidden && <Badge>Скрыт</Badge>}
 
-                                {account?.status !== 'closed' &&
-                                    <Group>
-                                        <Button
-                                            leftSection={<IconArrowUp size={16} />}
-                                            color="green"
-                                            onClick={() => setDepositModalOpened(true)}
-                                        >
-                                            Пополнить
-                                        </Button>
+                                </Group>
+                            </Group>
 
-                                        <Button
-                                            leftSection={<IconArrowDown size={16} />}
-                                            onClick={() => setTransferModalOpened(true)}
-                                        >
-                                            Перевести
-                                        </Button>
+                            <Divider color="rgba(255,255,255,0.15)" />
 
-                                        <Button
-                                            variant="outline"
-                                            leftSection={<IconArrowDown size={16} />}
-                                            onClick={() => setWithdrawModalOpened(true)}
-                                        >
-                                            Снять
-                                        </Button>
+                            <Stack gap={0}>
+                                <Text size="sm" c="gray.4">
+                                    Баланс
+                                </Text>
 
-                                        <Button
-                                            color="red"
-                                            leftSection={<IconTrash size={16} />}
-                                            onClick={closeAccount}
-                                        >
-                                            Закрыть счет
-                                        </Button>
-                                    </Group>
-                                }
+                                <Title order={1} fw={800} size="3rem">
+                                    {account?.balance}
+                                </Title>
                             </Stack>
-                        </Card>
-                    </Grid.Col>
-                </Grid>
-                :
-                <div>Не удалось загрузить информацию о счете</div>
-            }
 
-            {
-                operations && operations.length ?
-                    <Transaction />
-                :
-                <div>Не удалось загрузить список операций</div>
-            }
+                            {account?.status !== "closed" && (
+                                <Group mt="md">
 
-            <Modal
-                opened={depositModalOpened}
-                onClose={() => setDepositModalOpened(false)}
-                title="Пополнить счет"
-            >
+                                    <Button
+                                        radius="xl"
+                                        color="green"
+                                        leftSection={<IconArrowUp size={16} />}
+                                        onClick={() =>
+                                            setDepositModalOpened(true)
+                                        }
+                                    >
+                                        Пополнить
+                                    </Button>
+
+                                    <Button
+                                        radius="xl"
+                                        variant="light"
+                                        leftSection={<IconArrowDown size={16} />}
+                                        onClick={() =>
+                                            setTransferModalOpened(true)
+                                        }
+                                    >
+                                        Перевести
+                                    </Button>
+
+                                    <Button
+                                        radius="xl"
+                                        variant="subtle"
+                                        onClick={() =>
+                                            setWithdrawModalOpened(true)
+                                        }
+                                    >
+                                        Снять
+                                    </Button>
+
+                                    <Button
+                                        radius="xl"
+                                        variant="outline"
+                                        color="gray"
+                                        leftSection={
+                                            isHidden ? (
+                                                <IconEye size={16} />
+                                            ) : (
+                                                <IconEyeOff size={16} />
+                                            )
+                                        }
+                                        onClick={setHiddenAccount}
+                                    >
+                                        {isHidden
+                                            ? "Показать счет"
+                                            : "Скрыть счет"}
+                                    </Button>
+
+                                    <Button
+                                        ml="auto"
+                                        radius="xl"
+                                        variant="outline"
+                                        color="red"
+                                        leftSection={<IconTrash size={16} />}
+                                        onClick={closeAccount}
+                                    >
+                                        Закрыть
+                                    </Button>
+                                </Group>
+                            )}
+                        </Stack>
+                    </Card>
+
+                    <Stack mt="xl">
+                        <Title order={3}>История операций</Title>
+
+                        {operations?.length ? (
+                            <Transaction items={operations} />
+                        ) : (
+                            <Text c="dimmed">Операции отсутствуют</Text>
+                        )}
+                    </Stack>
+                </Grid.Col>
+
+                <Grid.Col span={{ base: 12, md: 4 }}>
+                    <Card withBorder radius="lg" p="lg">
+                        <Text fw={600}>Информация о счете</Text>
+
+                        <Stack mt="md" gap="xs">
+                            <Group justify="space-between">
+                                <Text c="dimmed">Статус</Text>
+                                <Badge>{account?.status}</Badge>
+                            </Group>
+
+                            <Group justify="space-between">
+                                <Text c="dimmed">Валюта</Text>
+                                <Text>{account?.currency}</Text>
+                            </Group>
+
+                        </Stack>
+                    </Card>
+                </Grid.Col>
+            </Grid>
+
+            <Modal opened={depositModalOpened}
+                   onClose={() => setDepositModalOpened(false)}
+                   title="Пополнить счет"
+                   centered radius="lg">
                 <Stack>
                     <NumberInput
                         label="Сумма"
-                        placeholder="Введите сумму"
                         value={amount}
                         onChange={onChangeAmount}
                         min={0}
                         precision={2}
-                        step={100}
                     />
-                    <Text color='red'>{errorText}</Text>
-                    <Button color="green" onClick={depositAccount}>
+                    <Text c="red">{errorText}</Text>
+                    <Button fullWidth color="green" onClick={depositAccount}>
                         Пополнить
                     </Button>
                 </Stack>
             </Modal>
 
-            <Modal
-                opened={withdrawModalOpened}
-                onClose={() => setWithdrawModalOpened(false)}
-                title="Снять со счета"
-            >
+            <Modal opened={withdrawModalOpened}
+                   onClose={() => setWithdrawModalOpened(false)}
+                   title="Снять со счета"
+                   centered radius="lg">
                 <Stack>
                     <NumberInput
                         label="Сумма"
-                        placeholder="Введите сумму"
                         value={withdrawAmount}
                         onChange={onChangeWithdrawAmount}
                         min={0}
                         precision={2}
-                        step={100}
                     />
-                    <Text color='red'>{errorText}</Text>
-                    <Button color="blue" onClick={withdrawAccount}>
+                    <Text c="red">{errorText}</Text>
+                    <Button fullWidth onClick={withdrawAccount}>
                         Снять
                     </Button>
                 </Stack>
             </Modal>
 
-            <Modal
-                opened={transferModalOpened}
-                onClose={() => setTransferModalOpened(false)}
-                title="Перевод"
-            >
+            <Modal opened={transferModalOpened}
+                   onClose={() => setTransferModalOpened(false)}
+                   title="Перевод"
+                   centered radius="lg">
                 <Stack>
+
                     <Combobox
                         store={combobox}
                         onOptionSubmit={(val) => {
@@ -200,21 +288,24 @@ const AccountDetailPage = () => {
                         <Combobox.Target>
                             <TextInput
                                 label="Номер счета"
-                                placeholder="Введите или выберите счет"
                                 value={transferdAccount ?? ""}
-                                onChange={(event) => {
-                                    onChangeTrasferdAccount(event.currentTarget.value);
+                                onChange={(e) => {
+                                    onChangeTrasferdAccount(
+                                        e.currentTarget.value
+                                    );
                                     combobox.openDropdown();
                                 }}
-                                onFocus={() => combobox.openDropdown()}
-                                onBlur={() => combobox.closeDropdown()}
                             />
                         </Combobox.Target>
 
                         <Combobox.Dropdown>
                             <Combobox.Options>
                                 {(accountList ?? [])
-                                    .filter(a => a.status !== "closed" && a.id !== account?.id)
+                                    .filter(
+                                        a =>
+                                            a.status !== "closed" &&
+                                            a.id !== account?.id
+                                    )
                                     .map(a => (
                                         <Combobox.Option key={a.id} value={a.id}>
                                             {a.id}
@@ -223,24 +314,24 @@ const AccountDetailPage = () => {
                             </Combobox.Options>
                         </Combobox.Dropdown>
                     </Combobox>
+
                     <NumberInput
                         label="Сумма"
-                        placeholder="Введите сумму"
                         value={transferAmount}
                         onChange={onChangeTransferAmount}
                         min={0}
                         precision={2}
-                        step={100}
                     />
-                    <Text color='red'>{errorText}</Text>
-                    <Button color="green" onClick={transfer}>
+
+                    <Text c="red">{errorText}</Text>
+
+                    <Button fullWidth color="green" onClick={transfer}>
                         Перевести
                     </Button>
                 </Stack>
             </Modal>
-
         </Container>
     );
-}
+};
 
-export { AccountDetailPage }
+export { AccountDetailPage };

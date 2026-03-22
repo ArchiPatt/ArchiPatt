@@ -3,7 +3,7 @@ import {
     Button,
     Menu,
     Avatar,
-    UnstyledButton,
+    UnstyledButton, ActionIcon, Tooltip,
 } from "@mantine/core";
 import {
     IconPlus,
@@ -13,13 +13,14 @@ import {
 } from "@tabler/icons-react";
 import { Link } from "react-router-dom"
 import {LINK_PATHS} from "../../../../shared/constants/LINK_PATHS.ts";
-import {useNavbar} from "../../../../useCases/components/useNavbar.ts";
+import {useNavbar} from "../../../../useCases/components/Navbar/useNavbar.ts";
+import {COLOR_SCHEME_ICON} from "../../../../shared/constants/COLOR_SCHEME_ICON.ts";
 
 
 
 const Navbar = () => {
 
-    const { createAccount, logout } = useNavbar()
+    const { logout, setColorScheme, colorScheme } = useNavbar()
 
     return (
         <Group gap="md">
@@ -79,6 +80,24 @@ const Navbar = () => {
                     </Menu.Item>
                 </Menu.Dropdown>
             </Menu>
+
+            <Tooltip
+                label={colorScheme === 'light' ? 'Тёмная тема' : 'Светлая тема'}
+                position="bottom"
+            >
+                <Menu position="bottom-end">
+                    <Menu.Target>
+                        <ActionIcon variant="light" size="lg" aria-label="Сменить тему">
+                            {COLOR_SCHEME_ICON[colorScheme]}
+                        </ActionIcon>
+                    </Menu.Target>
+                    <Menu.Dropdown>
+                        <Menu.Item onClick={() => setColorScheme({ colorScheme: 'light' })}>☀️ Светлая</Menu.Item>
+                        <Menu.Item onClick={() => setColorScheme({ colorScheme: 'dark' })}>🌙 Тёмная</Menu.Item>
+                        <Menu.Item onClick={() => setColorScheme({ colorScheme: 'auto' })}>💻 Системная</Menu.Item>
+                    </Menu.Dropdown>
+                </Menu>
+            </Tooltip>
 
         </Group>
     )

@@ -29,7 +29,7 @@ const MainPage = () => {
         tariffs,
         tariffsLoading,
         tariffError,
-        createAccount,
+        hiddenAccounts
     } = useMainPage();
 
     if (accountLoading || creditLoading || tariffsLoading) return <div>Loading...</div>;
@@ -70,18 +70,19 @@ const MainPage = () => {
                                             Откройте свой первый счет, чтобы начать работу с банком
                                         </Text>
 
-                                        <Button
-                                            leftSection={<IconPlus size={16} />}
-                                            onClick={createAccount}
-                                        >
-                                            Открыть счет
-                                        </Button>
+                                        <Link to={LINK_PATHS.OPEN_ACCOUNT}>
+                                            <Button
+                                                leftSection={<IconPlus size={16} />}
+                                            >
+                                                Открыть счет
+                                            </Button>
+                                        </Link>
                                     </Stack>
                                 </Paper>
                             ) : (
                                 <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
                                     {accounts?.map((item) => (
-                                        <AccountCard {...item} />
+                                        <AccountCard key={item.id} isHidden={hiddenAccounts?.hiddenAccounts.includes(item.id)} {...item} />
                                     ))}
                                 </SimpleGrid>
                             )}
@@ -138,7 +139,7 @@ const MainPage = () => {
                                 </Paper>
                             ) : (
                                 <SimpleGrid cols={{ base: 1, md: 2, lg: 3 }} spacing="lg">
-                                    {credits?.map((item, index) => (
+                                    {credits?.map((item) => (
                                         <CreditCard
                                             creditInformation={{
                                                 id: item.id,
@@ -149,6 +150,7 @@ const MainPage = () => {
                                                 nextPaymentDueAt: item.nextPaymentDueAt,
                                                 createdAt: item.createdAt,
                                             }}
+                                            key={item.id}
                                             percent={tariffs?.find(tariff => tariff.id === item.tariffId).interestRate}
                                         />
                                     ))}

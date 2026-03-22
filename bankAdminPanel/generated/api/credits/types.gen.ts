@@ -170,6 +170,12 @@ export type CreditResponse = {
      */
     nextPaymentDueAt: string;
     /**
+     * Дата, когда началась просрочка (если клиент не внёс платёж в срок).
+     * Заполняется при первом обнаружении просрочки (nextPaymentDueAt < now).
+     *
+     */
+    overdueSince?: string | null;
+    /**
      * Дата закрытия (если кредит закрыт).
      */
     closedAt?: string | null;

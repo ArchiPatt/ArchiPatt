@@ -82,6 +82,10 @@ export type CreditOverview = {
     status?: 'active' | 'closed' | 'defaulted';
     issuedAt?: string;
     nextPaymentDueAt?: string | null;
+    /**
+     * Дата начала просрочки (если клиент не внёс платёж в срок).
+     */
+    overdueSince?: string | null;
     closedAt?: string | null;
 };
 

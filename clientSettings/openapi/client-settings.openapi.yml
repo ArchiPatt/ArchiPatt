@@ -1,13 +1,13 @@
 openapi: 3.0.3
 info:
-  title: Admin Settings Service
+  title: Client Settings Service
   version: 0.1.0
   description: |
-    Микросервис пользовательских настроек панели администратора.
+    Микросервис пользовательских настроек панели клиента.
     Хранит цветовую схему интерфейса и список скрытых счетов, привязанных к userId из JWT.
 
 servers:
-  - url: http://localhost:4005
+  - url: http://localhost:4006
     description: Local development
 
 components:
@@ -86,7 +86,7 @@ paths:
                   ok:
                     type: boolean
 
-  /admin-settings/color-scheme:
+  /client-settings/color-scheme:
     get:
       summary: Получить цветовую схему пользователя
       tags: [Settings]
@@ -151,7 +151,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /admin-settings/hidden-accounts:
+  /client-settings/hidden-accounts:
     get:
       summary: Получить список скрытых счетов
       tags: [Settings]
@@ -221,7 +221,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/Error"
 
-  /admin-settings/hidden-accounts/{accountId}:
+  /client-settings/hidden-accounts/{accountId}:
     delete:
       summary: Убрать счёт из списка скрытых
       tags: [Settings]

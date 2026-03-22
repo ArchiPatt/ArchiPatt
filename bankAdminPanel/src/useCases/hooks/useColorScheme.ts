@@ -1,8 +1,8 @@
 import { useEffect } from 'react'
 import { useMantineColorScheme } from '@mantine/core'
-import { useColorSchemeQuery } from '../../../api/hooks/useColorSchemeQuery'
-import { useSetColorSchemeMutation } from '../../../api/hooks/useSetColorSchemeMutation'
-import type { ColorScheme } from '../../../../generated/api/adminSettings'
+import { useColorSchemeQuery } from '../../api/hooks/useColorSchemeQuery'
+import { useSetColorSchemeMutation } from '../../api/hooks/useSetColorSchemeMutation'
+import type { ColorScheme } from '../../../generated/api/adminSettings'
 
 export const useColorScheme = () => {
    const { setColorScheme: setMantineColorScheme, colorScheme } = useMantineColorScheme()
@@ -13,7 +13,7 @@ export const useColorScheme = () => {
       if (isSuccess && data?.data?.colorScheme) {
          setMantineColorScheme(data.data.colorScheme)
       }
-   }, [isSuccess, data, setMantineColorScheme])
+   }, [isSuccess, data])
 
    const setColorScheme = (colorScheme: ColorScheme) => {
       setMantineColorScheme(colorScheme)

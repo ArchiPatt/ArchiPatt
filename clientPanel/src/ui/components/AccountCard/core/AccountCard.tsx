@@ -10,11 +10,12 @@ const AccountCard = (props: AccountProps) => {
         balance,
         currency,
         status,
-        openDetail
+        openDetail,
+        isHidden
     } = useAccountCard(props)
 
     return (
-        <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 420 }}>
+        <Card shadow="sm" padding="lg" radius="md" withBorder style={{ maxWidth: 420, opacity: isHidden ? 0.5 : 1 }}>
             <Group justify="space-between" mb="md">
                 <Group gap="md">
                     <ThemeIcon size={48} radius="xl" variant="light" color="blue">
@@ -31,9 +32,17 @@ const AccountCard = (props: AccountProps) => {
                     </div>
                 </Group>
 
-                <Badge variant={"light"}>
-                    {currency}
-                </Badge>
+                <Group gap="xs">
+                    <Badge variant="light">
+                        {currency}
+                    </Badge>
+
+                    {isHidden && (
+                        <Badge color="gray" variant="light">
+                            Скрыт
+                        </Badge>
+                    )}
+                </Group>
             </Group>
 
             <Stack gap={4} mb="lg">
