@@ -2,28 +2,14 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type {
-  GetCreditsRatingByClientIdData,
-  GetCreditsRatingByClientIdResponse,
-  GetCreditsRatingByClientIdError,
-} from "..\\..\\types.gen";
+import type { GetCreditsRatingByClientIdData, GetCreditsRatingByClientIdResponse, GetCreditsRatingByClientIdError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
-export type GetCreditsRatingByClientIdRequestParams =
-  AxiosRequestParams<GetCreditsRatingByClientIdData>;
+export type GetCreditsRatingByClientIdRequestParams = AxiosRequestParams<GetCreditsRatingByClientIdData>;
 
-export const getCreditsRatingByClientId = ({
-  config,
-  path,
-}: GetCreditsRatingByClientIdRequestParams): Promise<
-  ApicraftAxiosResponse<
-    GetCreditsRatingByClientIdResponse,
-    GetCreditsRatingByClientIdError
-  >
-> =>
-  instance.request({
+export const getCreditsRatingByClientId = ({ config, path }: GetCreditsRatingByClientIdRequestParams): Promise<ApicraftAxiosResponse<GetCreditsRatingByClientIdResponse, GetCreditsRatingByClientIdError>> => instance.request({
     method: "GET",
     url: `/credits/rating/${path.clientId}`,
-    ...config,
-  });
+    ...config
+});

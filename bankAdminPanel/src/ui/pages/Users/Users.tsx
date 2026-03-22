@@ -29,7 +29,7 @@ const getUserRoleLabel = (roles?: string[]) => {
 }
 
 type UserCardProps = {
-   user: { id: string; displayName?: string; username?: string; roles?: string[]; createdAt?: string }
+   user: { id: string; displayName?: string | null; username?: string; roles?: string[]; createdAt?: string }
    isBlocked: boolean
    isCurrentUser: boolean
    onBlock: { mutate: (p: { id: string; isBlocked: boolean }) => void; isPending: boolean }

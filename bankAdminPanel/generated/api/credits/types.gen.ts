@@ -21,6 +21,28 @@ export type ErrorResponse = {
 };
 
 /**
+ * Кредитный рейтинг клиента (0–100).
+ */
+export type CreditRatingResponse = {
+    /**
+     * Балл рейтинга (0–100).
+     */
+    score: number;
+    /**
+     * Количество просроченных кредитов.
+     */
+    overdueCount: number;
+    /**
+     * Всего кредитов у клиента.
+     */
+    totalCredits: number;
+    /**
+     * Количество закрытых кредитов.
+     */
+    closedCount: number;
+};
+
+/**
  * Создание кредитного тарифа (доступно `employee/admin`).
  *
  * `interestRate` – **доля** (не проценты) начисления за один расчётный период.
@@ -553,6 +575,37 @@ export type GetCreditsByClientByClientIdResponses = {
 
 export type GetCreditsByClientByClientIdResponse = GetCreditsByClientByClientIdResponses[keyof GetCreditsByClientByClientIdResponses];
 
+export type GetCreditsRatingByClientIdData = {
+    body?: never;
+    path: {
+        clientId: string;
+    };
+    query?: never;
+    url: '/credits/rating/{clientId}';
+};
+
+export type GetCreditsRatingByClientIdErrors = {
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+};
+
+export type GetCreditsRatingByClientIdError = GetCreditsRatingByClientIdErrors[keyof GetCreditsRatingByClientIdErrors];
+
+export type GetCreditsRatingByClientIdResponses = {
+    /**
+     * Кредитный рейтинг
+     */
+    200: CreditRatingResponse;
+};
+
+export type GetCreditsRatingByClientIdResponse = GetCreditsRatingByClientIdResponses[keyof GetCreditsRatingByClientIdResponses];
+
 export type GetCreditsOverdueData = {
     body?: never;
     path?: never;
@@ -719,38 +772,6 @@ export type PostCreditsAccrueRunResponses = {
 };
 
 export type PostCreditsAccrueRunResponse = PostCreditsAccrueRunResponses[keyof PostCreditsAccrueRunResponses];
-
-/**
- * Кредитный рейтинг клиента (0–100).
- */
-export type CreditRatingResponse = {
-    score: number;
-    overdueCount: number;
-    totalCredits: number;
-    closedCount: number;
-};
-
-export type GetCreditsRatingByClientIdData = {
-    body?: never;
-    path: {
-        clientId: string;
-    };
-    query?: never;
-    url: '/credits/rating/{clientId}';
-};
-
-export type GetCreditsRatingByClientIdErrors = {
-    401: ErrorResponse;
-    403: ErrorResponse;
-};
-
-export type GetCreditsRatingByClientIdError = GetCreditsRatingByClientIdErrors[keyof GetCreditsRatingByClientIdErrors];
-
-export type GetCreditsRatingByClientIdResponses = {
-    200: CreditRatingResponse;
-};
-
-export type GetCreditsRatingByClientIdResponse = GetCreditsRatingByClientIdResponses[keyof GetCreditsRatingByClientIdResponses];
 
 export type ClientOptions = {
     baseUrl: 'http://localhost:4002' | (string & {});

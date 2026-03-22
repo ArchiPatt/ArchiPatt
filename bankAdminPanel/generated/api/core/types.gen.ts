@@ -397,6 +397,39 @@ export type PostAccountsResponses = {
 
 export type PostAccountsResponse = PostAccountsResponses[keyof PostAccountsResponses];
 
+export type GetAccountsMasterData = {
+    body?: never;
+    path?: never;
+    query?: never;
+    url: '/accounts/master';
+};
+
+export type GetAccountsMasterErrors = {
+    /**
+     * Не авторизован
+     */
+    401: ErrorResponse;
+    /**
+     * Доступ запрещён
+     */
+    403: ErrorResponse;
+    /**
+     * Мастер-счёт не найден
+     */
+    404: ErrorResponse;
+};
+
+export type GetAccountsMasterError = GetAccountsMasterErrors[keyof GetAccountsMasterErrors];
+
+export type GetAccountsMasterResponses = {
+    /**
+     * Мастер-счёт и его баланс
+     */
+    200: Account;
+};
+
+export type GetAccountsMasterResponse = GetAccountsMasterResponses[keyof GetAccountsMasterResponses];
+
 export type PostAccountsTransferData = {
     body: TransferRequest;
     path?: never;
