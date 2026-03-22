@@ -47,12 +47,8 @@ export async function getAccountController(
 
 export async function getMasterAccountController(
   ds: DataSource,
-  payload: JWTPayload,
+  _payload: JWTPayload,
 ) {
-  if (!canManageAll(payload)) {
-    return { status: 403, body: { error: "forbidden" } };
-  }
-
   const account = await accountsService.findAccountById(ds, env.masterAccountId);
   if (!account) return { status: 404, body: { error: "account_not_found" } };
 

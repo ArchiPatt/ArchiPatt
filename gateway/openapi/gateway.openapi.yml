@@ -809,7 +809,7 @@ paths:
     get:
       tags: [Core]
       summary: Мастер-счёт
-      description: Проксирован на core /accounts/master. Мастер-счёт банка и его баланс (employee/admin).
+      description: Проксирован на core /accounts/master. Мастер-счёт банка и его баланс. Доступно всем авторизованным.
       security:
         - bearerAuth: []
       responses:
