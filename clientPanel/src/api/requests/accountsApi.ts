@@ -36,6 +36,11 @@ const accountsApi = {
         const response: AxiosResponse<CurrencyResponse> = await instance.get('currencies')
 
         return response.data
+    },
+    getMasterAccount: async() => {
+        const response: AxiosResponse<Account> = await instance.get('accounts/master')
+
+        return response.data
     }
 }
 

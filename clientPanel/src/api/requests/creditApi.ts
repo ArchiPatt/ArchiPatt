@@ -3,6 +3,8 @@ import type {CreditResponse} from "../../types/credit/CreditResponse.ts";
 import type {RepayCreditRequest} from "../../types/credit/RepayCreditRequest.ts";
 import type {RepayCreditResponse} from "../../types/credit/RepayCreditResponse.ts";
 import {instance} from "../network/instance.ts";
+import type {AxiosResponse} from "axios";
+import type {CreditRating} from "../../types/credit/CreditRating.ts";
 
 const creditsApi = {
     createCredit: async (model: IssueCreditRequest) => {
@@ -25,6 +27,11 @@ const creditsApi = {
 
         return data
     },
+    getCreditRatingByUserId: async (userId: string) => {
+        const response: AxiosResponse<CreditRating> = await instance.get(`credits/rating/${userId}`)
+
+        return response.data
+    }
 }
 
 export { creditsApi }

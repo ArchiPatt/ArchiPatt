@@ -1,10 +1,15 @@
 import {useGetPersonalProfile} from "../../api/hooks/userHooks/useGetPersonalProfile.ts";
+import {useGetCreditRatingByUserId} from "../../api/hooks/creditHooks/useGetCreditRatingByUserId.ts";
+import {userStorage} from "../../shared/storage/userStorage";
 
 const useProfilePage = () => {
 
-    const { data: userData, isLoading } = useGetPersonalProfile()
+    const userId = userStorage.getItem()
 
-    return { userData, isLoading }
+    const { data: userData, isLoading } = useGetPersonalProfile()
+    const { data: creditRating, isLoading: creditLoading } = useGetCreditRatingByUserId(userId)
+
+    return { userData, isLoading, creditRating, creditLoading }
 }
 
 export { useProfilePage }
