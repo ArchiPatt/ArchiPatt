@@ -1,9 +1,9 @@
 import type {AxiosResponse} from "axios";
-import type {ColorSchemeResponse} from "../../types/settings/ColorSchemeResponse.ts";
+import type {ColorSchemeResponse} from "../../../generated/api/customTypes/settings/ColorSchemeResponse.ts";
 import {instance} from "../network/instance.ts";
-import type {SetColorSchemeRequest} from "../../types/settings/SetColorSchemeRequest.ts";
-import type {HiddenAccountsResponse} from "../../types/settings/HiddenAccountsResponse.ts";
-import type {AddHiddenAccountRequest} from "../../types/settings/AddHiddenAccountRequest.ts";
+import type {SetColorSchemeRequest} from "../../../generated/api/customTypes/settings/SetColorSchemeRequest.ts";
+import type {HiddenAccountsResponse} from "../../../generated/api/customTypes/settings/HiddenAccountsResponse.ts";
+import type {AddHiddenAccountRequest} from "../../../generated/api/customTypes/settings/AddHiddenAccountRequest.ts";
 
 const clientSettings = {
     getColorScheme: async () => {

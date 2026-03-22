@@ -4,7 +4,7 @@ import {userStorage} from "../../shared/storage/userStorage";
 import {useCreateAccount} from "../../api/hooks/accountHooks/useCreateAccount.ts";
 import {useNavigate} from "react-router-dom";
 import {LINK_PATHS} from "../../shared/constants/LINK_PATHS.ts";
-import type {Currency} from "../../types/account/Currency.ts";
+import type {Currency} from "../../../generated/api/customTypes/account/Currency.ts";
 import type {CreateAccountRequest} from "../../../generated/api/core";
 
 const useOpenAccountPage = () => {

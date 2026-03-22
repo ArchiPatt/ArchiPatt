@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetAdminSettingsHiddenAccountsData, GetAdminSettingsHiddenAccountsResponse, GetAdminSettingsHiddenAccountsError } from "..\\..\\types.gen";
+import type { GetAdminSettingsHiddenAccountsData, GetAdminSettingsHiddenAccountsResponse, GetAdminSettingsHiddenAccountsError } from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

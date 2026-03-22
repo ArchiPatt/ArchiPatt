@@ -1,7 +1,7 @@
 import {Button, Card, Container, Group, NumberInput, Select, Stack, Text, Title} from "@mantine/core";
 import {Link} from "react-router-dom";
-import {useOpenAccountPage} from "../../../useCases/pages/useOpenAccountPage.ts";
-import {Loading} from "../../components/Loading";
+import {useOpenAccountPage} from "../../../../useCases/pages/useOpenAccountPage.ts";
+import {Loading} from "../../../components/Loading";
 
 const OpenAccountPage = () => {
 

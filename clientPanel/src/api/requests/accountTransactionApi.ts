@@ -1,6 +1,6 @@
 import {instance} from "../network/instance.ts";
 import type {AccountOperationsPage} from "../../../generated/api/core";
-import type {AccountTransactionRequest} from "../../types/transaction/accountTransactionRequest.ts";
+import type {AccountTransactionRequest} from "../../../generated/api/customTypes/transaction/accountTransactionRequest.ts";
 
 const accountTransactionApi = {
     getAccountTransactions: async (params: AccountTransactionRequest) => {

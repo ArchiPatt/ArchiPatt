@@ -6,7 +6,7 @@ import type {
   GetCreditsRatingByClientIdData,
   GetCreditsRatingByClientIdResponse,
   GetCreditsRatingByClientIdError,
-} from "..\\..\\types.gen";
+} from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

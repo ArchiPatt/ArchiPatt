@@ -1,4 +1,4 @@
-import type {AccountOperation} from "../../../generated/api/core";
+import type {AccountOperation} from "../../core";
 
 
 interface TransactionProps {

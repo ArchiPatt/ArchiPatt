@@ -11,7 +11,7 @@ import {useAccountOperationsWS} from "../../api/hooks/accountHooks/useAccountOpe
 import {useSetHiddenAccount} from "../../api/hooks/settingsHooks/useSetHiddenAccount.ts";
 import {useDeleteHiddenAccount} from "../../api/hooks/settingsHooks/useDeleteHiddenAccount.ts";
 import {useGetHiddenAccounts} from "../../api/hooks/settingsHooks/useGetHiddenAccount.ts";
-import type {DepositArgs} from "../../types/account/DepositArgs.ts";
+import type {DepositArgs} from "../../../generated/api/customTypes/account/DepositArgs.ts";
 import type {TransferRequest} from "../../../generated/api/core";
 
 const useAccountDetailPage = () => {

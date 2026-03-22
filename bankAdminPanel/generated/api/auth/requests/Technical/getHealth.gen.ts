@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetHealthData, GetHealthResponse } from "..\\..\\types.gen";
+import type { GetHealthData, GetHealthResponse } from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

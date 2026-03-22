@@ -10,9 +10,9 @@ import {
     Grid,
     Badge
 } from '@mantine/core';
-import {useProfilePage} from "../../../useCases/pages/useProfilePage.ts";
-import {ROLES} from "../../../shared/constants/ROLES.ts";
-import {Loading} from "../../components/Loading";
+import {useProfilePage} from "../../../../useCases/pages/useProfilePage.ts";
+import {ROLES} from "../../../../shared/constants/ROLES.ts";
+import {Loading} from "../../../components/Loading";
 
 const ProfilePage = () => {
 

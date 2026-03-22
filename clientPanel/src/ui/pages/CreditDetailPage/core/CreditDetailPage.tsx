@@ -17,11 +17,11 @@ import {
     IconCreditCard,
     IconCalendar,
 } from '@tabler/icons-react';
-import {useCreditDetailPage} from "../../../useCases/pages/useCreditDetailPage.ts";
-import {formatDate} from "../../../shared/utils/formatDate.ts";
-import {getCreditStatusColor} from "../../../useCases/shared/credit/getCreditStatusColor.ts";
-import {getCreditStatusLabel} from "../../../useCases/shared/credit/getCreditStatusLabel.ts";
-import {Loading} from "../../components/Loading";
+import {useCreditDetailPage} from "../../../../useCases/pages/useCreditDetailPage.ts";
+import {formatDate} from "../../../../shared/utils/formatDate.ts";
+import {getCreditStatusColor} from "../../../../useCases/shared/credit/getCreditStatusColor.ts";
+import {getCreditStatusLabel} from "../../../../useCases/shared/credit/getCreditStatusLabel.ts";
+import {Loading} from "../../../components/Loading";
 
 const CreditDetailPage = () => {
 

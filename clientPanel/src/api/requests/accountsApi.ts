@@ -1,7 +1,7 @@
 import {instance} from "../network/instance.ts";
 import type {AxiosResponse} from "axios";
 import type {Account, CreateAccountRequest, DepositWithdrawRequest, TransferRequest} from "../../../generated/api/core";
-import type {CurrencyResponse} from "../../types/account/CurrencyResponse.ts";
+import type {CurrencyResponse} from "../../../generated/api/customTypes/account/CurrencyResponse.ts";
 
 const accountsApi = {
     getAccountsList: async () => {

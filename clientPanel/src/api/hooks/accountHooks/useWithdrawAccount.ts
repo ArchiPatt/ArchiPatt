@@ -1,7 +1,7 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {accountsApi} from "../../requests/accountsApi.ts";
 import {notifications} from "@mantine/notifications";
-import type {DepositArgs} from "../../../types/account/DepositArgs.ts";
+import type {DepositArgs} from "../../../../generated/api/customTypes/account/DepositArgs.ts";
 
 const useWithdrawAccount = () => {
     const queryClient = useQueryClient();

@@ -7,7 +7,7 @@ import {useGetCreditById} from "../../api/hooks/creditHooks/useGetCreditById.ts"
 import {useGetCreditTransactions} from "../../api/hooks/transactionHooks/useGetCreditTransactions.ts";
 import {useGetTariffById} from "../../api/hooks/tariffHooks/useGetTariffById.ts";
 import {useGetAccountById} from "../../api/hooks/accountHooks/useGetAccountById.ts";
-import type {RepayArgs} from "../../types/credit/RepayArgs.ts";
+import type {RepayArgs} from "../../../generated/api/customTypes/credit/RepayArgs.ts";
 
 const useCreditDetailPage = () => {
 

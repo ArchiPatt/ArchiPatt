@@ -1,4 +1,4 @@
-import type {DepositWithdrawRequest} from "../../../generated/api/core";
+import type {DepositWithdrawRequest} from "../../core";
 
 interface DepositArgs {
     model: DepositWithdrawRequest

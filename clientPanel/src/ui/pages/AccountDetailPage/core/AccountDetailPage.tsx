@@ -24,9 +24,9 @@ import {
     IconEyeOff,
 } from "@tabler/icons-react";
 
-import { useAccountDetailPage } from "../../../useCases/pages/useAccountDetailPage.ts";
-import { Transaction } from "../../components/Transaction/core/Transaction.tsx";
-import {Loading} from "../../components/Loading";
+import { useAccountDetailPage } from "../../../../useCases/pages/useAccountDetailPage.ts";
+import { Transaction } from "../../../components/Transaction/core/Transaction.tsx";
+import {Loading} from "../../../components/Loading";
 
 const AccountDetailPage = () => {
     const {

@@ -12,8 +12,8 @@ import {
 } from "@mantine/core";
 import { IconCalculator } from "@tabler/icons-react";
 import { Link } from "react-router-dom";
-import { useOpenCreditPage } from "../../../useCases/pages/useOpenCreditPage.ts";
-import {Loading} from "../../components/Loading";
+import { useOpenCreditPage } from "../../../../useCases/pages/useOpenCreditPage.ts";
+import {Loading} from "../../../components/Loading";
 
 const OpenCreditPage = () => {
   const {

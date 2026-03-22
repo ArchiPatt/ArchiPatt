@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import {accountTransactionApi} from "../../requests/accountTransactionApi.ts";
-import type {AccountTransactionRequest} from "../../../types/transaction/accountTransactionRequest.ts";
+import type {AccountTransactionRequest} from "../../../../generated/api/customTypes/transaction/accountTransactionRequest.ts";
 import type {AccountOperationsPage} from "../../../../generated/api/core";
 
 const useGetAccountTransactions = (model: AccountTransactionRequest) => {

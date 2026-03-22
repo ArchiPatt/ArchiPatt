@@ -1,6 +1,6 @@
 import {Card, Table, Text, Title} from "@mantine/core";
 import {useTransaction} from "../../../../useCases/components/useTransaction.ts";
-import type {TransactionProps} from "../../../../types/transaction/TransactionProps.ts";
+import type {TransactionProps} from "../../../../../generated/api/customTypes/transaction/TransactionProps.ts";
 import {getTransactionStatus} from "../../../../useCases/shared/transaction/getTransactionStatus.ts";
 import {getTransactionStatusColor} from "../../../../useCases/shared/transaction/getTransactionStatusColor.ts";
 

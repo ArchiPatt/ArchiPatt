@@ -1,4 +1,4 @@
-import type {CreditStatus} from "../../../types/credit/CreditStatus.ts";
+import type {CreditStatus} from "../../../../generated/api/customTypes/credit/CreditStatus.ts";
 
 const getCreditStatusLabel = (status: CreditStatus) => {
     if (status === 'active') return 'Активен'
