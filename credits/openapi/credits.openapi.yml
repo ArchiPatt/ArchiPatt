@@ -366,6 +366,11 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/CreditRatingResponse"
+              example:
+                score: 85
+                overdueCount: 0
+                totalCredits: 3
+                closedCount: 2
         "401":
           description: Не авторизован
           content:

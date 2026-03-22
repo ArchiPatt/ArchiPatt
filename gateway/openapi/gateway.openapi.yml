@@ -438,7 +438,13 @@ paths:
     get:
       tags: [Credits]
       summary: Кредитный рейтинг клиента
-      description: Проксирован на credits /credits/rating/{clientId}
+      description: |
+        Возвращает кредитный рейтинг конкретного пользователя (0–100).
+        Проксирован на credits /credits/rating/{clientId}.
+
+        Доступ:
+        - `client` — только для себя (`clientId = token.sub`)
+        - `employee/admin` — для любого клиента
       security:
         - bearerAuth: []
       parameters:
