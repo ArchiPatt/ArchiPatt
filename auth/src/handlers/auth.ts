@@ -2,6 +2,7 @@ import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { verifyAccessToken } from "../security/bearer";
 import { htmlPage, escapeHtml } from "../utils/html";
 import { env } from "../env";
+import * as authService from "../services/auth";
 import {
   internalTokensRevokedController,
   jwksController,
@@ -219,7 +220,14 @@ export function createAuthHandlers(app: FastifyInstance) {
       } catch {
         return reply.code(401).send({ error: "unauthorized" });
       }
+      const sessionId = req.cookies?.[env.session.cookieName] as
+        | string
+        | undefined;
       const res = await logoutController(app, payload ?? null);
+      if (sessionId) {
+        await authService.deleteSessionBySessionId(app.db, sessionId);
+      }
+      reply.clearCookie(env.session.cookieName, { path: "/" });
       return reply.code(res.status).send(res.body);
     },
 
