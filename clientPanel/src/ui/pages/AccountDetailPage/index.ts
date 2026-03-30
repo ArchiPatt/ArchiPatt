@@ -1,0 +1,1 @@
+export { AccountDetailPage } from "./core/AccountDetailPage.tsx"

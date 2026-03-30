@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import {creditsApi} from "../../requests/creditApi.ts";
-import type {CreditResponse} from "../../../types/credit/CreditResponse.ts";
+import type {CreditResponse} from "../../../../generated/api/credits";
 
 const useGetCreditsByClientId = (id: string | null) => {
     return useQuery<CreditResponse[], Error, CreditResponse[], ['creditList', string | null]>({

@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import {accountsApi} from "../../requests/accountsApi.ts";
-import type {CurrencyResponse} from "../../../types/account/CurrencyResponse.ts";
+import type {CurrencyResponse} from "../../../../generated/api/customTypes/account/CurrencyResponse.ts";
 
 const useGetCurrencies = () => {
 

@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetCurrenciesData, GetCurrenciesResponse } from "..\\..\\types.gen";
+import type { GetCurrenciesData, GetCurrenciesResponse } from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

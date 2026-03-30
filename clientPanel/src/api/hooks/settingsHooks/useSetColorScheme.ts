@@ -1,5 +1,5 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import type {ColorScheme} from "../../../types/settings/ColorScheme.ts";
+import type {ColorScheme} from "../../../../generated/api/customTypes/settings/ColorScheme.ts";
 import {clientSettings} from "../../requests/clientSettings.ts";
 
 const useSetColorScheme = () => {

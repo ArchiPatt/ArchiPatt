@@ -1,5 +1,5 @@
 import {instance} from "../network/instance.ts";
-import type {UserProfileResponse} from "../../types/user/UserProfileResponse.ts";
+import type {UserProfileResponse} from "../../../generated/api/userHooks";
 
 const userApi = {
     getPersonalProfile: async () => {

@@ -1,8 +1,8 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
-import type {TokenResponse} from "../../../types/auth/TokenResponse.ts";
 import {authApi} from "../../requests/authApi.ts";
 import {tokenStorage} from "../../../shared/storage/tokenStorage";
 import {refreshStorage} from "../../../shared/storage/refreshStorage";
+import type {TokenResponse} from "../../../../generated/api/authHooks";
 
 const useRefreshToken = () => {
     const queryClient = useQueryClient();

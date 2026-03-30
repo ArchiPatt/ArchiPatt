@@ -1,5 +1,5 @@
 import {localStorageFactory} from "../../../localStorageFactory";
 
-const tokenStorage = localStorageFactory('tokenStorage')
+const tokenStorage = localStorageFactory<string>('tokenStorage')
 
 export { tokenStorage }

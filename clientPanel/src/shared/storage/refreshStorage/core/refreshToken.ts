@@ -1,5 +1,5 @@
 import {localStorageFactory} from "../../../localStorageFactory";
 
-const refreshStorage = localStorageFactory('refreshStorage');
+const refreshStorage = localStorageFactory<string>('refreshStorage');
 
 export { refreshStorage };

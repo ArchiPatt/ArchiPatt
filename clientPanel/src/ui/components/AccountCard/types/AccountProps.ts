@@ -1,4 +1,4 @@
-import type {Account} from "../../../../types/account/Account.ts";
+import type {Account} from "../../../../../generated/api/core";
 
 type AccountProps = Omit<Account, 'createdAt'> & {
     isHidden?: boolean

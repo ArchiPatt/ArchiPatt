@@ -1,10 +1,12 @@
-import type {IssueCreditRequest} from "../../types/credit/IssueCreditRequest.ts";
-import type {CreditResponse} from "../../types/credit/CreditResponse.ts";
-import type {RepayCreditRequest} from "../../types/credit/RepayCreditRequest.ts";
-import type {RepayCreditResponse} from "../../types/credit/RepayCreditResponse.ts";
 import {instance} from "../network/instance.ts";
 import type {AxiosResponse} from "axios";
-import type {CreditRating} from "../../types/credit/CreditRating.ts";
+import type {
+    CreditResponse,
+    IssueCreditRequest,
+    RepayCreditRequest,
+    RepayCreditResponse
+} from "../../../generated/api/credits";
+import type {CreditRating} from "../../../generated/api/core";
 
 const creditsApi = {
     createCredit: async (model: IssueCreditRequest) => {

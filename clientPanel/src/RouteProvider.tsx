@@ -1,13 +1,13 @@
 import { Route, Routes } from "react-router-dom";
 import {LINK_PATHS} from "./shared/constants/LINK_PATHS.ts";
 import {Header} from "./ui/components/Header";
-import {MainPage} from "./ui/pages/MainPage/MainPage.tsx";
-import {ProfilePage} from "./ui/pages/ProfilePage/ProfilePage.tsx";
-import {OpenCreditPage} from "./ui/pages/OpenCreditPage/OpenCreditPage.tsx";
-import {AccountDetailPage} from "./ui/pages/AccountDetailPage/AccountDetailPage.tsx";
-import {CreditDetailPage} from "./ui/pages/CreditDetailPage/CreditDetailPage.tsx";
-import {NotFoundPage} from "./ui/pages/NotFoundPage/NotFoundPage.tsx";
-import {OpenAccountPage} from "./ui/pages/OpenAccountPage/OpenAccountPage.tsx";
+import {MainPage} from "./ui/pages/MainPage/core/MainPage.tsx";
+import {ProfilePage} from "./ui/pages/ProfilePage/core/ProfilePage.tsx";
+import {OpenCreditPage} from "./ui/pages/OpenCreditPage/core/OpenCreditPage.tsx";
+import {AccountDetailPage} from "./ui/pages/AccountDetailPage/core/AccountDetailPage.tsx";
+import {CreditDetailPage} from "./ui/pages/CreditDetailPage/core/CreditDetailPage.tsx";
+import {NotFoundPage} from "./ui/pages/NotFoundPage/core/NotFoundPage.tsx";
+import {OpenAccountPage} from "./ui/pages/OpenAccountPage/core/OpenAccountPage.tsx";
 
 
 

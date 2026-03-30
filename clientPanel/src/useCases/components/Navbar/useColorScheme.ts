@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import { useMantineColorScheme } from '@mantine/core'
-import type {ColorScheme} from "../../../types/settings/ColorScheme.ts";
+import type {ColorScheme} from "../../../../generated/api/customTypes/settings/ColorScheme.ts";
 import {useGetColorScheme} from "../../../api/hooks/settingsHooks/useGetColorShceme.ts";
 import {useSetColorScheme} from "../../../api/hooks/settingsHooks/useSetColorScheme.ts";
 

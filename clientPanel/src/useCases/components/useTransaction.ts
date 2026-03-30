@@ -1,4 +1,4 @@
-import type {TransactionProps} from "../../types/transaction/TransactionProps.ts";
+import type {TransactionProps} from "../../../generated/api/customTypes/transaction/TransactionProps.ts";
 
 const useTransaction = (props: TransactionProps) => {
 

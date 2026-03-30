@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PatchUsersByIdBlockData, PatchUsersByIdBlockResponse, PatchUsersByIdBlockError } from "..\\..\\types.gen";
+import type { PatchUsersByIdBlockData, PatchUsersByIdBlockResponse, PatchUsersByIdBlockError } from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

@@ -1,12 +1,9 @@
-import {useNavigate, useParams} from "react-router-dom";
-import {LINK_PATHS} from "../../shared/constants/LINK_PATHS.ts";
+import {useParams} from "react-router-dom";
 import {useState} from "react";
-import type {DepositArgs} from "../../types/account/DepositArgs.ts";
 import {useCloseAccount} from "../../api/hooks/accountHooks/useCloseAccount.ts";
 import {useWithdrawAccount} from "../../api/hooks/accountHooks/useWithdrawAccount.ts";
 import {useDepositAccount} from "../../api/hooks/accountHooks/useDepositAccount.ts";
 import {useGetAccountById} from "../../api/hooks/accountHooks/useGetAccountById.ts";
-import type {TransferRequest} from "../../types/account/TransferRequest.ts";
 import {useGetAccountList} from "../../api/hooks/accountHooks/useGetAccountList.ts";
 import {useCombobox} from "@mantine/core";
 import {useTransferAccount} from "../../api/hooks/accountHooks/useTransferAccount.ts";
@@ -14,11 +11,12 @@ import {useAccountOperationsWS} from "../../api/hooks/accountHooks/useAccountOpe
 import {useSetHiddenAccount} from "../../api/hooks/settingsHooks/useSetHiddenAccount.ts";
 import {useDeleteHiddenAccount} from "../../api/hooks/settingsHooks/useDeleteHiddenAccount.ts";
 import {useGetHiddenAccounts} from "../../api/hooks/settingsHooks/useGetHiddenAccount.ts";
+import type {DepositArgs} from "../../../generated/api/customTypes/account/DepositArgs.ts";
+import type {TransferRequest} from "../../../generated/api/core";
 
 const useAccountDetailPage = () => {
 
     const { id } = useParams();
-    const navigate = useNavigate()
     const combobox = useCombobox({
         onDropdownClose: () => combobox.resetSelectedOption(),
     });
@@ -52,7 +50,6 @@ const useAccountDetailPage = () => {
 
     const closeAccount = () => {
         close(id);
-        navigate(LINK_PATHS.MAIN)
     }
 
     const onChangeAmount = (value: number | undefined) => {
@@ -85,7 +82,6 @@ const useAccountDetailPage = () => {
         deposit(model)
         setDepositModalOpened(false)
         setAmount(undefined)
-        navigate(LINK_PATHS.MAIN)
     }
 
     const withdrawAccount = () => {
@@ -106,7 +102,6 @@ const useAccountDetailPage = () => {
         withdraw(model)
         setWithdrawModalOpened(false)
         setWithdrawAmount(undefined)
-        navigate(LINK_PATHS.MAIN)
     }
 
     const transfer = () => {
@@ -133,7 +128,6 @@ const useAccountDetailPage = () => {
         setTransferModalOpened(false)
         setTransferdAccount(null)
         setTransferAmount(null)
-        navigate(LINK_PATHS.MAIN)
     }
 
     const setHiddenAccount = () => {

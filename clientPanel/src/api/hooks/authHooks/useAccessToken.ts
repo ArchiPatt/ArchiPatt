@@ -2,7 +2,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {authApi} from "../../requests/authApi.ts";
 import {tokenStorage} from "../../../shared/storage/tokenStorage";
 import {refreshStorage} from "../../../shared/storage/refreshStorage";
-import type {TokenResponse} from "../../../types/auth/TokenResponse.ts";
+import type {TokenResponse} from "../../../../generated/api/authHooks";
 
 const useAccessToken = () => {
     const queryClient = useQueryClient();
@@ -16,7 +16,6 @@ const useAccessToken = () => {
             tokenStorage.setItem(data.access_token)
             refreshStorage.setItem(data.refresh_token)
 
-            // Убираем code из URL после успешного обмена
             const url = new URL(window.location.href);
             url.searchParams.delete('code');
             window.history.replaceState({}, '', url.toString());

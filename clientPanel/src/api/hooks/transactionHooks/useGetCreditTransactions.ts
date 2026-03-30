@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import {creditTransactionApi} from "../../requests/creditTransactionApi.ts";
-import type {CreditPaymentResponse} from "../../../types/transaction/CreditPaymentResponse.ts";
+import type {CreditPaymentResponse} from "../../../../generated/api/credits";
 
 const useGetCreditTransactions = (id: string | undefined) => {
     return useQuery<CreditPaymentResponse[], Error, CreditPaymentResponse[], ['creditTransactions', string | undefined]>({

@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
 import {accountsApi} from "../../requests/accountsApi.ts";
-import type {Account} from "../../../types/account/Account.ts";
+import type {Account} from "../../../../generated/api/core";
 
 const useGetMasterAccount = () => {
 

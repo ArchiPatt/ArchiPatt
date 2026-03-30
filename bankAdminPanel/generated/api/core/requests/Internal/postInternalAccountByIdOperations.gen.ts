@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostInternalAccountsByIdOperationsData, PostInternalAccountsByIdOperationsResponse, PostInternalAccountsByIdOperationsError } from "..\\..\\types.gen";
+import type { PostInternalAccountsByIdOperationsData, PostInternalAccountsByIdOperationsResponse, PostInternalAccountsByIdOperationsError } from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

@@ -1,5 +1,5 @@
 import {localStorageFactory} from "../../../localStorageFactory";
 
-const userStorage = localStorageFactory('userStorage');
+const userStorage = localStorageFactory<string>('userStorage');
 
 export { userStorage }

@@ -1,14 +1,14 @@
-const localStorageFactory = (namespace: string) => {
+const localStorageFactory = <T>(namespace: string) => {
 
     return {
-        setItem: (value: any) => {
+        setItem: (value: T) => {
             localStorage.setItem(namespace, JSON.stringify(value))
         },
 
-        getItem: () => {
+        getItem: (): T | null => {
             const item = localStorage.getItem(namespace)
             if (item) {
-                return JSON.parse(item)
+                return JSON.parse(item) as T
             }
             return null
         },

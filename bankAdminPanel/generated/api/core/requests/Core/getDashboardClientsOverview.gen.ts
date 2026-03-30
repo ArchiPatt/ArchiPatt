@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetDashboardClientsOverviewData, GetDashboardClientsOverviewResponse } from "..\\..\\types.gen";
+import type { GetDashboardClientsOverviewData, GetDashboardClientsOverviewResponse } from "..\\..\\customTypes.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
