@@ -46,4 +46,5 @@ export const env = {
     password: process.env.DB_PASSWORD ?? "12345",
     name: process.env.DB_NAME ?? "client_settings",
   },
+  monitoringServiceUrl: (process.env.MONITORING_SERVICE_URL ?? "").trim(),
 };

@@ -5,7 +5,17 @@ param(
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$services = @("users", "gateway", "credits", "core", "auth", "adminSettings")
+# monitoring — первым, чтобы к моменту старта gateway сервис приёма метрик уже слушал порт
+$services = @(
+  "monitoring",
+  "users",
+  "gateway",
+  "credits",
+  "core",
+  "auth",
+  "adminSettings",
+  "clientSettings"
+)
 
 foreach ($service in $services) {
   $servicePath = Join-Path $root $service

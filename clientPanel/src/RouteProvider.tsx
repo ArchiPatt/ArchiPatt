@@ -1,4 +1,5 @@
 import { Route, Routes } from "react-router-dom";
+import { RumRouteTracker } from "./monitoring/RumRouteTracker.tsx";
 import {LINK_PATHS} from "./shared/constants/LINK_PATHS.ts";
 import {Header} from "./ui/components/Header";
 import {MainPage} from "./ui/pages/MainPage/core/MainPage.tsx";
@@ -13,6 +14,8 @@ import {OpenAccountPage} from "./ui/pages/OpenAccountPage/core/OpenAccountPage.t
 
 const RouteProvider = () => {
     return (
+        <>
+        <RumRouteTracker />
         <Routes>
             <Route path={LINK_PATHS.MAIN} element={<Header />}>
                 <Route index element={<MainPage />} />
@@ -24,6 +27,7 @@ const RouteProvider = () => {
             </Route>
             <Route path="*" element={<NotFoundPage />} />
         </Routes>
+        </>
     );
 };
 

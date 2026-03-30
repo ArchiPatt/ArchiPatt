@@ -6,11 +6,54 @@ import Fastify, {
 } from "fastify";
 import type { IncomingHttpHeaders, IncomingMessage } from "http";
 import type { Http2ServerRequest } from "http2";
+import { randomUUID } from "node:crypto";
 import proxy from "@fastify/http-proxy";
 import cors from "@fastify/cors";
 import path from "path";
 import { readFile } from "fs/promises";
 import { env } from "./env";
+
+declare module "fastify" {
+  interface FastifyRequest {
+    traceId: string;
+    traceStartMs: number;
+  }
+}
+
+function mergeTraceHeader(
+  req: Pick<FastifyRequest, "traceId">,
+  headers: IncomingHttpHeaders,
+): IncomingHttpHeaders {
+  return req.traceId ? { ...headers, "x-trace-id": req.traceId } : headers;
+}
+
+function reportGatewaySpan(payload: {
+  traceId: string;
+  method: string;
+  path: string;
+  statusCode: number;
+  durationMs: number;
+  error: boolean;
+}): void {
+  const base = env.monitoringServiceUrl;
+  if (!base) return;
+  const url = `${base.replace(/\/$/, "")}/internal/ingest`;
+  const body = JSON.stringify({
+    ...payload,
+    source: "gateway",
+    at: Date.now(),
+  });
+  const ac = new AbortController();
+  const t = setTimeout(() => ac.abort(), 2000);
+  void fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body,
+    signal: ac.signal,
+  })
+    .catch(() => undefined)
+    .finally(() => clearTimeout(t));
+}
 
 function authRedirectUrl(path: string, queryString: string) {
   const qs = queryString ? `?${queryString}` : "";
@@ -22,6 +65,40 @@ export async function buildApp(): Promise<FastifyInstance> {
     logger: {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
+  });
+
+  app.addHook("onRequest", async (req, reply) => {
+    const incoming = req.headers["x-trace-id"] ?? req.headers["x-request-id"];
+    const traceId =
+      typeof incoming === "string" && incoming.length > 0
+        ? incoming
+        : randomUUID();
+    req.traceId = traceId;
+    req.traceStartMs = Date.now();
+    reply.header("x-trace-id", traceId);
+  });
+
+  app.addHook("onResponse", async (req, reply) => {
+    const path = (req.raw.url ?? "").split("?")[0] ?? "";
+    if (
+      path === "/health" ||
+      path.startsWith("/debug") ||
+      path === "/swagger" ||
+      path === "/swagger.yml"
+    ) {
+      return;
+    }
+    const durationMs = Date.now() - req.traceStartMs;
+    const statusCode = reply.statusCode;
+    const error = statusCode >= 500;
+    reportGatewaySpan({
+      traceId: req.traceId,
+      method: req.method,
+      path,
+      statusCode,
+      durationMs,
+      error,
+    });
   });
 
   await app.register(cors, {
@@ -117,11 +194,16 @@ export async function buildApp(): Promise<FastifyInstance> {
     upstream: env.authServiceUrl,
     replyOptions: {
       rewriteRequestHeaders(
-        req: FastifyRequest,
+        req: FastifyRequest<
+          RequestGenericInterface,
+          RawServerBase,
+          IncomingMessage | Http2ServerRequest
+        >,
         headers: IncomingHttpHeaders,
       ): IncomingHttpHeaders {
         const cookie = req.headers.cookie;
-        return cookie ? { ...headers, cookie } : headers;
+        const withCookie = cookie ? { ...headers, cookie } : headers;
+        return mergeTraceHeader(req, withCookie);
       },
     },
   };
@@ -145,6 +227,18 @@ export async function buildApp(): Promise<FastifyInstance> {
     upstream: env.authServiceUrl,
     prefix: "/jwks",
     rewritePrefix: "/jwks",
+    replyOptions: {
+      rewriteRequestHeaders(
+        req: FastifyRequest<
+          RequestGenericInterface,
+          RawServerBase,
+          IncomingMessage | Http2ServerRequest
+        >,
+        headers: IncomingHttpHeaders,
+      ): IncomingHttpHeaders {
+        return mergeTraceHeader(req, headers);
+      },
+    },
   });
 
   const proxyWithAuth = (upstream: string, prefix: string) =>
@@ -164,7 +258,10 @@ export async function buildApp(): Promise<FastifyInstance> {
           const h = req.headers;
           const raw = h.authorization ?? h.Authorization;
           const auth = Array.isArray(raw) ? raw[0] : raw;
-          return auth ? { ...headers, authorization: auth } : headers;
+          const withAuth = auth
+            ? { ...headers, authorization: auth }
+            : headers;
+          return mergeTraceHeader(req, withAuth);
         },
       },
     });
@@ -184,9 +281,22 @@ export async function buildApp(): Promise<FastifyInstance> {
     prefix: "/ws",
     rewritePrefix: "/ws",
     websocket: true,
+    replyOptions: {
+      rewriteRequestHeaders(
+        req: FastifyRequest<
+          RequestGenericInterface,
+          RawServerBase,
+          IncomingMessage | Http2ServerRequest
+        >,
+        headers: IncomingHttpHeaders,
+      ): IncomingHttpHeaders {
+        return mergeTraceHeader(req, headers);
+      },
+    },
   });
 
   await proxyWithAuth(env.adminSettingServiceUrl, "/admin-settings");
+  await proxyWithAuth(env.clientSettingsServiceUrl, "/client-settings");
 
   return app;
 }

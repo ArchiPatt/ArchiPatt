@@ -3,6 +3,7 @@ import type {AxiosError, AxiosRequestConfig, AxiosResponse} from "axios";
 import {tokenStorage} from "../../shared/storage/tokenStorage";
 import {refreshStorage} from "../../shared/storage/refreshStorage";
 import {authApi} from "../requests/authApi.ts";
+import { reportAxiosError } from "../../monitoring/rum.ts";
 
 const AUTH_LOGIN_URL = 'http://localhost:4004/login';
 const RETURN_TO = 'http://localhost:5173/';
@@ -32,6 +33,7 @@ const processQueue = (error: unknown, token: string | null = null) => {
 instance.interceptors.response.use(
     (response: AxiosResponse) => response,
     async (error: AxiosError) => {
+        reportAxiosError(error);
         const originalRequest = error.config as AxiosRequestConfig & { _retry?: boolean };
 
         if (error.response?.status === 401 && !originalRequest._retry) {

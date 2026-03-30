@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: Monitoring API
+  version: 1.0.0
+  description: |
+    Приём телеметрии (шлюз → `/internal/ingest`, SPA/WebView → `/public/ingest`) и агрегаты для дашборда.
+servers:
+  - url: http://localhost:4010
+tags:
+  - name: Health
+  - name: Ingest
+  - name: Metrics
+  - name: Docs
+paths:
+  /health:
+    get:
+      tags: [Health]
+      summary: Проверка здоровья
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+
+  /internal/ingest:
+    post:
+      tags: [Ingest]
+      summary: Приём событий (бэкенды, приватная сеть)
+      description: |
+        Одно событие или `{ "events": [ ... ] }`. Поля события см. `IngestEvent`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: "#/components/schemas/IngestEvent"
+                - type: object
+                  required: [events]
+                  properties:
+                    events:
+                      type: array
+                      items:
+                        $ref: "#/components/schemas/IngestEvent"
+      responses:
+        "200":
+          description: Принято
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestOk"
+        "400":
+          description: Неверное тело
+
+  /public/ingest:
+    post:
+      tags: [Ingest]
+      summary: Приём событий (браузер / WebView, CORS)
+      description: Формат тот же, что у `/internal/ingest`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IngestEvent"
+      responses:
+        "200":
+          description: Принято
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IngestOk"
+        "400":
+          description: Неверное тело
+
+  /api/metrics/summary:
+    get:
+      tags: [Metrics]
+      summary: Агрегаты за скользящее окно
+      parameters:
+        - in: query
+          name: windowMinutes
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1440
+            default: 60
+          description: Ширина окна в минутах
+      responses:
+        "200":
+          description: Сводка
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MetricsSummary"
+
+  /swagger:
+    get:
+      tags: [Docs]
+      summary: Swagger UI
+      responses:
+        "200":
+          description: HTML
+
+  /swagger.yml:
+    get:
+      tags: [Docs]
+      summary: OpenAPI YAML
+      responses:
+        "200":
+          description: YAML
+
+components:
+  schemas:
+    HealthResponse:
+      type: object
+      properties:
+        ok:
+          type: boolean
+    IngestOk:
+      type: object
+      properties:
+        ok:
+          type: boolean
+        accepted:
+          type: integer
+    IngestEvent:
+      type: object
+      required: [traceId, source]
+      properties:
+        traceId:
+          type: string
+          format: uuid
+        source:
+          type: string
+          description: Например gateway, web-bankAdminPanel
+        method:
+          type: string
+          description: HTTP-метод или CLIENT для RUM
+        path:
+          type: string
+        route:
+          type: string
+          description: Альтернатива path для SPA
+        kind:
+          type: string
+          enum: [rum, client]
+        statusCode:
+          type: integer
+        durationMs:
+          type: integer
+        error:
+          type: boolean
+        at:
+          type: integer
+          format: int64
+          description: Unix ms; если нет — подставляется сервером
+    MetricsSummary:
+      type: object
+      properties:
+        windowMinutes:
+          type: integer
+        totalRequests:
+          type: integer
+        errorRequests:
+          type: integer
+        errorRatePercent:
+          type: number
+        avgDurationMs:
+          type: integer
+        series:
+          type: array
+          items:
+            type: object
+        recent:
+          type: array
+          items:
+            type: object

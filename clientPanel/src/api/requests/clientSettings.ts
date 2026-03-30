@@ -5,32 +5,45 @@ import type {SetColorSchemeRequest} from "../../../generated/api/customTypes/set
 import type {HiddenAccountsResponse} from "../../../generated/api/customTypes/settings/HiddenAccountsResponse.ts";
 import type {AddHiddenAccountRequest} from "../../../generated/api/customTypes/settings/AddHiddenAccountRequest.ts";
 
+/** Через gateway (4004) → те же метрики мониторинга, что и для остальных API */
 const clientSettings = {
     getColorScheme: async () => {
-        const response: AxiosResponse<ColorSchemeResponse> = await instance.get('http://localhost:4006/client-settings/color-scheme')
+        const response: AxiosResponse<ColorSchemeResponse> = await instance.get(
+            "/client-settings/color-scheme",
+        );
 
-        return response.data
+        return response.data;
     },
     setColorScheme: async (model: SetColorSchemeRequest) => {
-        const response: AxiosResponse<ColorSchemeResponse> = await instance.post('http://localhost:4006/client-settings/color-scheme', model)
+        const response: AxiosResponse<ColorSchemeResponse> = await instance.post(
+            "/client-settings/color-scheme",
+            model,
+        );
 
-        return response.data
+        return response.data;
     },
     getHiddenAccounts: async () => {
-        const response: AxiosResponse<HiddenAccountsResponse> = await instance.get('http://localhost:4006/client-settings/hidden-accounts\n')
+        const response: AxiosResponse<HiddenAccountsResponse> = await instance.get(
+            "/client-settings/hidden-accounts",
+        );
 
-        return response.data
+        return response.data;
     },
     setHiddenAccount: async (model: AddHiddenAccountRequest) => {
-        const response: AxiosResponse<HiddenAccountsResponse> = await instance.post('http://localhost:4006/client-settings/hidden-accounts', model)
+        const response: AxiosResponse<HiddenAccountsResponse> = await instance.post(
+            "/client-settings/hidden-accounts",
+            model,
+        );
 
-        return response.data
+        return response.data;
     },
     deleteHiddenAccount: async (accountId: string) => {
-        const response: AxiosResponse<HiddenAccountsResponse> = await instance.delete(`http://localhost:4006/client-settings/hidden-accounts/${accountId}`)
+        const response: AxiosResponse<HiddenAccountsResponse> = await instance.delete(
+            `/client-settings/hidden-accounts/${accountId}`,
+        );
 
-        return response.data
-    }
-}
+        return response.data;
+    },
+};
 
 export { clientSettings }

@@ -46,4 +46,6 @@ export const env = {
     password: process.env.DB_PASSWORD ?? "1234",
     name: process.env.DB_NAME ?? "admin_settings",
   },
+  /** Пусто — span BFF в monitoring не отправляются */
+  monitoringServiceUrl: (process.env.MONITORING_SERVICE_URL ?? "").trim(),
 };

@@ -7,10 +7,15 @@ import { Users } from './ui/pages/Users/Users'
 import { AccountDetails } from './ui/pages/AccountDetails/AccountDetails'
 import { CreditDetails } from './ui/pages/CreditDetails/CreditDetails'
 import { ErrorBoundary } from 'react-error-boundary'
+import { RumRouteTracker } from './monitoring/RumRouteTracker'
+import { sendRumReactError } from './monitoring/rum'
 
 function App() {
    return (
       <ErrorBoundary
+         onError={(error) => {
+            sendRumReactError(error)
+         }}
          fallbackRender={({ error }) => (
             <div
                style={{
@@ -26,6 +31,7 @@ function App() {
       >
          <Providers>
             <BrowserRouter>
+               <RumRouteTracker />
                <Routes>
                   <Route element={<Layout />}>
                      <Route path="/" element={<Home />} />

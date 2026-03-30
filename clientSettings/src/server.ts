@@ -7,6 +7,7 @@ import { env } from './env';
 import { initDataSource } from './db/data-source';
 import { registerDocsRoutes } from './routes/docs';
 import { registerSettingsRoutes } from './routes/settings';
+import { registerBffMonitoring } from './plugins/bffMonitoring';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -15,10 +16,15 @@ export async function buildApp(): Promise<FastifyInstance> {
     },
   });
 
+  registerBffMonitoring(app, {
+    monitoringServiceUrl: env.monitoringServiceUrl,
+    source: 'client-settings',
+  });
+
   await app.register(cors, {
     origin: true,
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-trace-id'],
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   });
   await app.register(formbody);

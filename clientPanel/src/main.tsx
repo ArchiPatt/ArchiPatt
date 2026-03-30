@@ -12,6 +12,9 @@ import { ErrorBoundary } from "react-error-boundary";
 import { App } from "./App.tsx";
 import { Notifications } from "@mantine/notifications";
 import {LINK_PATHS} from "./shared/constants/LINK_PATHS.ts";
+import { initRumMonitoring, sendRumReactError } from "./monitoring/rum.ts";
+
+initRumMonitoring();
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -45,7 +48,12 @@ createRoot(document.getElementById("root")!).render(
             <MantineProvider defaultColorScheme="auto">
                 <QueryClientProvider client={queryClient}>
 
-                    <ErrorBoundary FallbackComponent={ErrorFallback}>
+                    <ErrorBoundary
+                        FallbackComponent={ErrorFallback}
+                        onError={(error: Error) => {
+                            sendRumReactError(error);
+                        }}
+                    >
                         <App />
                     </ErrorBoundary>
 
