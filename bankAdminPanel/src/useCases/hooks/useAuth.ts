@@ -31,10 +31,16 @@ export const useAuth = () => {
 
    useEffect(() => {
       if (code) {
-         token.mutateAsync({ grant_type: 'authorization_code', code }).then(() => {
-            setSearchParams(new URLSearchParams())
-            window.location.reload()
-         })
+         token
+            .mutateAsync({ grant_type: 'authorization_code', code })
+            .then(() => {
+               setSearchParams(new URLSearchParams())
+               window.location.reload()
+            })
+            .finally(() => {
+               setSearchParams(new URLSearchParams())
+               window.location.reload()
+            })
       }
    }, [searchParams])
 
