@@ -1,5 +1,6 @@
 import { createRemoteJWKSet, jwtVerify, JWTPayload } from "jose";
 import { env } from "../env";
+import { traceHeaders } from "../trace/traceContext";
 
 const JWKS_URL = `${env.auth.issuer}/jwks`;
 const jwks = createRemoteJWKSet(new URL(JWKS_URL));
@@ -22,6 +23,7 @@ async function isRevoked(jti: string): Promise<boolean> {
     method: "GET",
     headers: {
       "x-internal-token": env.authService.internalToken,
+      ...traceHeaders(),
     },
   });
   if (!res.ok) {

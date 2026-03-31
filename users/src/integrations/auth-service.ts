@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { traceHeaders } from "../trace/traceContext";
 
 export async function createAuthCredentials(input: { username: string }) {
   if (!env.authService.internalToken) {
@@ -11,8 +12,9 @@ export async function createAuthCredentials(input: { username: string }) {
   const res = await fetch(url, {
     method: "POST",
     headers: {
-      "content-type": "useCases/json",
+      "content-type": "application/json",
       "x-internal-token": env.authService.internalToken,
+      ...traceHeaders(),
     },
     body: JSON.stringify({
       username: input.username,

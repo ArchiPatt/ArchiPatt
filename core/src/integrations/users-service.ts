@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { traceHeaders } from "../trace/traceContext";
 
 type ExternalUserProfile = {
   id: string;
@@ -14,6 +15,7 @@ export async function fetchUserProfileByUsername(
   const url = `${env.usersService.baseUrl}/internal/users/by-username/${encodeURIComponent(username)}`;
   const headers: Record<string, string> = {
     "x-internal-token": env.usersService.internalToken,
+    ...traceHeaders(),
   };
   if (authorization) headers["authorization"] = authorization;
   const res = await fetch(url, {
@@ -49,6 +51,7 @@ export async function fetchUsersInternal(
   const url = `${env.usersService.baseUrl}/internal/users?limit=${limit}&offset=${offset}`;
   const headers: Record<string, string> = {
     "x-internal-token": env.usersService.internalToken,
+    ...traceHeaders(),
   };
   if (authorization) headers["authorization"] = authorization;
   const res = await fetch(url, {

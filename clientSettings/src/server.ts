@@ -7,7 +7,7 @@ import { env } from './env';
 import { initDataSource } from './db/data-source';
 import { registerDocsRoutes } from './routes/docs';
 import { registerSettingsRoutes } from './routes/settings';
-import { registerBffMonitoring } from './plugins/bffMonitoring';
+import { registerServiceMonitoring } from './plugins/serviceMonitoring';
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -16,7 +16,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     },
   });
 
-  registerBffMonitoring(app, {
+  registerServiceMonitoring(app, {
     monitoringServiceUrl: env.monitoringServiceUrl,
     source: 'client-settings',
   });

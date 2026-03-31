@@ -10,6 +10,7 @@ import { registerDocsRoutes } from "./routes/docs";
 import { registerAccountsRoutes } from "./routes/accounts";
 import { registerDashboardRoutes } from "./routes/dashboard";
 import { registerWsAccountsRoutes } from "./routes/ws-accounts";
+import { registerServiceMonitoring } from "./plugins/serviceMonitoring";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -18,11 +19,16 @@ export async function buildApp(): Promise<FastifyInstance> {
     },
   });
 
+  registerServiceMonitoring(app, {
+    monitoringServiceUrl: env.monitoringServiceUrl,
+    source: "core",
+  });
+
   await app.register(fastifyWebsocket);
   await app.register(cors, {
     origin: true,
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: ["Content-Type", "Authorization", "x-trace-id"],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
   await app.register(formbody);

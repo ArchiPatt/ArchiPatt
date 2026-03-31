@@ -53,4 +53,6 @@ export const env = {
     clientUsername: process.env.SEED_CLIENT_USERNAME ?? "client1",
     clientRoles: list("SEED_CLIENT_ROLES", ["client"]),
   },
+
+  monitoringServiceUrl: (process.env.MONITORING_SERVICE_URL ?? "").trim(),
 };

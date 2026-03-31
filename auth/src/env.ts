@@ -71,4 +71,6 @@ export const env = {
     })(),
   },
   internalToken: process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? process.env.USERS_INTERNAL_TOKEN ?? "",
+
+  monitoringServiceUrl: (process.env.MONITORING_SERVICE_URL ?? "").trim(),
 };

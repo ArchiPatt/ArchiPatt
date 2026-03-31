@@ -1,14 +1,16 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
+import { enterTraceContext } from "../trace/traceContext";
 
 declare module "fastify" {
   interface FastifyRequest {
-    bffTraceId: string;
-    bffTraceStartMs: number;
+    monitorTraceId: string;
+    monitorTraceStartMs: number;
   }
 }
 
-export function registerBffMonitoring(
+/** Трассировка и метрики в monitoring: traceId, duration, ошибки 5xx. */
+export function registerServiceMonitoring(
   app: FastifyInstance,
   options: { monitoringServiceUrl: string; source: string },
 ): void {
@@ -21,8 +23,9 @@ export function registerBffMonitoring(
       typeof incoming === "string" && incoming.length > 0
         ? incoming
         : randomUUID();
-    req.bffTraceId = traceId;
-    req.bffTraceStartMs = Date.now();
+    req.monitorTraceId = traceId;
+    req.monitorTraceStartMs = Date.now();
+    enterTraceContext(traceId);
     reply.header("x-trace-id", traceId);
   });
 
@@ -37,13 +40,13 @@ export function registerBffMonitoring(
     }
     if (!base) return;
 
-    const durationMs = Date.now() - req.bffTraceStartMs;
+    const durationMs = Date.now() - req.monitorTraceStartMs;
     const statusCode = reply.statusCode;
     const error = statusCode >= 500;
 
     const url = `${base.replace(/\/$/, "")}/internal/ingest`;
     const body = JSON.stringify({
-      traceId: req.bffTraceId,
+      traceId: req.monitorTraceId,
       source,
       method: req.method,
       path,

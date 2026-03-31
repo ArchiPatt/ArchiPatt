@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { traceHeaders } from "../trace/traceContext";
 
 type ExternalUserProfile = {
   id: string;
@@ -15,6 +16,7 @@ export async function fetchUserProfileByUsername(
     method: "GET",
     headers: {
       "x-internal-token": env.usersService.internalToken,
+      ...traceHeaders(),
     },
   });
 

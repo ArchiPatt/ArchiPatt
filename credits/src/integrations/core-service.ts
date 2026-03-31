@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { traceHeaders } from "../trace/traceContext";
 
 type OperationKind = "credit" | "debit";
 
@@ -28,6 +29,7 @@ export async function postAccountOperation(input: {
     headers: {
       "content-type": "application/json",
       "x-internal-token": env.coreService.internalToken,
+      ...traceHeaders(),
     },
     body: JSON.stringify({
       idempotencyKey: input.idempotencyKey,
@@ -61,6 +63,7 @@ export async function transferFromMaster(input: {
   const headers: Record<string, string> = {
     "content-type": "application/json",
     "x-internal-token": env.coreService.internalToken,
+    ...traceHeaders(),
   };
   if (input.authorization) headers["authorization"] = input.authorization;
 
@@ -100,6 +103,7 @@ export async function transferToMaster(input: {
   const headers: Record<string, string> = {
     "content-type": "application/json",
     "x-internal-token": env.coreService.internalToken,
+    ...traceHeaders(),
   };
   if (input.authorization) headers["authorization"] = input.authorization;
 

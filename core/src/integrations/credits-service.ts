@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { traceHeaders } from "../trace/traceContext";
 
 export type CreditItem = {
   id: string;
@@ -20,6 +21,7 @@ export async function fetchAllCredits(
   const url = `${env.creditsService.baseUrl}/internal/credits/by-clients`;
   const headers: Record<string, string> = {
     "x-internal-token": env.creditsService.internalToken,
+    ...traceHeaders(),
   };
   if (authorization) headers["authorization"] = authorization;
   const res = await fetch(url, {
