@@ -7,6 +7,7 @@ import { env } from "./env";
 import { initDataSource } from "./db/data-source";
 import { registerCreditsRoutes } from "./routes/credits";
 import { registerDocsRoutes } from "./routes/docs";
+import { registerSimulatedInstability } from "./plugins/simulatedInstability";
 import { registerServiceMonitoring } from "./plugins/serviceMonitoring";
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -15,6 +16,8 @@ export async function buildApp(): Promise<FastifyInstance> {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
   });
+
+  registerSimulatedInstability(app);
 
   registerServiceMonitoring(app, {
     monitoringServiceUrl: env.monitoringServiceUrl,

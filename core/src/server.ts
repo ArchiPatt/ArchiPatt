@@ -10,6 +10,7 @@ import { registerDocsRoutes } from "./routes/docs";
 import { registerAccountsRoutes } from "./routes/accounts";
 import { registerDashboardRoutes } from "./routes/dashboard";
 import { registerWsAccountsRoutes } from "./routes/ws-accounts";
+import { registerSimulatedInstability } from "./plugins/simulatedInstability";
 import { registerServiceMonitoring } from "./plugins/serviceMonitoring";
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -18,6 +19,8 @@ export async function buildApp(): Promise<FastifyInstance> {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
   });
+
+  registerSimulatedInstability(app);
 
   registerServiceMonitoring(app, {
     monitoringServiceUrl: env.monitoringServiceUrl,
