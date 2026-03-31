@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { CIRCUIT_USERS_SERVICE, resilientFetch } from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 export type ExternalUserProfile = {
@@ -12,7 +13,7 @@ export async function fetchUserProfileByUsername(
   username: string,
 ): Promise<ExternalUserProfile | null> {
   const url = `${env.usersService.baseUrl}/internal/users/by-username/${encodeURIComponent(username)}`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_USERS_SERVICE, url, {
     method: "GET",
     headers: {
       "x-internal-token": env.usersService.internalToken,

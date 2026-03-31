@@ -104,7 +104,12 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(cors, {
     origin: true,
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "Idempotency-Key",
+      "x-trace-id",
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
 
@@ -258,9 +263,7 @@ export async function buildApp(): Promise<FastifyInstance> {
           const h = req.headers;
           const raw = h.authorization ?? h.Authorization;
           const auth = Array.isArray(raw) ? raw[0] : raw;
-          const withAuth = auth
-            ? { ...headers, authorization: auth }
-            : headers;
+          const withAuth = auth ? { ...headers, authorization: auth } : headers;
           return mergeTraceHeader(req, withAuth);
         },
       },

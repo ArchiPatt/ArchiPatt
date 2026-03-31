@@ -1,4 +1,8 @@
 import { env } from "../env";
+import {
+  CIRCUIT_CREDITS_SERVICE,
+  resilientFetch,
+} from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 export type CreditItem = {
@@ -24,7 +28,7 @@ export async function fetchAllCredits(
     ...traceHeaders(),
   };
   if (authorization) headers["authorization"] = authorization;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_CREDITS_SERVICE, url, {
     method: "GET",
     headers,
   });

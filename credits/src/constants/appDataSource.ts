@@ -5,6 +5,7 @@ import { env } from "../env";
 import { CreditTariff } from "../db/entities/CreditTariff";
 import { Credit } from "../db/entities/Credit";
 import { CreditPayment } from "../db/entities/CreditPayment";
+import { IdempotencyLedger } from "../db/entities/IdempotencyLedger";
 
 const AppDataSource = new DataSource({
   type: "postgres",
@@ -13,7 +14,7 @@ const AppDataSource = new DataSource({
   username: env.db.user,
   password: env.db.password,
   database: env.db.name,
-  entities: [CreditTariff, Credit, CreditPayment],
+  entities: [CreditTariff, Credit, CreditPayment, IdempotencyLedger],
   migrations: [path.join(process.cwd(), "src/migrations/*.{ts,js}")],
   synchronize: false,
   logging: false,

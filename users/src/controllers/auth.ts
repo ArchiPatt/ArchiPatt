@@ -1,7 +1,12 @@
 import { JWTPayload } from "jose";
 import { hasRole } from "../security/jwt";
 
-export function requireAuth(payload: JWTPayload | null) {
+export type RequireAuthFail = { ok: false; code: number };
+export type RequireAuthOk = { ok: true; payload: JWTPayload };
+
+export function requireAuth(
+  payload: JWTPayload | null,
+): RequireAuthFail | RequireAuthOk {
   if (!payload) return { ok: false, code: 401 };
   return { ok: true, payload };
 }

@@ -1,5 +1,6 @@
 import { createRemoteJWKSet, jwtVerify, JWTPayload } from "jose";
 import { env } from "../env";
+import { CIRCUIT_AUTH_SERVICE, resilientFetch } from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 const JWKS_URL = `${env.auth.issuer}/jwks`;
@@ -19,7 +20,7 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 
 async function isRevoked(jti: string): Promise<boolean> {
   const url = `${env.authService.baseUrl}/internal/tokens/revoked/${encodeURIComponent(jti)}`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_AUTH_SERVICE, url, {
     method: "GET",
     headers: {
       "x-internal-token": env.authService.internalToken,
@@ -45,7 +46,7 @@ export async function verifyBearerToken(
   if (!authorization?.startsWith("Bearer ")) {
     console.warn(
       "[Users JWT] Нет Bearer в Authorization:",
-      authorization ? "заголовок есть, но не Bearer" : "заголовок отсутствует"
+      authorization ? "заголовок есть, но не Bearer" : "заголовок отсутствует",
     );
     return null;
   }
@@ -64,7 +65,7 @@ export async function verifyBearerToken(
       "| совпадает:",
       issuerMatch,
       "| JWKS:",
-      JWKS_URL
+      JWKS_URL,
     );
   }
 
@@ -83,7 +84,7 @@ export async function verifyBearerToken(
       "| issuer:",
       expectedIssuer,
       "| JWKS:",
-      JWKS_URL
+      JWKS_URL,
     );
     throw e;
   }

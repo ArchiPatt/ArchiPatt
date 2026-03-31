@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { CIRCUIT_AUTH_SERVICE, resilientFetch } from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 export async function createAuthCredentials(input: { username: string }) {
@@ -9,7 +10,7 @@ export async function createAuthCredentials(input: { username: string }) {
   }
 
   const url = `${env.authService.baseUrl}/internal/users`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_AUTH_SERVICE, url, {
     method: "POST",
     headers: {
       "content-type": "application/json",

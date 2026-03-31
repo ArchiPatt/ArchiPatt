@@ -1,12 +1,13 @@
 import { createRemoteJWKSet, jwtVerify, JWTPayload } from "jose";
 import { env } from "../env";
+import { CIRCUIT_AUTH_SERVICE, resilientFetch } from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 const jwks = createRemoteJWKSet(new URL(`${env.authIssuer}/jwks`));
 
 async function isRevoked(jti: string): Promise<boolean> {
   const url = `${env.authService.baseUrl}/internal/tokens/revoked/${encodeURIComponent(jti)}`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_AUTH_SERVICE, url, {
     method: "GET",
     headers: {
       "x-internal-token": env.authService.internalToken,

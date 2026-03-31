@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { CIRCUIT_CORE_SERVICE, resilientFetch } from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 type OperationKind = "credit" | "debit";
@@ -17,14 +18,13 @@ export async function postAccountOperation(input: {
   }
 
   const amountValue = Number(input.amount.toFixed(2));
-  const amount =
-    input.kind === "debit" ? -amountValue : amountValue;
+  const amount = input.kind === "debit" ? -amountValue : amountValue;
 
   const operationType =
     input.kind === "credit" ? "credit_issue" : "credit_repayment";
 
   const url = `${env.coreService.baseUrl}/internal/accounts/${encodeURIComponent(input.accountId)}/operations`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_CORE_SERVICE, url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
@@ -68,7 +68,7 @@ export async function transferFromMaster(input: {
   if (input.authorization) headers["authorization"] = input.authorization;
 
   const url = `${env.coreService.baseUrl}/internal/transfers/from-master`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_CORE_SERVICE, url, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -108,7 +108,7 @@ export async function transferToMaster(input: {
   if (input.authorization) headers["authorization"] = input.authorization;
 
   const url = `${env.coreService.baseUrl}/internal/transfers/to-master`;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_CORE_SERVICE, url, {
     method: "POST",
     headers,
     body: JSON.stringify({

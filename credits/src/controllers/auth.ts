@@ -12,12 +12,22 @@ export function isEmployee(payload: JWTPayload): boolean {
   return hasRole(payload, "employee") || hasRole(payload, "admin");
 }
 
-export function requireAuth(payload: JWTPayload | null) {
+export type RequireAuthFail = { ok: false; code: number };
+export type RequireAuthOk = { ok: true; payload: JWTPayload };
+
+export function requireAuth(
+  payload: JWTPayload | null,
+): RequireAuthFail | RequireAuthOk {
   if (!payload) return { ok: false, code: 401 };
   return { ok: true, payload };
 }
 
-export async function requireActiveAuth(payload: JWTPayload | null) {
+export type ActiveAuthFail = { ok: false; code: number; error: string };
+export type ActiveAuthOk = { ok: true; payload: JWTPayload };
+
+export async function requireActiveAuth(
+  payload: JWTPayload | null,
+): Promise<ActiveAuthFail | ActiveAuthOk> {
   const a = requireAuth(payload);
   if (!a.ok) return { ok: false, code: a.code, error: "unauthorized" };
   const username =
@@ -57,10 +67,9 @@ export async function requireActiveAuth(payload: JWTPayload | null) {
 
 export async function safeVerify(req: FastifyRequest) {
   try {
-    const auth =
-      (req.headers.authorization ?? req.headers.Authorization) as
-        | string
-        | undefined;
+    const auth = (req.headers.authorization ?? req.headers.Authorization) as
+      | string
+      | undefined;
     return await verifyBearerToken(auth);
   } catch (err) {
     req.log.warn(
@@ -69,7 +78,7 @@ export async function safeVerify(req: FastifyRequest) {
         hasAuth: !!(req.headers.authorization ?? req.headers.Authorization),
         url: req.url,
       },
-      "[Credits] token verify failed"
+      "[Credits] token verify failed",
     );
     return null;
   }

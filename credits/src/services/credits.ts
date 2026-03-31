@@ -95,8 +95,7 @@ export async function findOverdueCredits(
 
   const overdueCredits = credits.filter(
     (c) =>
-      c.nextPaymentDueAt.getTime() <= now.getTime() ||
-      c.overdueSince != null,
+      c.nextPaymentDueAt.getTime() <= now.getTime() || c.overdueSince != null,
   );
 
   for (const c of overdueCredits) {
@@ -153,7 +152,12 @@ export async function calculateCreditRating(
   ds: DataSource,
   clientId: string,
   now: Date = new Date(),
-): Promise<{ score: number; overdueCount: number; totalCredits: number; closedCount: number }> {
+): Promise<{
+  score: number;
+  overdueCount: number;
+  totalCredits: number;
+  closedCount: number;
+}> {
   const credits = await ds.getRepository(Credit).find({
     where: { clientId },
     order: { issuedAt: "DESC" },
@@ -203,6 +207,7 @@ export async function issueCredit(
     amount: number;
     performedBy: string;
     authorization?: string;
+    idempotencyKey?: string | null;
   },
 ) {
   const tariff = await findTariffById(ds, params.tariffId);
@@ -210,6 +215,14 @@ export async function issueCredit(
 
   const creditsRepo = ds.getRepository(Credit);
   const paymentsRepo = ds.getRepository(CreditPayment);
+
+  const idem = params.idempotencyKey?.trim();
+  if (idem) {
+    const existing = await creditsRepo.findOne({
+      where: { idempotencyKey: idem },
+    });
+    if (existing) return existing;
+  }
 
   const credit = await creditsRepo.save(
     creditsRepo.create({
@@ -222,6 +235,7 @@ export async function issueCredit(
       issuedAt: new Date(),
       nextPaymentDueAt: nowPlusDays(tariff.billingPeriodDays),
       closedAt: null,
+      idempotencyKey: idem ?? null,
     }),
   );
 
@@ -302,10 +316,7 @@ export async function repayCredit(
   };
 }
 
-export async function accrueDueCredits(
-  ds: DataSource,
-  now: Date = new Date(),
-) {
+export async function accrueDueCredits(ds: DataSource, now: Date = new Date()) {
   const creditsRepo = ds.getRepository(Credit);
   const dueCredits = await creditsRepo.find({
     where: { status: CreditStatus.Active },

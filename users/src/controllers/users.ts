@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 import { JWTPayload } from "jose";
 import { requireAuth, canManage } from "./auth";
 import { verifyBearerToken } from "../security/jwt";
+import { UserProfile } from "../db/entities/UserProfile";
 import {
   createUser,
   deleteById,
@@ -18,7 +19,22 @@ function normalizeRoles(roles?: string[]): string[] {
   return [...new Set(roles.map((r) => r.trim()).filter(Boolean))];
 }
 
-async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
+type RequireActiveUserFail = {
+  ok: false;
+  status: number;
+  body: { error: string };
+};
+
+type RequireActiveUserOk = {
+  ok: true;
+  payload: JWTPayload;
+  actor: UserProfile;
+};
+
+async function requireActiveUser(
+  ds: DataSource,
+  payload: JWTPayload | null,
+): Promise<RequireActiveUserFail | RequireActiveUserOk> {
   const auth = requireAuth(payload);
   if (!auth.ok) {
     return {
@@ -27,7 +43,8 @@ async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
       body: { error: "unauthorized" },
     };
   }
-  if (!auth.payload.sub) {
+  const jwt = auth.payload;
+  if (!jwt.sub) {
     return {
       ok: false,
       status: 401,
@@ -35,7 +52,7 @@ async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
     };
   }
 
-  const actor = await findById(ds, String(auth.payload.sub));
+  const actor = await findById(ds, String(jwt.sub));
   if (!actor) {
     return {
       ok: false,
@@ -51,7 +68,7 @@ async function requireActiveUser(ds: DataSource, payload: JWTPayload | null) {
     };
   }
 
-  return { ok: true, payload: auth.payload, actor };
+  return { ok: true, payload: jwt, actor };
 }
 
 export async function internalListController(
@@ -206,22 +223,24 @@ export async function createController(
     displayName: body.displayName?.trim() || null,
     roles,
   });
-  if (res.kind === "conflict")
+  if (res.kind !== "ok") {
     return { status: 409, body: { error: "username_exists" } };
+  }
+  const newUser = res.user;
 
   let setupUrl: string | null = null;
   try {
     const authRes = await createAuthCredentials({ username });
     if (authRes.kind === "conflict") {
-      await deleteById(ds, res.user.id);
+      await deleteById(ds, newUser.id);
       return {
         status: 409,
         body: { error: "username_exists_in_auth" },
       };
     }
-    setupUrl = authRes.setupUrl;
+    setupUrl = authRes.setupUrl ?? null;
   } catch {
-    await deleteById(ds, res.user.id);
+    await deleteById(ds, newUser.id);
     return {
       status: 502,
       body: { error: "auth_service_unavailable" },
@@ -231,11 +250,11 @@ export async function createController(
   return {
     status: 201,
     body: {
-      id: res.user.id,
-      username: res.user.username,
-      displayName: res.user.displayName,
-      roles: res.user.roles,
-      isBlocked: res.user.isBlocked,
+      id: newUser.id,
+      username: newUser.username,
+      displayName: newUser.displayName,
+      roles: newUser.roles,
+      isBlocked: newUser.isBlocked,
       setupUrl,
     },
   };
@@ -260,15 +279,17 @@ export async function blockController(
   }
 
   const res = await setBlocked(ds, params.id, body.isBlocked);
-  if (res.kind === "not_found")
+  if (res.kind !== "ok") {
     return { status: 404, body: { error: "not_found" } };
+  }
+  const updated = res.user;
 
   return {
     status: 200,
     body: {
-      id: res.user.id,
-      username: res.user.username,
-      isBlocked: res.user.isBlocked,
+      id: updated.id,
+      username: updated.username,
+      isBlocked: updated.isBlocked,
     },
   };
 }

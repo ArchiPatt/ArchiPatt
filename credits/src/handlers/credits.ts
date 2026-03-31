@@ -1,5 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { env } from "../env";
+import { idempotencyKeyFromRequest } from "../http/idempotencyHeaders";
+import { replayOrRun } from "../services/idempotencyReplay";
 import { safeVerify, requireActiveAuth } from "../controllers/auth";
 import {
   listTariffsController,
@@ -54,7 +56,10 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
-      const res = await createTariffController(app.db, a.payload, req.body ?? {});
+      const key = idempotencyKeyFromRequest(req);
+      const res = await replayOrRun(app.db, key, "POST /tariffs", () =>
+        createTariffController(app.db, a.payload, req.body ?? {}),
+      );
       return reply.code(res.status).send(res.body);
     },
 
@@ -136,7 +141,11 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
-      const res = await getCreditRatingController(app.db, a.payload, req.params);
+      const res = await getCreditRatingController(
+        app.db,
+        a.payload,
+        req.params,
+      );
       return reply.code(res.status).send(res.body);
     },
 
@@ -154,10 +163,14 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
+      const key = idempotencyKeyFromRequest(req);
+      if (!key)
+        return reply.code(400).send({ error: "idempotency_key_required" });
       const authorization = req.headers.authorization as string | undefined;
       const res = await issueCreditController(app.db, a.payload, {
         ...(req.body ?? {}),
         authorization,
+        idempotencyKey: key,
       });
       return reply.code(res.status).send(res.body);
     },
@@ -172,12 +185,19 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
+      const key = idempotencyKeyFromRequest(req);
       const authorization = req.headers.authorization as string | undefined;
-      const res = await repayCreditController(app.db, a.payload, {
-        ...req.params,
-        amount: req.body?.amount,
-        authorization,
-      });
+      const res = await replayOrRun(
+        app.db,
+        key,
+        `POST /credits/${req.params.id}/repay`,
+        () =>
+          repayCreditController(app.db, a.payload, {
+            ...req.params,
+            amount: req.body?.amount,
+            authorization,
+          }),
+      );
       return reply.code(res.status).send(res.body);
     },
 
@@ -185,7 +205,13 @@ export function createCreditsHandlers(app: FastifyInstance) {
       const payload = await safeVerify(req);
       const a = await requireActiveAuth(payload);
       if (!a.ok) return reply.code(a.code).send({ error: a.error });
-      const res = await accrueRunController(app.db, a.payload);
+      const key = idempotencyKeyFromRequest(req);
+      const res = await replayOrRun(
+        app.db,
+        key,
+        "POST /credits/accrue/run",
+        () => accrueRunController(app.db, a.payload),
+      );
       return reply.code(res.status).send(res.body);
     },
 
@@ -193,12 +219,16 @@ export function createCreditsHandlers(app: FastifyInstance) {
       req: FastifyRequest<{ Querystring: { clientIds?: string } }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
       const authorization = req.headers.authorization as string | undefined;
-      const res = await internalByClientsController(app.db, internalOk, {
-        clientIds: req.query?.clientIds,
-      }, authorization);
+      const res = await internalByClientsController(
+        app.db,
+        internalOk,
+        {
+          clientIds: req.query?.clientIds,
+        },
+        authorization,
+      );
       return reply.code(res.status).send(res.body);
     },
   };

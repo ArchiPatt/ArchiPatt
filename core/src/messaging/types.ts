@@ -14,12 +14,14 @@ export interface DepositCommand extends BaseCommand {
   kind: "deposit";
   accountId: string;
   amount: number;
+  idempotencyKey?: string | null;
 }
 
 export interface WithdrawCommand extends BaseCommand {
   kind: "withdraw";
   accountId: string;
   amount: number;
+  idempotencyKey?: string | null;
 }
 
 export interface PostOperationCommand extends BaseCommand {

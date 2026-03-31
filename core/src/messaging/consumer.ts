@@ -58,13 +58,9 @@ async function processCommand(
 ): Promise<OperationReply> {
   switch (command.kind) {
     case "deposit": {
+      const idem = command.idempotencyKey?.trim() || command.correlationId;
       const result = await ds.manager.transaction((em) =>
-        accountsService.deposit(
-          em,
-          command.accountId,
-          command.amount,
-          command.correlationId,
-        ),
+        accountsService.deposit(em, command.accountId, command.amount, idem),
       );
       if (!result) return replyErr(404, "account_not_found");
       if (result === "closed") return replyErr(400, "account_closed");
@@ -73,13 +69,9 @@ async function processCommand(
     }
 
     case "withdraw": {
+      const idem = command.idempotencyKey?.trim() || command.correlationId;
       const result = await ds.manager.transaction((em) =>
-        accountsService.withdraw(
-          em,
-          command.accountId,
-          command.amount,
-          command.correlationId,
-        ),
+        accountsService.withdraw(em, command.accountId, command.amount, idem),
       );
       if (!result) return replyErr(404, "account_not_found");
       if (result === "closed") return replyErr(400, "account_closed");

@@ -1,6 +1,12 @@
+import crypto from "node:crypto";
 import { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import { env } from "../env";
 import { authPayloadOrNull } from "../controllers/auth";
+import {
+  idempotencyKeyFromRequest,
+  mergeIdempotencyKey,
+} from "../http/idempotencyHeaders";
+import { replayOrRun } from "../services/idempotencyReplay";
 import {
   listAccountsController,
   getAccountController,
@@ -82,10 +88,13 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
-      const res = await createAccountController(app.db, auth.payload, {
-        clientId: req.body?.clientId,
-        currency: req.body?.currency,
-      });
+      const key = idempotencyKeyFromRequest(req);
+      const res = await replayOrRun(app.db, key, "POST /accounts", () =>
+        createAccountController(app.db, auth.payload, {
+          clientId: req.body?.clientId,
+          currency: req.body?.currency,
+        }),
+      );
       return reply.code(res.status).send(res.body);
     },
 
@@ -95,10 +104,12 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const auth = await authPayloadOrNull(req);
       if (!auth.ok) return reply.code(auth.code).send({ error: auth.error });
-      const res = await closeAccountController(
+      const key = idempotencyKeyFromRequest(req);
+      const res = await replayOrRun(
         app.db,
-        auth.payload,
-        req.params,
+        key,
+        `POST /accounts/${req.params.id}/close`,
+        () => closeAccountController(app.db, auth.payload, req.params),
       );
       return reply.code(res.status).send(res.body);
     },
@@ -123,11 +134,15 @@ export function createAccountsHandlers(app: FastifyInstance) {
         return reply.code(400).send({ error: "invalid_amount" });
       const correlationId = crypto.randomUUID();
       const resultPromise = registerPendingReply(correlationId);
+      const idempotencyKey =
+        mergeIdempotencyKey(undefined, idempotencyKeyFromRequest(req)) ??
+        correlationId;
       await publishOperationCommand({
         kind: "deposit",
         correlationId,
         accountId: req.params.id,
         amount,
+        idempotencyKey,
       });
       try {
         const result = await resultPromise;
@@ -157,11 +172,15 @@ export function createAccountsHandlers(app: FastifyInstance) {
         return reply.code(400).send({ error: "invalid_amount" });
       const correlationId = crypto.randomUUID();
       const resultPromise = registerPendingReply(correlationId);
+      const idempotencyKey =
+        mergeIdempotencyKey(undefined, idempotencyKeyFromRequest(req)) ??
+        correlationId;
       await publishOperationCommand({
         kind: "withdraw",
         correlationId,
         accountId: req.params.id,
         amount,
+        idempotencyKey,
       });
       try {
         const result = await resultPromise;
@@ -208,13 +227,18 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }
       const correlationId = crypto.randomUUID();
       const resultPromise = registerPendingReply(correlationId);
+      const idempotencyKey =
+        mergeIdempotencyKey(
+          req.body?.idempotencyKey,
+          idempotencyKeyFromRequest(req),
+        ) ?? null;
       await publishOperationCommand({
         kind: "transfer",
         correlationId,
         fromAccountId,
         toAccountId,
         amount,
-        idempotencyKey: req.body?.idempotencyKey ?? null,
+        idempotencyKey,
       });
       try {
         const result = await resultPromise;
@@ -239,7 +263,10 @@ export function createAccountsHandlers(app: FastifyInstance) {
     ) => {
       const internalOk = req.headers["x-internal-token"] === env.internalToken;
       if (!internalOk) return reply.code(401).send({ error: "unauthorized" });
-      const idempotencyKey = req.body?.idempotencyKey?.trim();
+      const idempotencyKey = mergeIdempotencyKey(
+        req.body?.idempotencyKey,
+        idempotencyKeyFromRequest(req),
+      )?.trim();
       if (!idempotencyKey)
         return reply.code(400).send({ error: "idempotency_key_required" });
       const n =
@@ -282,8 +309,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
       if (!internalOk) return reply.code(401).send({ error: "unauthorized" });
       const amount =
         typeof req.body?.amount === "number"
@@ -291,11 +317,15 @@ export function createAccountsHandlers(app: FastifyInstance) {
           : typeof req.body?.amount === "string"
             ? parseFloat(req.body.amount)
             : NaN;
+      const idempotencyKey = mergeIdempotencyKey(
+        req.body?.idempotencyKey,
+        idempotencyKeyFromRequest(req),
+      )?.trim();
       if (
         !req.body?.toAccountId ||
         !Number.isFinite(amount) ||
         amount <= 0 ||
-        !req.body?.idempotencyKey
+        !idempotencyKey
       ) {
         return reply.code(400).send({ error: "invalid_input" });
       }
@@ -306,7 +336,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
         correlationId,
         toAccountId: req.body.toAccountId,
         amount,
-        idempotencyKey: req.body.idempotencyKey,
+        idempotencyKey,
         type: req.body.type,
         meta: req.body.meta,
       });
@@ -330,8 +360,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
       }>,
       reply: FastifyReply,
     ) => {
-      const internalOk =
-        req.headers["x-internal-token"] === env.internalToken;
+      const internalOk = req.headers["x-internal-token"] === env.internalToken;
       if (!internalOk) return reply.code(401).send({ error: "unauthorized" });
       const amount =
         typeof req.body?.amount === "number"
@@ -339,11 +368,15 @@ export function createAccountsHandlers(app: FastifyInstance) {
           : typeof req.body?.amount === "string"
             ? parseFloat(req.body.amount)
             : NaN;
+      const idempotencyKey = mergeIdempotencyKey(
+        req.body?.idempotencyKey,
+        idempotencyKeyFromRequest(req),
+      )?.trim();
       if (
         !req.body?.fromAccountId ||
         !Number.isFinite(amount) ||
         amount <= 0 ||
-        !req.body?.idempotencyKey
+        !idempotencyKey
       ) {
         return reply.code(400).send({ error: "invalid_input" });
       }
@@ -354,7 +387,7 @@ export function createAccountsHandlers(app: FastifyInstance) {
         correlationId,
         fromAccountId: req.body.fromAccountId,
         amount,
-        idempotencyKey: req.body.idempotencyKey,
+        idempotencyKey,
         type: req.body.type,
         meta: req.body.meta,
       });

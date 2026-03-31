@@ -43,6 +43,9 @@ export class Credit {
   @Column({ type: "timestamptz", nullable: true })
   closedAt!: Date | null;
 
+  @Column({ type: "varchar", length: 255, nullable: true })
+  idempotencyKey!: string | null;
+
   @CreateDateColumn({ type: "timestamptz" })
   createdAt!: Date;
 }

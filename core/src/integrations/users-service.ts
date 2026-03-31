@@ -1,4 +1,5 @@
 import { env } from "../env";
+import { CIRCUIT_USERS_SERVICE, resilientFetch } from "../http/resilientFetch";
 import { traceHeaders } from "../trace/traceContext";
 
 type ExternalUserProfile = {
@@ -18,7 +19,7 @@ export async function fetchUserProfileByUsername(
     ...traceHeaders(),
   };
   if (authorization) headers["authorization"] = authorization;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_USERS_SERVICE, url, {
     method: "GET",
     headers,
   });
@@ -54,7 +55,7 @@ export async function fetchUsersInternal(
     ...traceHeaders(),
   };
   if (authorization) headers["authorization"] = authorization;
-  const res = await fetch(url, {
+  const res = await resilientFetch(CIRCUIT_USERS_SERVICE, url, {
     method: "GET",
     headers,
   });

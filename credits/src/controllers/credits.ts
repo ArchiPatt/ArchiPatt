@@ -127,6 +127,7 @@ export async function issueCreditController(
     tariffId?: string;
     amount?: number;
     authorization?: string;
+    idempotencyKey?: string | null;
   },
 ) {
   const clientId = params.clientId;
@@ -155,6 +156,7 @@ export async function issueCreditController(
     amount,
     performedBy: String(payload.sub ?? "unknown"),
     authorization: params.authorization,
+    idempotencyKey: params.idempotencyKey ?? null,
   });
 
   if (!credit) return { status: 404, body: { error: "tariff_not_found" } };
@@ -227,10 +229,8 @@ export async function internalByClientsController(
   } else {
     const sub = String(payload.sub ?? "");
     const allowed =
-      isEmployee(payload) ||
-      (clientIds.length === 1 && clientIds[0] === sub);
-    if (!allowed)
-      return { status: 403 as const, body: { error: "forbidden" } };
+      isEmployee(payload) || (clientIds.length === 1 && clientIds[0] === sub);
+    if (!allowed) return { status: 403 as const, body: { error: "forbidden" } };
   }
 
   const credits = await creditsService.findCreditsByClientIds(ds, clientIds);
