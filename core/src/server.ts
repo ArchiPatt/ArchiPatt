@@ -10,6 +10,7 @@ import { registerDocsRoutes } from "./routes/docs";
 import { registerAccountsRoutes } from "./routes/accounts";
 import { registerDashboardRoutes } from "./routes/dashboard";
 import { registerWsAccountsRoutes } from "./routes/ws-accounts";
+import { registerSimulatedInstability } from "./plugins/simulatedInstability";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -17,6 +18,8 @@ export async function buildApp(): Promise<FastifyInstance> {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
   });
+
+  registerSimulatedInstability(app);
 
   await app.register(fastifyWebsocket);
   await app.register(cors, {

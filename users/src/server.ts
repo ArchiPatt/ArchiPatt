@@ -9,6 +9,7 @@ import { initDataSource } from "./db/data-source";
 import { seedInitialUsers } from "./bootstrap/seed";
 import { registerUsersRoutes } from "./routes/users";
 import { registerDocsRoutes } from "./routes/docs";
+import { registerSimulatedInstability } from "./plugins/simulatedInstability";
 
 export async function buildApp(): Promise<FastifyInstance> {
   const app = Fastify({
@@ -16,6 +17,8 @@ export async function buildApp(): Promise<FastifyInstance> {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
   });
+
+  registerSimulatedInstability(app);
 
   await app.register(cors, {
     origin: true,
