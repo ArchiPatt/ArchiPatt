@@ -1,10 +1,18 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 
+/** Требование: по умолчанию ~30% ответов 500 (нечётные минуты часа 1,3,5,…) */
+const FAILURE_RATE_ODD_MINUTE = 0.3;
+/** Требование: в чётные минуты часа (0,2,4,…) — ~70% ответов 500 */
+const FAILURE_RATE_EVEN_MINUTE = 0.7;
+
 /**
- * Доля ответов 500: в чётные минуты часа — 70%, в нечётные — 30%.
+ * Вероятность 500 для **каждого** запроса (независимо): при большом числе запросов
+ * доля ошибок по закону больших чисел стремится к этим процентам — «получить все
+ * данные» с первого раза статистически маловероятно; это ожидаемо для хаос-теста.
  */
 function failureProbability(): number {
-  return new Date().getMinutes() % 2 === 0 ? 0.7 : 0.3;
+  const minute = new Date().getMinutes();
+  return minute % 2 === 0 ? FAILURE_RATE_EVEN_MINUTE : FAILURE_RATE_ODD_MINUTE;
 }
 
 function requestPath(req: FastifyRequest): string {

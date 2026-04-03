@@ -1,10 +1,12 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 
-/**
- * Доля ответов 500: в чётные минуты часа — 70%, в нечётные — 30%.
- */
+/** Нечётные минуты часа — 30% 500; чётные — 70% (независимо на каждый запрос). */
+const FAILURE_RATE_ODD_MINUTE = 0.3;
+const FAILURE_RATE_EVEN_MINUTE = 0.7;
+
 function failureProbability(): number {
-  return new Date().getMinutes() % 2 === 0 ? 0.7 : 0.3;
+  const minute = new Date().getMinutes();
+  return minute % 2 === 0 ? FAILURE_RATE_EVEN_MINUTE : FAILURE_RATE_ODD_MINUTE;
 }
 
 function requestPath(req: FastifyRequest): string {
