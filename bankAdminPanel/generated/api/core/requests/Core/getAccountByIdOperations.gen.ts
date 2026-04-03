@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetAccountsByIdOperationsData, GetAccountsByIdOperationsResponse, GetAccountsByIdOperationsError } from "..\\..\\customTypes.gen";
+import type { GetAccountsByIdOperationsData, GetAccountsByIdOperationsResponse, GetAccountsByIdOperationsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

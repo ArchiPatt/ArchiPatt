@@ -79,7 +79,7 @@ export type AuthCodeRequest = {
  * Ответ с access/refresh токенами.
  *
  * `access_token` – JWT (RS256). Внутри:
- * - `sub` = `userHooks.id` (из Users Service)
+ * - `sub` = `user.id` (из Users Service)
  * - `roles` = роли пользователя
  * - `iss` = `ISSUER`
  *

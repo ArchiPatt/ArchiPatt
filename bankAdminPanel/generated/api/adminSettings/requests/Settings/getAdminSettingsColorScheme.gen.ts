@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetAdminSettingsColorSchemeData, GetAdminSettingsColorSchemeResponse, GetAdminSettingsColorSchemeError } from "..\\..\\customTypes.gen";
+import type { GetAdminSettingsColorSchemeData, GetAdminSettingsColorSchemeResponse, GetAdminSettingsColorSchemeError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

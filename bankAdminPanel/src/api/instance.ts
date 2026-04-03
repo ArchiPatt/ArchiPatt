@@ -1,4 +1,4 @@
-import axios, { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios'
+import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios'
 import Cookies from 'js-cookie'
 import { reportAxiosError, reportAxiosResponse } from '../monitoring/rum'
 import {

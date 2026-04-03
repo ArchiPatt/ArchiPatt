@@ -14,7 +14,7 @@ function App() {
    return (
       <ErrorBoundary
          onError={(error) => {
-            sendRumReactError(error)
+            sendRumReactError(error as Error)
          }}
          fallbackRender={({ error }) => (
             <div

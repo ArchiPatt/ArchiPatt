@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostLogoutData, PostLogoutResponse } from "..\\..\\customTypes.gen";
+import type { PostLogoutData, PostLogoutResponse } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetTariffsData, GetTariffsResponse, GetTariffsError } from "..\\..\\customTypes.gen";
+import type { GetTariffsData, GetTariffsResponse, GetTariffsError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

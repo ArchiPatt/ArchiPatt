@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { GetSetupPasswordData, GetSetupPasswordResponse, GetSetupPasswordError } from "..\\..\\customTypes.gen";
+import type { GetSetupPasswordData, GetSetupPasswordResponse, GetSetupPasswordError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 

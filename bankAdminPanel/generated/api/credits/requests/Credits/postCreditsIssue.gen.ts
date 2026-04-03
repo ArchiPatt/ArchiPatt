@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostCreditsIssueData, PostCreditsIssueResponse, PostCreditsIssueError } from "..\\..\\customTypes.gen";
+import type { PostCreditsIssueData, PostCreditsIssueResponse, PostCreditsIssueError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
