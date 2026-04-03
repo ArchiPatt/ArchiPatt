@@ -10,11 +10,13 @@ export async function createAuthCredentials(input: { username: string }) {
   }
 
   const url = `${env.authService.baseUrl}/internal/users`;
+  const idempotencyKey = `internal-auth-user:${input.username.trim()}`;
   const res = await resilientFetch(CIRCUIT_AUTH_SERVICE, url, {
     method: "POST",
     headers: {
       "content-type": "application/json",
       "x-internal-token": env.authService.internalToken,
+      "idempotency-key": idempotencyKey,
       ...traceHeaders(),
     },
     body: JSON.stringify({

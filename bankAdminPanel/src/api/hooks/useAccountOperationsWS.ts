@@ -2,14 +2,20 @@ import { useEffect, useState } from 'react'
 import Cookies from 'js-cookie'
 import type { AccountOperation } from '../../../generated/api/core'
 import { useQueryClient } from '@tanstack/react-query'
+
+const GATEWAY_WS =
+   (import.meta.env.VITE_GATEWAY_WS_URL as string | undefined)?.replace(/\/$/, '') ||
+   'ws://localhost:4004'
+
 export const useAccountOperationsWS = (id: string) => {
    const [operations, setOperations] = useState<AccountOperation[]>([])
    const [isLoading, setIsLoading] = useState(true)
    const queryClient = useQueryClient()
 
    useEffect(() => {
+      const token = Cookies.get('accessToken')
       const socket = new WebSocket(
-         `ws://localhost:4003/ws/accounts/${id}/operations?authorization=Bearer ${Cookies.get('accessToken')}`
+         `${GATEWAY_WS}/ws/accounts/${id}/operations?authorization=${encodeURIComponent(`Bearer ${token ?? ''}`)}`
       )
       socket.onopen = () => {
          setIsLoading(false)
@@ -27,7 +33,7 @@ export const useAccountOperationsWS = (id: string) => {
       return () => {
          socket.close()
       }
-   }, [])
+   }, [id, queryClient])
 
    return { operations, isLoading }
 }

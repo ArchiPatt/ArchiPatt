@@ -1,8 +1,6 @@
 import axios from 'axios'
 
-const SOURCE =
-   (import.meta.env.VITE_RUM_SOURCE as string | undefined)?.trim() ||
-   'web-bankAdminPanel'
+const SOURCE = (import.meta.env.VITE_RUM_SOURCE as string | undefined)?.trim() || 'web-bankAdminPanel'
 
 function monitoringBase(): string | null {
    const u = import.meta.env.VITE_MONITORING_URL as string | undefined
@@ -16,7 +14,7 @@ function postIngest(body: Record<string, unknown>): void {
    void fetch(`${base}/public/ingest`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(body)
    }).catch(() => undefined)
 }
 
@@ -33,9 +31,7 @@ type SendRumOpts = {
 export function sendRumEvent(opts: SendRumOpts): void {
    const traceId = crypto.randomUUID()
    const pathBase =
-      opts.path ??
-      opts.route ??
-      (typeof window !== 'undefined' ? window.location.pathname : '/')
+      opts.path ?? opts.route ?? (typeof window !== 'undefined' ? window.location.pathname : '/')
    const path =
       opts.message && opts.kind === 'client'
          ? `${pathBase}#${encodeURIComponent(opts.message.slice(0, 240))}`
@@ -49,7 +45,7 @@ export function sendRumEvent(opts: SendRumOpts): void {
       statusCode: opts.statusCode ?? 0,
       durationMs: opts.durationMs ?? 0,
       error: opts.error === true,
-      at: Date.now(),
+      at: Date.now()
    })
 }
 
@@ -59,7 +55,7 @@ export function sendRumNavigation(route: string): void {
       route,
       error: false,
       durationMs: 0,
-      statusCode: 200,
+      statusCode: 200
    })
 }
 
@@ -69,7 +65,7 @@ export function sendRumReactError(error: Error): void {
       path: `${window.location.pathname}#react-boundary`,
       error: true,
       statusCode: 0,
-      message: error.message,
+      message: error.message
    })
 }
 
@@ -83,7 +79,7 @@ export function initRumMonitoring(): void {
          path: `${window.location.pathname}#window-error`,
          error: true,
          statusCode: 0,
-         message: ev.message || 'window.error',
+         message: ev.message || 'window.error'
       })
    })
 
@@ -95,8 +91,24 @@ export function initRumMonitoring(): void {
          path: `${window.location.pathname}#unhandledrejection`,
          error: true,
          statusCode: 0,
-         message: msg,
+         message: msg
       })
+   })
+}
+
+export function reportAxiosResponse(
+   cfg: { url?: string; baseURL?: string; method?: string },
+   status: number,
+   durationMs: number
+): void {
+   const fullPath = `${cfg.baseURL ?? ''}${cfg.url ?? ''}`.replace(/\s/g, '').slice(0, 500)
+   sendRumEvent({
+      kind: 'client',
+      path: fullPath || (typeof window !== 'undefined' ? window.location.pathname : '/'),
+      error: status >= 500,
+      statusCode: status,
+      durationMs,
+      message: `${(cfg.method ?? '').toUpperCase()} ${status}`.trim()
    })
 }
 
@@ -118,6 +130,6 @@ export function reportAxiosError(err: unknown): void {
       error: bad,
       statusCode: status,
       durationMs: 0,
-      message: err.message,
+      message: err.message
    })
 }

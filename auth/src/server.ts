@@ -26,7 +26,12 @@ export async function buildApp(): Promise<FastifyInstance> {
   await app.register(cors, {
     origin: true,
     credentials: true,
-    allowedHeaders: ["Content-Type", "Authorization", "x-trace-id"],
+    allowedHeaders: [
+      "Content-Type",
+      "Authorization",
+      "x-trace-id",
+      "Idempotency-Key",
+    ],
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   });
   await app.register(cookie, { secret: env.session.cookieSecret });

@@ -12,6 +12,8 @@ import cors from "@fastify/cors";
 import path from "path";
 import { readFile } from "fs/promises";
 import { env } from "./env";
+import { postMonitoringIngest } from "./http/monitoringIngest";
+import { registerResilientHttpProxies } from "./http/upstreamProxy";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -43,21 +45,12 @@ function reportGatewaySpan(payload: {
     source: "gateway",
     at: Date.now(),
   });
-  const ac = new AbortController();
-  const t = setTimeout(() => ac.abort(), 2000);
-  void fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body,
-    signal: ac.signal,
-  })
-    .catch(() => undefined)
-    .finally(() => clearTimeout(t));
+  void postMonitoringIngest(url, body);
 }
 
-function authRedirectUrl(path: string, queryString: string) {
+function authRedirectUrl(pathSegment: string, queryString: string) {
   const qs = queryString ? `?${queryString}` : "";
-  return `${env.authServiceUrl}${path}${qs}`;
+  return `${env.authServiceUrl}${pathSegment}${qs}`;
 }
 
 export async function buildApp(): Promise<FastifyInstance> {
@@ -65,7 +58,17 @@ export async function buildApp(): Promise<FastifyInstance> {
     logger: {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
+    bodyLimit: 10 * 1024 * 1024,
   });
+
+  app.removeAllContentTypeParsers();
+  app.addContentTypeParser(
+    "*",
+    { parseAs: "buffer" },
+    (_req, payload, done) => {
+      done(null, payload);
+    },
+  );
 
   app.addHook("onRequest", async (req, reply) => {
     const incoming = req.headers["x-trace-id"] ?? req.headers["x-request-id"];
@@ -79,12 +82,12 @@ export async function buildApp(): Promise<FastifyInstance> {
   });
 
   app.addHook("onResponse", async (req, reply) => {
-    const path = (req.raw.url ?? "").split("?")[0] ?? "";
+    const pathOnly = (req.raw.url ?? "").split("?")[0] ?? "";
     if (
-      path === "/health" ||
-      path.startsWith("/debug") ||
-      path === "/swagger" ||
-      path === "/swagger.yml"
+      pathOnly === "/health" ||
+      pathOnly.startsWith("/debug") ||
+      pathOnly === "/swagger" ||
+      pathOnly === "/swagger.yml"
     ) {
       return;
     }
@@ -94,7 +97,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     reportGatewaySpan({
       traceId: req.traceId,
       method: req.method,
-      path,
+      path: pathOnly,
       statusCode,
       durationMs,
       error,
@@ -115,7 +118,6 @@ export async function buildApp(): Promise<FastifyInstance> {
 
   app.get("/health", async () => ({ ok: true }));
 
-  // Диагностика: проверка передачи Authorization (только для отладки)
   app.get("/debug/headers", async (req) => ({
     hasAuthorization: !!(
       req.headers.authorization ?? req.headers.Authorization
@@ -170,7 +172,6 @@ export async function buildApp(): Promise<FastifyInstance> {
 </html>`;
   });
 
-  // Пароль вводится только на auth-страницах, поэтому тут только redirect.
   app.get("/login", async (req, reply) => {
     return reply.redirect(
       authRedirectUrl("/login", req.raw.url?.split("?")[1] ?? ""),
@@ -195,89 +196,7 @@ export async function buildApp(): Promise<FastifyInstance> {
     });
   });
 
-  const authProxyOptions = {
-    upstream: env.authServiceUrl,
-    replyOptions: {
-      rewriteRequestHeaders(
-        req: FastifyRequest<
-          RequestGenericInterface,
-          RawServerBase,
-          IncomingMessage | Http2ServerRequest
-        >,
-        headers: IncomingHttpHeaders,
-      ): IncomingHttpHeaders {
-        const cookie = req.headers.cookie;
-        const withCookie = cookie ? { ...headers, cookie } : headers;
-        return mergeTraceHeader(req, withCookie);
-      },
-    },
-  };
-
-  await app.register(proxy, {
-    ...authProxyOptions,
-    prefix: "/token",
-    rewritePrefix: "/token",
-  });
-  await app.register(proxy, {
-    ...authProxyOptions,
-    prefix: "/logout",
-    rewritePrefix: "/logout",
-  });
-  await app.register(proxy, {
-    ...authProxyOptions,
-    prefix: "/logout-session",
-    rewritePrefix: "/logout-session",
-  });
-  await app.register(proxy, {
-    upstream: env.authServiceUrl,
-    prefix: "/jwks",
-    rewritePrefix: "/jwks",
-    replyOptions: {
-      rewriteRequestHeaders(
-        req: FastifyRequest<
-          RequestGenericInterface,
-          RawServerBase,
-          IncomingMessage | Http2ServerRequest
-        >,
-        headers: IncomingHttpHeaders,
-      ): IncomingHttpHeaders {
-        return mergeTraceHeader(req, headers);
-      },
-    },
-  });
-
-  const proxyWithAuth = (upstream: string, prefix: string) =>
-    app.register(proxy, {
-      upstream,
-      prefix,
-      rewritePrefix: prefix,
-      replyOptions: {
-        rewriteRequestHeaders(
-          req: FastifyRequest<
-            RequestGenericInterface,
-            RawServerBase,
-            IncomingMessage | Http2ServerRequest
-          >,
-          headers: IncomingHttpHeaders,
-        ): IncomingHttpHeaders {
-          const h = req.headers;
-          const raw = h.authorization ?? h.Authorization;
-          const auth = Array.isArray(raw) ? raw[0] : raw;
-          const withAuth = auth ? { ...headers, authorization: auth } : headers;
-          return mergeTraceHeader(req, withAuth);
-        },
-      },
-    });
-
-  await proxyWithAuth(env.usersServiceUrl, "/users");
-  await proxyWithAuth(env.usersServiceUrl, "/me");
-
-  await proxyWithAuth(env.creditsServiceUrl, "/credits");
-  await proxyWithAuth(env.creditsServiceUrl, "/tariffs");
-
-  await proxyWithAuth(env.coreServiceUrl, "/currencies");
-  await proxyWithAuth(env.coreServiceUrl, "/accounts");
-  await proxyWithAuth(env.coreServiceUrl, "/dashboard");
+  registerResilientHttpProxies(app);
 
   await app.register(proxy, {
     upstream: env.coreServiceUrl,
@@ -297,9 +216,6 @@ export async function buildApp(): Promise<FastifyInstance> {
       },
     },
   });
-
-  await proxyWithAuth(env.adminSettingServiceUrl, "/admin-settings");
-  await proxyWithAuth(env.clientSettingsServiceUrl, "/client-settings");
 
   return app;
 }

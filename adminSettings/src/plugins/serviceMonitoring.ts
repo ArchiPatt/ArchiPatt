@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import type { FastifyInstance } from "fastify";
 import { enterTraceContext } from "../trace/traceContext";
+import { postMonitoringIngest } from "../http/monitoringIngest";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -9,7 +10,9 @@ declare module "fastify" {
   }
 }
 
-/** Трассировка и метрики в monitoring: traceId, duration, ошибки 5xx. */
+/**
+ * Трассировка и метрики в monitoring: traceId, duration, ошибки 5xx
+ */
 export function registerServiceMonitoring(
   app: FastifyInstance,
   options: { monitoringServiceUrl: string; source: string },
@@ -55,15 +58,6 @@ export function registerServiceMonitoring(
       error,
       at: Date.now(),
     });
-    const ac = new AbortController();
-    const t = setTimeout(() => ac.abort(), 2000);
-    void fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body,
-      signal: ac.signal,
-    })
-      .catch(() => undefined)
-      .finally(() => clearTimeout(t));
+    void postMonitoringIngest(url, body);
   });
 }

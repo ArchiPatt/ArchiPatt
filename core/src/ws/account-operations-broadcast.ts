@@ -29,6 +29,18 @@ export function operationToPayload(op: AccountOperation): OperationPayload {
 
 const subscribers = new Map<string, Set<(data: string) => void>>();
 
+/**
+ * Подписка сотрудников на операции по всем счетам (firehose)
+ */
+const globalSubscribers = new Set<(data: string) => void>();
+
+export function subscribeGlobal(send: (data: string) => void): () => void {
+  globalSubscribers.add(send);
+  return () => {
+    globalSubscribers.delete(send);
+  };
+}
+
 export function subscribe(
   accountId: string,
   send: (data: string) => void,
@@ -66,6 +78,14 @@ export function notifyNewOperation(
     try {
       send(data);
     } catch {}
+  }
+
+  if (globalSubscribers.size > 0) {
+    for (const send of globalSubscribers) {
+      try {
+        send(data);
+      } catch {}
+    }
   }
 }
 

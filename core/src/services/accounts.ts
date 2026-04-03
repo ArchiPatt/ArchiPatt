@@ -70,6 +70,22 @@ export async function findOperations(
   return { items, total };
 }
 
+/**
+ * Последние операции по всем счетам (снимок для WS сотрудников)
+ */
+export async function findRecentOperationsGlobally(
+  ds: DataSource,
+  opts: { limit: number },
+) {
+  const repo = ds.getRepository(AccountOperation);
+  const total = await repo.count();
+  const items = await repo.find({
+    order: { createdAt: "DESC" },
+    take: opts.limit,
+  });
+  return { items, total };
+}
+
 export async function findOperationByIdempotency(
   ds: DataSource,
   accountId: string,

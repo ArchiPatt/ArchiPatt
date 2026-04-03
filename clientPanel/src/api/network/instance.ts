@@ -3,12 +3,27 @@ import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 import { tokenStorage } from "../../shared/storage/tokenStorage";
 import { refreshStorage } from "../../shared/storage/refreshStorage";
 import { authApi } from "../requests/authApi.ts";
-import { reportAxiosError } from "../../monitoring/rum.ts";
+import { reportAxiosError, reportAxiosResponse } from "../../monitoring/rum.ts";
+import {
+  axiosRetryDelay,
+  canRetryIdempotentRequest,
+  gatewayCircuit,
+  shouldRetryHttpError,
+} from "../../monitoring/gatewayResilience.ts";
 
 const AUTH_LOGIN_URL = "http://localhost:4004/login";
 const RETURN_TO = "http://localhost:5173/";
 
 const instance = axios.create({ baseURL: "http://localhost:4004/" });
+
+const REQ_START = Symbol.for("archipatt.reqStart");
+const INFRA_RETRY = "_archipattInfraRetry";
+
+type ConfigExtras = AxiosRequestConfig & {
+  [REQ_START]?: number;
+  [INFRA_RETRY]?: number;
+  _retry?: boolean;
+};
 
 function attachIdempotencyKey(config: AxiosRequestConfig): void {
   const m = config.method?.toUpperCase();
@@ -17,7 +32,7 @@ function attachIdempotencyKey(config: AxiosRequestConfig): void {
   const h = config.headers as Record<string, string | undefined>;
   if (h["Idempotency-Key"] ?? h["idempotency-key"]) return;
   const sym = Symbol.for("archipatt.idempotencyKey");
-  type WithKey = AxiosRequestConfig & { [sym]?: string };
+  type WithKey = AxiosRequestConfig & { [k: symbol]: string | undefined };
   const w = config as WithKey;
   if (!w[sym]) {
     w[sym] =
@@ -28,13 +43,35 @@ function attachIdempotencyKey(config: AxiosRequestConfig): void {
   h["Idempotency-Key"] = w[sym];
 }
 
+function recordCircuitOnFinalError(error: AxiosError): void {
+  const s = error.response?.status;
+  if (s === 401) {
+    gatewayCircuit.recordSuccess();
+    return;
+  }
+  if (
+    !error.response ||
+    (s !== undefined && (s >= 500 || s === 408 || s === 429))
+  ) {
+    gatewayCircuit.recordInfrastructureFailure();
+  } else {
+    gatewayCircuit.recordSuccess();
+  }
+}
+
 instance.interceptors.request.use((config) => {
+  try {
+    gatewayCircuit.beforeRequest();
+  } catch (e) {
+    return Promise.reject(e);
+  }
   attachIdempotencyKey(config);
   const token = tokenStorage.getItem();
   if (token && typeof token === "string") {
     config.headers = config.headers ?? {};
     config.headers["Authorization"] = `Bearer ${token}`;
   }
+  (config as ConfigExtras)[REQ_START] = Date.now();
   return config;
 });
 
@@ -53,12 +90,32 @@ const processQueue = (error: unknown, token: string | null = null) => {
 };
 
 instance.interceptors.response.use(
-  (response: AxiosResponse) => response,
+  (response: AxiosResponse) => {
+    gatewayCircuit.recordSuccess();
+    const cfg = response.config as ConfigExtras;
+    const t0 = cfg[REQ_START];
+    const durationMs = typeof t0 === "number" ? Date.now() - t0 : 0;
+    reportAxiosResponse(cfg, response.status, durationMs);
+    return response;
+  },
   async (error: AxiosError) => {
+    const originalRequest = error.config as ConfigExtras;
+
+    if (
+      shouldRetryHttpError(error) &&
+      originalRequest &&
+      canRetryIdempotentRequest(originalRequest)
+    ) {
+      const n = originalRequest[INFRA_RETRY] ?? 0;
+      if (n < 3) {
+        originalRequest[INFRA_RETRY] = n + 1;
+        await axiosRetryDelay(n);
+        return instance(originalRequest);
+      }
+    }
+
     reportAxiosError(error);
-    const originalRequest = error.config as AxiosRequestConfig & {
-      _retry?: boolean;
-    };
+    recordCircuitOnFinalError(error);
 
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
