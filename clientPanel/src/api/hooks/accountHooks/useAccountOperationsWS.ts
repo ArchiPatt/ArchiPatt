@@ -25,12 +25,22 @@ const useAccountOperationsWS = (id: string) => {
       setIsLoading(false);
     };
     socket.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === "snapshot" && Array.isArray(data.items)) {
-        setOperations(data.items);
+      let data: {
+        type?: string;
+        items?: unknown;
+        operation?: AccountOperation;
+      };
+      try {
+        data = JSON.parse(String(event.data)) as typeof data;
+      } catch {
+        return;
       }
-      if (data.type === "operation_added" && "operation" in data) {
-        setOperations((prev) => [data.operation, ...prev]);
+      if (data.type === "snapshot") {
+        setOperations(Array.isArray(data.items) ? data.items : []);
+      }
+      if (data.type === "operation_added" && data.operation) {
+        const op = data.operation;
+        setOperations((prev) => [op, ...prev]);
         queryClient.invalidateQueries({ queryKey: ["account"] });
       }
     };

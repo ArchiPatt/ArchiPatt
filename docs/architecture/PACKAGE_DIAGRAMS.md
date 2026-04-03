@@ -69,9 +69,9 @@ flowchart TB
 | Handlers | auth | controllers, security |
 | Controllers | auth | services, security, integrations |
 | Services | auth | db/entities |
-| DB | data-source, entities | — |
+| DB | data-source, entities | – |
 | Integrations | users-service | Users API |
-| Security | bearer, tokens, jwks | — |
+| Security | bearer, tokens, jwks | – |
 
 ---
 
@@ -140,7 +140,7 @@ flowchart TB
 | Handlers | users | controllers, security |
 | Controllers | users, auth | services, integrations |
 | Services | profiles | db/entities |
-| DB | data-source, entities | — |
+| DB | data-source, entities | – |
 | Integrations | auth-service | Auth API |
 | Bootstrap | seed | db |
 
@@ -215,7 +215,7 @@ flowchart TB
 | Handlers | credits | controllers, security |
 | Controllers | credits, tariffs, auth | services |
 | Services | credits | db/entities, integrations |
-| DB | data-source, entities, enums | — |
+| DB | data-source, entities, enums | – |
 | Integrations | core-service, users-service | Core API, Users API |
 | Workers | accrual | services |
 
@@ -309,9 +309,9 @@ flowchart TB
 | Controllers | accounts, dashboard, auth | services, integrations |
 | Services | accounts, exchange-rates | db/entities |
 | Messaging | consumer, publisher | services, ws |
-| DB | data-source, entities, enums | — |
+| DB | data-source, entities, enums | – |
 | Integrations | credits-service, users-service | Credits API, Users API |
-| WS | broadcast | — |
+| WS | broadcast | – |
 
 ---
 
@@ -352,7 +352,7 @@ flowchart TB
 | Config | env | Переменные окружения |
 | Proxy | http-proxy | Проксирование на auth, users, credits, core, admin-settings |
 
-Gateway не содержит бизнес-логики — только маршрутизацию запросов на целевые сервисы.
+Gateway не содержит бизнес-логики – только маршрутизацию запросов на целевые сервисы.
 
 ---
 

@@ -59,7 +59,7 @@ export function createUsersHandlers(app: FastifyInstance) {
         {
           hasAuth,
           url: req.url,
-          authPrefix: auth?.slice(0, 25) ?? "—",
+          authPrefix: auth?.slice(0, 25) ?? "–",
         },
         "[Users] GET /me",
       );

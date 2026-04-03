@@ -4,7 +4,7 @@ export function getDashboardHtml(): string {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Мониторинг — шлюз и сервисы</title>
+  <title>Мониторинг – шлюз и сервисы</title>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <style>
     :root {
@@ -73,14 +73,14 @@ export function getDashboardHtml(): string {
 <body>
   <header>
     <h1>Мониторинг</h1>
-    <p>Шлюз (сервер), клиенты (SPA/WebView через /public/ingest) — окно: последний час</p>
+    <p>Шлюз (сервер), клиенты (SPA/WebView через /public/ingest) – окно: последний час</p>
   </header>
   <div class="wrap">
     <div class="tiles">
-      <div class="tile"><div class="label">Запросов</div><div class="value" id="t-total">—</div></div>
-      <div class="tile error"><div class="label">Ошибки (5xx / клиент)</div><div class="value" id="t-err">—</div></div>
-      <div class="tile error"><div class="label">% ошибок</div><div class="value" id="t-rate">—</div></div>
-      <div class="tile"><div class="label">Ср. время ответа, мс</div><div class="value" id="t-lat">—</div></div>
+      <div class="tile"><div class="label">Запросов</div><div class="value" id="t-total">–</div></div>
+      <div class="tile error"><div class="label">Ошибки (5xx / клиент)</div><div class="value" id="t-err">–</div></div>
+      <div class="tile error"><div class="label">% ошибок</div><div class="value" id="t-rate">–</div></div>
+      <div class="tile"><div class="label">Ср. время ответа, мс</div><div class="value" id="t-lat">–</div></div>
     </div>
     <div class="charts">
       <div class="chart-box">
@@ -163,7 +163,7 @@ export function getDashboardHtml(): string {
       const tb = document.getElementById('tb');
       tb.innerHTML = (d.recent || []).map(ev => '<tr class="' + (ev.error ? 'err' : '') + '">' +
         '<td class="mono">' + ev.at.slice(11, 19) + '</td>' +
-        '<td class="mono">' + (ev.source || '—') + '</td>' +
+        '<td class="mono">' + (ev.source || '–') + '</td>' +
         '<td class="mono" title="' + ev.traceId + '">' + ev.traceId.slice(0, 8) + '…</td>' +
         '<td>' + ev.method + '</td>' +
         '<td class="mono">' + (ev.path.length > 48 ? ev.path.slice(0, 46) + '…' : ev.path) + '</td>' +

@@ -9,6 +9,7 @@ import {
   operationToPayload,
   type OperationPayload,
 } from "../ws/account-operations-broadcast";
+import { makeWsTextSender } from "../ws/wsSend";
 
 const SNAPSHOT_LIMIT = 80;
 
@@ -19,7 +20,7 @@ interface SnapshotMessage {
 }
 
 /**
- * Поток новых операций по всем клиентам — только employee/admin.
+ * Поток новых операций по всем клиентам – только employee/admin.
  * Дополняет per-account WS; для сотруднических панелей.
  */
 export function registerWsStaffOperationsRoutes(app: FastifyInstance): void {
@@ -52,6 +53,12 @@ export function registerWsStaffOperationsRoutes(app: FastifyInstance): void {
         return;
       }
 
+      const send = makeWsTextSender(socket);
+      const unsubscribe = subscribeGlobal(send);
+      socket.on("close", () => {
+        unsubscribe();
+      });
+
       const { items, total } =
         await accountsService.findRecentOperationsGlobally(app.db, {
           limit: SNAPSHOT_LIMIT,
@@ -63,16 +70,7 @@ export function registerWsStaffOperationsRoutes(app: FastifyInstance): void {
         total,
       };
 
-      const send = (data: string) => {
-        if (socket.readyState === WebSocket.OPEN) socket.send(data);
-      };
-
       send(JSON.stringify(snapshot));
-
-      const unsubscribe = subscribeGlobal(send);
-      socket.on("close", () => {
-        unsubscribe();
-      });
     },
   );
 }

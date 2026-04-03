@@ -17,16 +17,16 @@
 | Переменная             | Описание                                          | Default          |
 | ---------------------- | ------------------------------------------------- | ---------------- |
 | `PORT`                 | Порт сервиса                                      | `4005`           |
-| `AUTH_ISSUER`          | URL auth-сервиса (для JWKS и проверки iss)        | —                |
+| `AUTH_ISSUER`          | URL auth-сервиса (для JWKS и проверки iss)        | –                |
 | `AUTH_SERVICE_URL`     | Базовый URL auth-сервиса (проверка revoke токена) | `AUTH_ISSUER`    |
-| `AUTH_INTERNAL_TOKEN`  | Внутренний токен для запросов к auth              | —                |
+| `AUTH_INTERNAL_TOKEN`  | Внутренний токен для запросов к auth              | –                |
 | `USERS_SERVICE_URL`    | Базовый URL users-сервиса                         | `localhost:4001` |
-| `USERS_INTERNAL_TOKEN` | Внутренний токен для запросов к users             | —                |
-| `INTERNAL_TOKEN`       | Fallback для всех internal-токенов                | —                |
+| `USERS_INTERNAL_TOKEN` | Внутренний токен для запросов к users             | –                |
+| `INTERNAL_TOKEN`       | Fallback для всех internal-токенов                | –                |
 | `DB_HOST`              | Хост PostgreSQL                                   | `localhost`      |
 | `DB_PORT`              | Порт PostgreSQL                                   | `5432`           |
 | `DB_USER`              | Пользователь БД                                   | `postgres`       |
-| `DB_PASSWORD`          | Пароль БД                                         | —                |
+| `DB_PASSWORD`          | Пароль БД                                         | –                |
 | `DB_NAME`              | Имя базы данных                                   | `admin_settings` |
 
 ## Запуск
@@ -87,4 +87,4 @@ Swagger UI доступен по адресу: `http://localhost:4005/swagger`
 | `accountId` | `text`        | ID скрытого счёта              |
 | `createdAt` | `timestamptz` | Дата скрытия                   |
 
-Уникальный составной индекс на `(userId, accountId)` — один пользователь не может скрыть один счёт дважды.
+Уникальный составной индекс на `(userId, accountId)` – один пользователь не может скрыть один счёт дважды.

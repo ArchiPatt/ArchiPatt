@@ -610,10 +610,10 @@ paths:
   /ws/accounts/{id}/operations:
     get:
       tags: [Core]
-      summary: WebSocket — операции по счёту в реальном времени
+      summary: WebSocket – операции по счёту в реальном времени
       description: |
         WebSocket-подключение. При подключении отправляется snapshot последних 50 операций,
-        затем при новых операциях по счёту — push-обновления в реальном времени.
+        затем при новых операциях по счёту – push-обновления в реальном времени.
 
         Авторизация: заголовок `Authorization: Bearer <token>` или query `authorization=Bearer%20<token>`.
       parameters:
@@ -632,7 +632,7 @@ paths:
           description: Bearer token (альтернатива заголовку)
       responses:
         "101":
-          description: Switching Protocols — WebSocket подключение установлено
+          description: Switching Protocols – WebSocket подключение установлено
         "401":
           description: Не авторизован
         "403":

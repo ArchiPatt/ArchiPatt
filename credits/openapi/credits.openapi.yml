@@ -394,8 +394,8 @@ paths:
       description: |
         Возвращает кредиты со статусом Active, у которых `nextPaymentDueAt` < now (дата следующего платежа просрочена).
 
-        - Без `clientId` — все просроченные (только employee/admin).
-        - С `clientId` — просроченные кредиты клиента (employee/admin или владелец).
+        - Без `clientId` – все просроченные (только employee/admin).
+        - С `clientId` – просроченные кредиты клиента (employee/admin или владелец).
       security:
         - bearerAuth: []
       parameters:
@@ -436,11 +436,11 @@ paths:
       tags: [Credits]
       summary: Просроченные платежи по кредитам
       description: |
-        Возвращает список **платежей, которые клиент просрочил** — по каждому кредиту со статусом Active,
+        Возвращает список **платежей, которые клиент просрочил** – по каждому кредиту со статусом Active,
         у которого `nextPaymentDueAt` < now, одна запись: какой платёж был due и когда.
 
-        - Без `clientId` — все просроченные платежи (только employee/admin).
-        - С `clientId` — просроченные платежи клиента (employee/admin или владелец).
+        - Без `clientId` – все просроченные платежи (только employee/admin).
+        - С `clientId` – просроченные платежи клиента (employee/admin или владелец).
       security:
         - bearerAuth: []
       parameters:
@@ -837,7 +837,7 @@ components:
         ]
     OverduePaymentResponse:
       type: object
-      description: Просроченный платёж — платёж по кредиту, который клиент не внёс в срок.
+      description: Просроченный платёж – платёж по кредиту, который клиент не внёс в срок.
       required:
         [
           creditId,

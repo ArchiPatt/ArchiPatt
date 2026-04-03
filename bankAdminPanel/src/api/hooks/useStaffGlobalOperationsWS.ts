@@ -41,9 +41,14 @@ export function useStaffGlobalOperationsWS(enabled: boolean) {
          setIsLoading(false)
       }
       socket.onmessage = (event) => {
-         const data = JSON.parse(event.data) as WsMessage
-         if (data.type === 'snapshot' && Array.isArray(data.items)) {
-            setOperations(data.items)
+         let data: WsMessage
+         try {
+            data = JSON.parse(String(event.data)) as WsMessage
+         } catch {
+            return
+         }
+         if (data.type === 'snapshot') {
+            setOperations(Array.isArray(data.items) ? data.items : [])
          }
          if (data.type === 'operation_added' && data.operation) {
             setOperations((prev) => [data.operation!, ...prev].slice(0, 200))

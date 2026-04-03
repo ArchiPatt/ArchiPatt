@@ -9,6 +9,7 @@ import {
   operationToPayload,
   type OperationPayload,
 } from "../ws/account-operations-broadcast";
+import { makeWsTextSender } from "../ws/wsSend";
 
 const SNAPSHOT_LIMIT = 50;
 const SNAPSHOT_SORT = "DESC" as const;
@@ -61,6 +62,12 @@ export function registerWsAccountsRoutes(app: FastifyInstance): void {
         return;
       }
 
+      const send = makeWsTextSender(socket);
+      const unsubscribe = subscribeToBroadcast(accountId, send);
+      socket.on("close", () => {
+        unsubscribe();
+      });
+
       const { items, total } = await accountsService.findOperations(
         app.db,
         accountId,
@@ -76,16 +83,8 @@ export function registerWsAccountsRoutes(app: FastifyInstance): void {
         items: items.map(operationToPayload),
         total,
       };
-      const send = (data: string) => {
-        if (socket.readyState === WebSocket.OPEN) socket.send(data);
-      };
 
       send(JSON.stringify(snapshot));
-
-      const unsubscribe = subscribeToBroadcast(accountId, send);
-      socket.on("close", () => {
-        unsubscribe();
-      });
     },
   );
 }

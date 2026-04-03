@@ -27,9 +27,7 @@ export const env = {
       process.env.AUTH_ISSUER ??
       "http://localhost:4000",
     internalToken:
-      process.env.AUTH_INTERNAL_TOKEN ??
-      process.env.INTERNAL_TOKEN ??
-      "",
+      process.env.AUTH_INTERNAL_TOKEN ?? process.env.INTERNAL_TOKEN ?? "",
   },
   usersService: {
     baseUrl: process.env.USERS_SERVICE_URL ?? "http://localhost:4001",
@@ -46,6 +44,6 @@ export const env = {
     password: process.env.DB_PASSWORD ?? "1234",
     name: process.env.DB_NAME ?? "admin_settings",
   },
-  /** Пусто — span BFF в monitoring не отправляются */
+  /** Пусто – span BFF в monitoring не отправляются */
   monitoringServiceUrl: (process.env.MONITORING_SERVICE_URL ?? "").trim(),
 };

@@ -17,9 +17,10 @@ export const env = {
   usersServiceUrl: process.env.USERS_SERVICE_URL ?? "http://localhost:4001",
   creditsServiceUrl: process.env.CREDITS_SERVICE_URL ?? "http://localhost:4002",
   coreServiceUrl: process.env.CORE_SERVICE_URL ?? "http://localhost:4003",
-  adminSettingServiceUrl: process.env.ADMIN_SETTING_SERVICE_URL ?? "http://localhost:4005",
+  adminSettingServiceUrl:
+    process.env.ADMIN_SETTING_SERVICE_URL ?? "http://localhost:4005",
   clientSettingsServiceUrl:
     process.env.CLIENT_SETTINGS_SERVICE_URL ?? "http://localhost:4006",
-  /** Если пусто — события в monitoring не отправляются */
+  /** Если пусто – события в monitoring не отправляются */
   monitoringServiceUrl: (process.env.MONITORING_SERVICE_URL ?? "").trim(),
 };

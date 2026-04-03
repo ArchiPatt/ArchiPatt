@@ -25,10 +25,10 @@ paths:
   /ws/accounts/{id}/operations:
     get:
       tags: [WebSocket, Core]
-      summary: WebSocket — операции по счёту в реальном времени
+      summary: WebSocket – операции по счёту в реальном времени
       description: |
         Проксирован на Core. WebSocket-подключение для получения операций по счёту в реальном времени.
-        При подключении — snapshot последних 50 операций, затем push при новых операциях.
+        При подключении – snapshot последних 50 операций, затем push при новых операциях.
         Авторизация: `Authorization: Bearer <token>` или query `authorization=Bearer%20<token>`.
       parameters:
         - in: path
@@ -46,7 +46,7 @@ paths:
           description: Bearer token (альтернатива заголовку)
       responses:
         "101":
-          description: Switching Protocols — WebSocket подключение установлено
+          description: Switching Protocols – WebSocket подключение установлено
         "401":
           description: Не авторизован
         "403":
@@ -443,8 +443,8 @@ paths:
         Проксирован на credits /credits/rating/{clientId}.
 
         Доступ:
-        - `client` — только для себя (`clientId = token.sub`)
-        - `employee/admin` — для любого клиента
+        - `client` – только для себя (`clientId = token.sub`)
+        - `employee/admin` – для любого клиента
       security:
         - bearerAuth: []
       parameters:
@@ -480,7 +480,7 @@ paths:
       summary: Проксирован на credits /credits/overdue
       description: |
         Просроченные кредиты (nextPaymentDueAt < now).
-        Без clientId — все (employee/admin). С clientId — фильтр по клиенту.
+        Без clientId – все (employee/admin). С clientId – фильтр по клиенту.
       security:
         - bearerAuth: []
       parameters:
@@ -518,8 +518,8 @@ paths:
       tags: [Credits]
       summary: Проксирован на credits /credits/overdue-payments
       description: |
-        Просроченные платежи — какие платежи по кредиту клиент просрочил.
-        Без clientId — все (employee/admin). С clientId — фильтр по клиенту.
+        Просроченные платежи – какие платежи по кредиту клиент просрочил.
+        Без clientId – все (employee/admin). С clientId – фильтр по клиенту.
       security:
         - bearerAuth: []
       parameters:

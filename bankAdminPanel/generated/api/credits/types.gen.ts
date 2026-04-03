@@ -4,11 +4,11 @@
  * Стандартный ответ healthcheck.
  */
 export type HealthResponse = {
-    /**
-     * Признак, что сервис жив.
-     */
-    ok: boolean;
-};
+   /**
+    * Признак, что сервис жив.
+    */
+   ok: boolean
+}
 
 /**
  * Единый формат ошибки в JSON.
@@ -17,30 +17,30 @@ export type HealthResponse = {
  *
  */
 export type ErrorResponse = {
-    error: string;
-};
+   error: string
+}
 
 /**
  * Кредитный рейтинг клиента (0–100).
  */
 export type CreditRatingResponse = {
-    /**
-     * Балл рейтинга (0–100).
-     */
-    score: number;
-    /**
-     * Количество просроченных кредитов.
-     */
-    overdueCount: number;
-    /**
-     * Всего кредитов у клиента.
-     */
-    totalCredits: number;
-    /**
-     * Количество закрытых кредитов.
-     */
-    closedCount: number;
-};
+   /**
+    * Балл рейтинга (0–100).
+    */
+   score: number
+   /**
+    * Количество просроченных кредитов.
+    */
+   overdueCount: number
+   /**
+    * Всего кредитов у клиента.
+    */
+   totalCredits: number
+   /**
+    * Количество закрытых кредитов.
+    */
+   closedCount: number
+}
 
 /**
  * Создание кредитного тарифа (доступно `employee/admin`).
@@ -50,55 +50,55 @@ export type CreditRatingResponse = {
  *
  */
 export type CreateTariffRequest = {
-    /**
-     * Уникальное имя тарифа.
-     */
-    name: string;
-    /**
-     * Ставка начисления за период, доля (например `0.015`).
-     */
-    interestRate: number;
-    /**
-     * Длина расчётного периода в днях.
-     *
-     * Если не передано – берётся значение по умолчанию `1`.
-     *
-     */
-    billingPeriodDays?: number;
-};
+   /**
+    * Уникальное имя тарифа.
+    */
+   name: string
+   /**
+    * Ставка начисления за период, доля (например `0.015`).
+    */
+   interestRate: number
+   /**
+    * Длина расчётного периода в днях.
+    *
+    * Если не передано – берётся значение по умолчанию `1`.
+    *
+    */
+   billingPeriodDays?: number
+}
 
 /**
  * Кредитный тариф.
  */
 export type TariffResponse = {
-    /**
-     * ID тарифа.
-     */
-    id: string;
-    /**
-     * Уникальное имя тарифа.
-     */
-    name: string;
-    /**
-     * Ставка начисления за период в виде строки (decimal, 4 знака).
-     *
-     * Пример: `"0.0150"` означает 1.5% за период (`billingPeriodDays` дней).
-     *
-     */
-    interestRate: string;
-    /**
-     * Длина расчётного периода (в днях).
-     */
-    billingPeriodDays: number;
-    /**
-     * Активен ли тариф.
-     */
-    isActive: boolean;
-    /**
-     * Дата создания тарифа.
-     */
-    createdAt: string;
-};
+   /**
+    * ID тарифа.
+    */
+   id: string
+   /**
+    * Уникальное имя тарифа.
+    */
+   name: string
+   /**
+    * Ставка начисления за период в виде строки (decimal, 4 знака).
+    *
+    * Пример: `"0.0150"` означает 1.5% за период (`billingPeriodDays` дней).
+    *
+    */
+   interestRate: string
+   /**
+    * Длина расчётного периода (в днях).
+    */
+   billingPeriodDays: number
+   /**
+    * Активен ли тариф.
+    */
+   isActive: boolean
+   /**
+    * Дата создания тарифа.
+    */
+   createdAt: string
+}
 
 /**
  * Запрос на выдачу кредита.
@@ -109,23 +109,23 @@ export type TariffResponse = {
  *
  */
 export type IssueCreditRequest = {
-    /**
-     * ID клиента (профиль в Users Service).
-     */
-    clientId: string;
-    /**
-     * ID счёта в Core, куда зачислить деньги.
-     */
-    accountId: string;
-    /**
-     * ID активного тарифа.
-     */
-    tariffId: string;
-    /**
-     * Сумма выдачи кредита.
-     */
-    amount: number;
-};
+   /**
+    * ID клиента (профиль в Users Service).
+    */
+   clientId: string
+   /**
+    * ID счёта в Core, куда зачислить деньги.
+    */
+   accountId: string
+   /**
+    * ID активного тарифа.
+    */
+   tariffId: string
+   /**
+    * Сумма выдачи кредита.
+    */
+   amount: number
+}
 
 /**
  * Погашение кредита.
@@ -134,11 +134,11 @@ export type IssueCreditRequest = {
  *
  */
 export type RepayCreditRequest = {
-    /**
-     * Сумма платежа.
-     */
-    amount: number;
-};
+   /**
+    * Сумма платежа.
+    */
+   amount: number
+}
 
 /**
  * Кредит.
@@ -148,631 +148,641 @@ export type RepayCreditRequest = {
  *
  */
 export type CreditResponse = {
-    /**
-     * ID кредита.
-     */
-    id: string;
-    /**
-     * ID клиента (владелец кредита).
-     */
-    clientId: string;
-    /**
-     * ID счёта в Core, через который проходят зачисления/платежи.
-     */
-    accountId: string;
-    /**
-     * ID тарифа, по которому был выдан кредит.
-     */
-    tariffId: string;
-    /**
-     * Первоначальная сумма (decimal строкой).
-     */
-    principalAmount: string;
-    /**
-     * Остаток долга (decimal строкой).
-     */
-    outstandingAmount: string;
-    /**
-     * Статус кредита:
-     * - `active` – активен
-     * - `closed` – полностью погашен
-     * - `defaulted` – дефолт (зарезервировано на будущее)
-     *
-     */
-    status: 'active' | 'closed' | 'defaulted';
-    /**
-     * Дата выдачи кредита.
-     */
-    issuedAt: string;
-    /**
-     * Следующая дата начисления процентов/платежа.
-     *
-     * Начисление процентов происходит циклически с шагом `billingPeriodDays`.
-     *
-     */
-    nextPaymentDueAt: string;
-    /**
-     * Дата, когда началась просрочка (если клиент не внёс платёж в срок).
-     * Заполняется при первом обнаружении просрочки (nextPaymentDueAt < now).
-     *
-     */
-    overdueSince?: string | null;
-    /**
-     * Дата закрытия (если кредит закрыт).
-     */
-    closedAt?: string | null;
-    /**
-     * Дата создания записи.
-     */
-    createdAt: string;
-};
+   /**
+    * ID кредита.
+    */
+   id: string
+   /**
+    * ID клиента (владелец кредита).
+    */
+   clientId: string
+   /**
+    * ID счёта в Core, через который проходят зачисления/платежи.
+    */
+   accountId: string
+   /**
+    * ID тарифа, по которому был выдан кредит.
+    */
+   tariffId: string
+   /**
+    * Первоначальная сумма (decimal строкой).
+    */
+   principalAmount: string
+   /**
+    * Остаток долга (decimal строкой).
+    */
+   outstandingAmount: string
+   /**
+    * Статус кредита:
+    * - `active` – активен
+    * - `closed` – полностью погашен
+    * - `defaulted` – дефолт (зарезервировано на будущее)
+    *
+    */
+   status: 'active' | 'closed' | 'defaulted'
+   /**
+    * Дата выдачи кредита.
+    */
+   issuedAt: string
+   /**
+    * Следующая дата начисления процентов/платежа.
+    *
+    * Начисление процентов происходит циклически с шагом `billingPeriodDays`.
+    *
+    */
+   nextPaymentDueAt: string
+   /**
+    * Дата, когда началась просрочка (если клиент не внёс платёж в срок).
+    * Заполняется при первом обнаружении просрочки (nextPaymentDueAt < now).
+    *
+    */
+   overdueSince?: string | null
+   /**
+    * Дата закрытия (если кредит закрыт).
+    */
+   closedAt?: string | null
+   /**
+    * Дата создания записи.
+    */
+   createdAt: string
+}
 
 /**
- * Просроченный платёж — платёж по кредиту, который клиент не внёс в срок.
+ * Просроченный платёж – платёж по кредиту, который клиент не внёс в срок.
  */
 export type OverduePaymentResponse = {
-    /**
-     * ID кредита.
-     */
-    creditId: string;
-    /**
-     * ID клиента.
-     */
-    clientId: string;
-    /**
-     * ID счёта.
-     */
-    accountId: string;
-    /**
-     * ID тарифа.
-     */
-    tariffId: string;
-    /**
-     * Первоначальная сумма кредита (decimal строкой).
-     */
-    principalAmount: string;
-    /**
-     * Текущий остаток долга (decimal строкой).
-     */
-    outstandingAmount: string;
-    /**
-     * Дата, когда платёж был due и не был внесён.
-     */
-    dueDate: string;
-    /**
-     * Сколько дней просрочено.
-     */
-    daysOverdue: number;
-    /**
-     * Дата выдачи кредита.
-     */
-    issuedAt: string;
-};
+   /**
+    * ID кредита.
+    */
+   creditId: string
+   /**
+    * ID клиента.
+    */
+   clientId: string
+   /**
+    * ID счёта.
+    */
+   accountId: string
+   /**
+    * ID тарифа.
+    */
+   tariffId: string
+   /**
+    * Первоначальная сумма кредита (decimal строкой).
+    */
+   principalAmount: string
+   /**
+    * Текущий остаток долга (decimal строкой).
+    */
+   outstandingAmount: string
+   /**
+    * Дата, когда платёж был due и не был внесён.
+    */
+   dueDate: string
+   /**
+    * Сколько дней просрочено.
+    */
+   daysOverdue: number
+   /**
+    * Дата выдачи кредита.
+    */
+   issuedAt: string
+}
 
 /**
  * Ответ после платежа по кредиту.
  */
 export type RepayCreditResponse = {
-    /**
-     * ID кредита.
-     */
-    id: string;
-    /**
-     * Новый статус кредита.
-     */
-    status: 'active' | 'closed' | 'defaulted';
-    /**
-     * Новый остаток долга (decimal строкой).
-     */
-    outstandingAmount: string;
-    /**
-     * Заполняется, если после платежа кредит закрылся.
-     */
-    closedAt?: string | null;
-};
+   /**
+    * ID кредита.
+    */
+   id: string
+   /**
+    * Новый статус кредита.
+    */
+   status: 'active' | 'closed' | 'defaulted'
+   /**
+    * Новый остаток долга (decimal строкой).
+    */
+   outstandingAmount: string
+   /**
+    * Заполняется, если после платежа кредит закрылся.
+    */
+   closedAt?: string | null
+}
 
 /**
  * История событий по кредиту (выдача / платежи / начисления).
  */
 export type CreditPaymentResponse = {
-    /**
-     * ID записи в истории.
-     */
-    id: string;
-    /**
-     * ID кредита.
-     */
-    creditId: string;
-    /**
-     * Сумма события (decimal строкой).
-     */
-    amount: string;
-    /**
-     * Тип события:
-     * - `issue` – выдача кредита
-     * - `repayment` – платёж клиента
-     * - `accrual` – начисление процентов (системное)
-     *
-     */
-    paymentType: 'issue' | 'repayment' | 'accrual';
-    /**
-     * Кто инициировал:
-     * - обычно `userId` (из JWT `sub`)
-     * - либо системная строка, например `system:accrual-worker`
-     *
-     */
-    performedBy: string;
-    /**
-     * Дата фактического выполнения (событие).
-     */
-    performedAt: string;
-    /**
-     * Дата создания записи в БД.
-     */
-    createdAt: string;
-};
+   /**
+    * ID записи в истории.
+    */
+   id: string
+   /**
+    * ID кредита.
+    */
+   creditId: string
+   /**
+    * Сумма события (decimal строкой).
+    */
+   amount: string
+   /**
+    * Тип события:
+    * - `issue` – выдача кредита
+    * - `repayment` – платёж клиента
+    * - `accrual` – начисление процентов (системное)
+    *
+    */
+   paymentType: 'issue' | 'repayment' | 'accrual'
+   /**
+    * Кто инициировал:
+    * - обычно `userId` (из JWT `sub`)
+    * - либо системная строка, например `system:accrual-worker`
+    *
+    */
+   performedBy: string
+   /**
+    * Дата фактического выполнения (событие).
+    */
+   performedAt: string
+   /**
+    * Дата создания записи в БД.
+    */
+   createdAt: string
+}
 
 /**
  * Итог ручного прогона начислений.
  */
 export type AccrualSummaryResponse = {
-    /**
-     * Сколько кредитов было обновлено (у которых наступил due).
-     */
-    processedCredits: number;
-    /**
-     * Сколько записей начислений создано в истории платежей.
-     */
-    accrualsCreated: number;
-    /**
-     * Общая начисленная сумма (decimal строкой).
-     */
-    accruedTotal: string;
-};
+   /**
+    * Сколько кредитов было обновлено (у которых наступил due).
+    */
+   processedCredits: number
+   /**
+    * Сколько записей начислений создано в истории платежей.
+    */
+   accrualsCreated: number
+   /**
+    * Общая начисленная сумма (decimal строкой).
+    */
+   accruedTotal: string
+}
 
 export type GetHealthData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/health';
-};
+   body?: never
+   path?: never
+   query?: never
+   url: '/health'
+}
 
 export type GetHealthResponses = {
-    /**
-     * OK
-     */
-    200: HealthResponse;
-};
+   /**
+    * OK
+    */
+   200: HealthResponse
+}
 
-export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses];
+export type GetHealthResponse = GetHealthResponses[keyof GetHealthResponses]
 
 export type GetTariffsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/tariffs';
-};
+   body?: never
+   path?: never
+   query?: never
+   url: '/tariffs'
+}
 
 export type GetTariffsErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+}
 
-export type GetTariffsError = GetTariffsErrors[keyof GetTariffsErrors];
+export type GetTariffsError = GetTariffsErrors[keyof GetTariffsErrors]
 
 export type GetTariffsResponses = {
-    /**
-     * Список тарифов
-     */
-    200: Array<TariffResponse>;
-};
+   /**
+    * Список тарифов
+    */
+   200: Array<TariffResponse>
+}
 
-export type GetTariffsResponse = GetTariffsResponses[keyof GetTariffsResponses];
+export type GetTariffsResponse = GetTariffsResponses[keyof GetTariffsResponses]
 
 export type PostTariffsData = {
-    body: CreateTariffRequest;
-    path?: never;
-    query?: never;
-    url: '/tariffs';
-};
+   body: CreateTariffRequest
+   path?: never
+   query?: never
+   url: '/tariffs'
+}
 
 export type PostTariffsErrors = {
-    /**
-     * Некорректный ввод
-     */
-    400: ErrorResponse;
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-    /**
-     * Тариф уже существует
-     */
-    409: ErrorResponse;
-};
+   /**
+    * Некорректный ввод
+    */
+   400: ErrorResponse
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+   /**
+    * Тариф уже существует
+    */
+   409: ErrorResponse
+}
 
-export type PostTariffsError = PostTariffsErrors[keyof PostTariffsErrors];
+export type PostTariffsError = PostTariffsErrors[keyof PostTariffsErrors]
 
 export type PostTariffsResponses = {
-    /**
-     * Tariff created
-     */
-    201: TariffResponse;
-};
+   /**
+    * Tariff created
+    */
+   201: TariffResponse
+}
 
-export type PostTariffsResponse = PostTariffsResponses[keyof PostTariffsResponses];
+export type PostTariffsResponse = PostTariffsResponses[keyof PostTariffsResponses]
 
 export type GetTariffsByIdData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/tariffs/{id}';
-};
+   body?: never
+   path: {
+      id: string
+   }
+   query?: never
+   url: '/tariffs/{id}'
+}
 
 export type GetTariffsByIdErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Тариф не найден
-     */
-    404: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Тариф не найден
+    */
+   404: ErrorResponse
+}
 
-export type GetTariffsByIdError = GetTariffsByIdErrors[keyof GetTariffsByIdErrors];
+export type GetTariffsByIdError = GetTariffsByIdErrors[keyof GetTariffsByIdErrors]
 
 export type GetTariffsByIdResponses = {
-    /**
-     * Тариф
-     */
-    200: TariffResponse;
-};
+   /**
+    * Тариф
+    */
+   200: TariffResponse
+}
 
-export type GetTariffsByIdResponse = GetTariffsByIdResponses[keyof GetTariffsByIdResponses];
+export type GetTariffsByIdResponse = GetTariffsByIdResponses[keyof GetTariffsByIdResponses]
 
 export type GetCreditsData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/credits';
-};
+   body?: never
+   path?: never
+   query?: never
+   url: '/credits'
+}
 
 export type GetCreditsErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+}
 
-export type GetCreditsError = GetCreditsErrors[keyof GetCreditsErrors];
+export type GetCreditsError = GetCreditsErrors[keyof GetCreditsErrors]
 
 export type GetCreditsResponses = {
-    /**
-     * Список кредитов
-     */
-    200: Array<CreditResponse>;
-};
+   /**
+    * Список кредитов
+    */
+   200: Array<CreditResponse>
+}
 
-export type GetCreditsResponse = GetCreditsResponses[keyof GetCreditsResponses];
+export type GetCreditsResponse = GetCreditsResponses[keyof GetCreditsResponses]
 
 export type PostCreditsIssueData = {
-    body: IssueCreditRequest;
-    path?: never;
-    query?: never;
-    url: '/credits/issue';
-};
+   body: IssueCreditRequest
+   path?: never
+   query?: never
+   url: '/credits/issue'
+}
 
 export type PostCreditsIssueErrors = {
-    /**
-     * Некорректный ввод
-     */
-    400: ErrorResponse;
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-    /**
-     * Тариф не найден
-     */
-    404: ErrorResponse;
-};
+   /**
+    * Некорректный ввод
+    */
+   400: ErrorResponse
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+   /**
+    * Тариф не найден
+    */
+   404: ErrorResponse
+}
 
-export type PostCreditsIssueError = PostCreditsIssueErrors[keyof PostCreditsIssueErrors];
+export type PostCreditsIssueError = PostCreditsIssueErrors[keyof PostCreditsIssueErrors]
 
 export type PostCreditsIssueResponses = {
-    /**
-     * Кредит создан
-     */
-    201: CreditResponse;
-};
+   /**
+    * Кредит создан
+    */
+   201: CreditResponse
+}
 
-export type PostCreditsIssueResponse = PostCreditsIssueResponses[keyof PostCreditsIssueResponses];
+export type PostCreditsIssueResponse = PostCreditsIssueResponses[keyof PostCreditsIssueResponses]
 
 export type PostCreditsByIdRepayData = {
-    body: RepayCreditRequest;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/credits/{id}/repay';
-};
+   body: RepayCreditRequest
+   path: {
+      id: string
+   }
+   query?: never
+   url: '/credits/{id}/repay'
+}
 
 export type PostCreditsByIdRepayErrors = {
-    /**
-     * Некорректное состояние или сумма
-     */
-    400: ErrorResponse;
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-    /**
-     * Кредит не найден
-     */
-    404: ErrorResponse;
-};
+   /**
+    * Некорректное состояние или сумма
+    */
+   400: ErrorResponse
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+   /**
+    * Кредит не найден
+    */
+   404: ErrorResponse
+}
 
-export type PostCreditsByIdRepayError = PostCreditsByIdRepayErrors[keyof PostCreditsByIdRepayErrors];
+export type PostCreditsByIdRepayError = PostCreditsByIdRepayErrors[keyof PostCreditsByIdRepayErrors]
 
 export type PostCreditsByIdRepayResponses = {
-    /**
-     * Кредит обновлён
-     */
-    200: RepayCreditResponse;
-};
+   /**
+    * Кредит обновлён
+    */
+   200: RepayCreditResponse
+}
 
-export type PostCreditsByIdRepayResponse = PostCreditsByIdRepayResponses[keyof PostCreditsByIdRepayResponses];
+export type PostCreditsByIdRepayResponse =
+   PostCreditsByIdRepayResponses[keyof PostCreditsByIdRepayResponses]
 
 export type GetCreditsByClientByClientIdData = {
-    body?: never;
-    path: {
-        clientId: string;
-    };
-    query?: never;
-    url: '/credits/by-client/{clientId}';
-};
+   body?: never
+   path: {
+      clientId: string
+   }
+   query?: never
+   url: '/credits/by-client/{clientId}'
+}
 
 export type GetCreditsByClientByClientIdErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+}
 
-export type GetCreditsByClientByClientIdError = GetCreditsByClientByClientIdErrors[keyof GetCreditsByClientByClientIdErrors];
+export type GetCreditsByClientByClientIdError =
+   GetCreditsByClientByClientIdErrors[keyof GetCreditsByClientByClientIdErrors]
 
 export type GetCreditsByClientByClientIdResponses = {
-    /**
-     * Список кредитов
-     */
-    200: Array<CreditResponse>;
-};
+   /**
+    * Список кредитов
+    */
+   200: Array<CreditResponse>
+}
 
-export type GetCreditsByClientByClientIdResponse = GetCreditsByClientByClientIdResponses[keyof GetCreditsByClientByClientIdResponses];
+export type GetCreditsByClientByClientIdResponse =
+   GetCreditsByClientByClientIdResponses[keyof GetCreditsByClientByClientIdResponses]
 
 export type GetCreditsRatingByClientIdData = {
-    body?: never;
-    path: {
-        clientId: string;
-    };
-    query?: never;
-    url: '/credits/rating/{clientId}';
-};
+   body?: never
+   path: {
+      clientId: string
+   }
+   query?: never
+   url: '/credits/rating/{clientId}'
+}
 
 export type GetCreditsRatingByClientIdErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+}
 
-export type GetCreditsRatingByClientIdError = GetCreditsRatingByClientIdErrors[keyof GetCreditsRatingByClientIdErrors];
+export type GetCreditsRatingByClientIdError =
+   GetCreditsRatingByClientIdErrors[keyof GetCreditsRatingByClientIdErrors]
 
 export type GetCreditsRatingByClientIdResponses = {
-    /**
-     * Кредитный рейтинг
-     */
-    200: CreditRatingResponse;
-};
+   /**
+    * Кредитный рейтинг
+    */
+   200: CreditRatingResponse
+}
 
-export type GetCreditsRatingByClientIdResponse = GetCreditsRatingByClientIdResponses[keyof GetCreditsRatingByClientIdResponses];
+export type GetCreditsRatingByClientIdResponse =
+   GetCreditsRatingByClientIdResponses[keyof GetCreditsRatingByClientIdResponses]
 
 export type GetCreditsOverdueData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Фильтр по клиенту (опционально).
-         */
-        clientId?: string;
-    };
-    url: '/credits/overdue';
-};
+   body?: never
+   path?: never
+   query?: {
+      /**
+       * Фильтр по клиенту (опционально).
+       */
+      clientId?: string
+   }
+   url: '/credits/overdue'
+}
 
 export type GetCreditsOverdueErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+}
 
-export type GetCreditsOverdueError = GetCreditsOverdueErrors[keyof GetCreditsOverdueErrors];
+export type GetCreditsOverdueError = GetCreditsOverdueErrors[keyof GetCreditsOverdueErrors]
 
 export type GetCreditsOverdueResponses = {
-    /**
-     * Список просроченных кредитов
-     */
-    200: Array<CreditResponse>;
-};
+   /**
+    * Список просроченных кредитов
+    */
+   200: Array<CreditResponse>
+}
 
-export type GetCreditsOverdueResponse = GetCreditsOverdueResponses[keyof GetCreditsOverdueResponses];
+export type GetCreditsOverdueResponse = GetCreditsOverdueResponses[keyof GetCreditsOverdueResponses]
 
 export type GetCreditsOverduePaymentsData = {
-    body?: never;
-    path?: never;
-    query?: {
-        /**
-         * Фильтр по клиенту (опционально).
-         */
-        clientId?: string;
-    };
-    url: '/credits/overdue-payments';
-};
+   body?: never
+   path?: never
+   query?: {
+      /**
+       * Фильтр по клиенту (опционально).
+       */
+      clientId?: string
+   }
+   url: '/credits/overdue-payments'
+}
 
 export type GetCreditsOverduePaymentsErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+}
 
-export type GetCreditsOverduePaymentsError = GetCreditsOverduePaymentsErrors[keyof GetCreditsOverduePaymentsErrors];
+export type GetCreditsOverduePaymentsError =
+   GetCreditsOverduePaymentsErrors[keyof GetCreditsOverduePaymentsErrors]
 
 export type GetCreditsOverduePaymentsResponses = {
-    /**
-     * Список просроченных платежей
-     */
-    200: Array<OverduePaymentResponse>;
-};
+   /**
+    * Список просроченных платежей
+    */
+   200: Array<OverduePaymentResponse>
+}
 
-export type GetCreditsOverduePaymentsResponse = GetCreditsOverduePaymentsResponses[keyof GetCreditsOverduePaymentsResponses];
+export type GetCreditsOverduePaymentsResponse =
+   GetCreditsOverduePaymentsResponses[keyof GetCreditsOverduePaymentsResponses]
 
 export type GetCreditsByIdData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/credits/{id}';
-};
+   body?: never
+   path: {
+      id: string
+   }
+   query?: never
+   url: '/credits/{id}'
+}
 
 export type GetCreditsByIdErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-    /**
-     * Кредит не найден
-     */
-    404: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+   /**
+    * Кредит не найден
+    */
+   404: ErrorResponse
+}
 
-export type GetCreditsByIdError = GetCreditsByIdErrors[keyof GetCreditsByIdErrors];
+export type GetCreditsByIdError = GetCreditsByIdErrors[keyof GetCreditsByIdErrors]
 
 export type GetCreditsByIdResponses = {
-    /**
-     * Кредит
-     */
-    200: CreditResponse;
-};
+   /**
+    * Кредит
+    */
+   200: CreditResponse
+}
 
-export type GetCreditsByIdResponse = GetCreditsByIdResponses[keyof GetCreditsByIdResponses];
+export type GetCreditsByIdResponse = GetCreditsByIdResponses[keyof GetCreditsByIdResponses]
 
 export type GetCreditsByIdPaymentsData = {
-    body?: never;
-    path: {
-        id: string;
-    };
-    query?: never;
-    url: '/credits/{id}/payments';
-};
+   body?: never
+   path: {
+      id: string
+   }
+   query?: never
+   url: '/credits/{id}/payments'
+}
 
 export type GetCreditsByIdPaymentsErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-    /**
-     * Кредит не найден
-     */
-    404: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+   /**
+    * Кредит не найден
+    */
+   404: ErrorResponse
+}
 
-export type GetCreditsByIdPaymentsError = GetCreditsByIdPaymentsErrors[keyof GetCreditsByIdPaymentsErrors];
+export type GetCreditsByIdPaymentsError =
+   GetCreditsByIdPaymentsErrors[keyof GetCreditsByIdPaymentsErrors]
 
 export type GetCreditsByIdPaymentsResponses = {
-    /**
-     * Список платежей
-     */
-    200: Array<CreditPaymentResponse>;
-};
+   /**
+    * Список платежей
+    */
+   200: Array<CreditPaymentResponse>
+}
 
-export type GetCreditsByIdPaymentsResponse = GetCreditsByIdPaymentsResponses[keyof GetCreditsByIdPaymentsResponses];
+export type GetCreditsByIdPaymentsResponse =
+   GetCreditsByIdPaymentsResponses[keyof GetCreditsByIdPaymentsResponses]
 
 export type PostCreditsAccrueRunData = {
-    body?: never;
-    path?: never;
-    query?: never;
-    url: '/credits/accrue/run';
-};
+   body?: never
+   path?: never
+   query?: never
+   url: '/credits/accrue/run'
+}
 
 export type PostCreditsAccrueRunErrors = {
-    /**
-     * Не авторизован
-     */
-    401: ErrorResponse;
-    /**
-     * Доступ запрещён
-     */
-    403: ErrorResponse;
-};
+   /**
+    * Не авторизован
+    */
+   401: ErrorResponse
+   /**
+    * Доступ запрещён
+    */
+   403: ErrorResponse
+}
 
-export type PostCreditsAccrueRunError = PostCreditsAccrueRunErrors[keyof PostCreditsAccrueRunErrors];
+export type PostCreditsAccrueRunError = PostCreditsAccrueRunErrors[keyof PostCreditsAccrueRunErrors]
 
 export type PostCreditsAccrueRunResponses = {
-    /**
-     * Итог начислений
-     */
-    200: AccrualSummaryResponse;
-};
+   /**
+    * Итог начислений
+    */
+   200: AccrualSummaryResponse
+}
 
-export type PostCreditsAccrueRunResponse = PostCreditsAccrueRunResponses[keyof PostCreditsAccrueRunResponses];
+export type PostCreditsAccrueRunResponse =
+   PostCreditsAccrueRunResponses[keyof PostCreditsAccrueRunResponses]
 
 export type ClientOptions = {
-    baseUrl: 'http://localhost:4002' | (string & {});
-};
+   baseUrl: 'http://localhost:4002' | (string & {})
+}

@@ -5,7 +5,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
-# monitoring — первым, чтобы к моменту старта gateway сервис приёма метрик уже слушал порт
+# monitoring – первым, чтобы к моменту старта gateway сервис приёма метрик уже слушал порт
 $services = @(
   "monitoring",
   "users",

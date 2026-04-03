@@ -10,7 +10,7 @@ function isPgUniqueViolation(e: unknown): boolean {
 
 /**
  * Повтор того же Idempotency-Key возвращает сохранённый ответ (статус + тело).
- * Ответы 5xx не фиксируем — клиент может безопасно повторить запрос.
+ * Ответы 5xx не фиксируем – клиент может безопасно повторить запрос.
  */
 export async function replayOrRun(
   ds: DataSource,

@@ -1,6 +1,6 @@
 import type { FastifyInstance, FastifyRequest } from "fastify";
 
-/** Нечётные минуты часа — 30% 500; чётные — 70% (независимо на каждый запрос). */
+/** Нечётные минуты часа – 30% 500; чётные – 70% (независимо на каждый запрос). */
 const FAILURE_RATE_ODD_MINUTE = 0.3;
 const FAILURE_RATE_EVEN_MINUTE = 0.7;
 

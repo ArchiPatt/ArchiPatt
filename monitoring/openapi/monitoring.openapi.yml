@@ -156,7 +156,7 @@ components:
         at:
           type: integer
           format: int64
-          description: Unix ms; если нет — подставляется сервером
+          description: Unix ms; если нет – подставляется сервером
     MetricsSummary:
       type: object
       properties:
