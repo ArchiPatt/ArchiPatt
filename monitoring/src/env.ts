@@ -1,5 +1,4 @@
 import * as dotenv from "dotenv";
-import path from "node:path";
 
 dotenv.config();
 
@@ -11,13 +10,16 @@ function num(name: string, fallback: number): number {
   return n;
 }
 
-const dbPath =
-  (process.env.MONITORING_DB_PATH ?? "").trim() ||
-  path.join(process.cwd(), "data", "monitoring.sqlite");
-
 export const env = {
   nodeEnv: process.env.NODE_ENV ?? "development",
   port: num("PORT", 4010),
-  sqlitePath: dbPath,
   maxStoredEvents: num("MONITORING_MAX_EVENTS", 100_000),
+  db: {
+    host: process.env.DB_HOST ?? "localhost",
+    port: num("DB_PORT", 5432),
+    user: process.env.DB_USER ?? "postgres",
+    password: process.env.DB_PASSWORD ?? "postgres",
+    /** Отдельная БД в том же кластере, что и users/core (создайте: `CREATE DATABASE monitoring;`) */
+    name: process.env.DB_NAME ?? "monitoring",
+  },
 };

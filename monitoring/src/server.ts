@@ -7,7 +7,14 @@ import path from "node:path";
 import { readFile } from "node:fs/promises";
 import cors from "@fastify/cors";
 import { env } from "./env";
-import { getSummary, ingestBatch, ingestOne, type IngestEvent } from "./store";
+import {
+  closeStore,
+  getSummary,
+  ingestBatch,
+  ingestOne,
+  initStore,
+  type IngestEvent,
+} from "./store";
 
 function isIngestBody(x: unknown): x is { events?: unknown } | IngestEvent {
   return typeof x === "object" && x !== null;
@@ -67,22 +74,28 @@ async function handleIngest(req: FastifyRequest, reply: FastifyReply) {
       const ev = normalizeEvent(item, now);
       if (ev) list.push(ev);
     }
-    ingestBatch(list);
+    await ingestBatch(list);
     return reply.send({ ok: true, accepted: list.length });
   }
   const one = normalizeEvent(body, now);
   if (!one) {
     return reply.code(400).send({ error: "invalid_event" });
   }
-  ingestOne(one);
+  await ingestOne(one);
   return reply.send({ ok: true, accepted: 1 });
 }
 
 export async function buildApp(): Promise<FastifyInstance> {
+  await initStore();
+
   const app = Fastify({
     logger: {
       level: env.nodeEnv === "development" ? "info" : "info",
     },
+  });
+
+  app.addHook("onClose", async () => {
+    await closeStore();
   });
 
   await app.register(cors, {
