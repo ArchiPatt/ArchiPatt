@@ -2,7 +2,7 @@
 
 import type { AxiosRequestParams } from "@siberiacancode/apicraft";
 
-import type { PostAccountsByIdCloseData, PostAccountsByIdCloseResponse, PostAccountsByIdCloseError } from "..\\..\\customTypes.gen";
+import type { PostAccountsByIdCloseData, PostAccountsByIdCloseResponse, PostAccountsByIdCloseError } from "..\\..\\types.gen";
 
 import { instance } from "..\\..\\..\\..\\..\\src\\api\\instance.ts";
 
