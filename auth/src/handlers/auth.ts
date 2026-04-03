@@ -299,7 +299,11 @@ export function createAuthHandlers(app: FastifyInstance) {
     logout: async (req: FastifyRequest, reply: FastifyReply) => {
       let payload;
       try {
-        payload = await verifyAccessToken(req.headers.authorization);
+        const authHeader =
+          req.headers.authorization ?? req.headers.Authorization;
+        payload = await verifyAccessToken(
+          typeof authHeader === "string" ? authHeader : undefined,
+        );
       } catch {
         return reply.code(401).send({ error: "unauthorized" });
       }
