@@ -4,6 +4,7 @@ import {tokenStorage} from "../../../shared/storage/tokenStorage";
 import {userStorage} from "../../../shared/storage/userStorage";
 import {refreshStorage} from "../../../shared/storage/refreshStorage";
 import Cookies from 'js-cookie'
+import {AUTH_LINK} from "../../../shared/constants/AUTH_LINK.ts";
 
 const useLogout = () => {
     const queryClient = useQueryClient()
@@ -16,7 +17,7 @@ const useLogout = () => {
             userStorage.removeItem()
             queryClient.invalidateQueries({ queryKey: ['user'] })
             Cookies.remove('auth_session')
-            window.location.replace('http://localhost:4000/login?return_to=http%3A%2F%2Flocalhost%3A5173%2F')
+            window.location.replace(AUTH_LINK)
         }
     })
 }

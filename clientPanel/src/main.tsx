@@ -6,43 +6,16 @@ import "@mantine/notifications/styles.css";
 
 import { MantineProvider } from "@mantine/core";
 import { BrowserRouter, Link } from "react-router-dom";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { ErrorBoundary } from "react-error-boundary";
+import { QueryClientProvider } from "@tanstack/react-query";
+import { ErrorFallback } from "./shared/errorFallback/ErrorFallback.tsx"
 
 import { App } from "./App.tsx";
 import { Notifications } from "@mantine/notifications";
-import { LINK_PATHS } from "./shared/constants/LINK_PATHS.ts";
 import { initRumMonitoring, sendRumReactError } from "./monitoring/rum.ts";
+import {queryClient} from "./shared/clients/queryClient.ts";
+import {ErrorBoundary} from "react-error-boundary";
 
 initRumMonitoring();
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 2,
-      retryDelay: (attempt) =>
-        80 * 2 ** attempt + Math.floor(Math.random() * 40),
-      refetchOnWindowFocus: false,
-    },
-  },
-});
-
-function ErrorFallback({ error }: { error: Error }) {
-  return (
-    <div
-      style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        padding: 40,
-      }}
-    >
-      <h2>Something went wrong</h2>
-      <p>{error.message}</p>
-      <Link to={LINK_PATHS.MAIN} />
-    </div>
-  );
-}
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

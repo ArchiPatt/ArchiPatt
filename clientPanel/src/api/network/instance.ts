@@ -10,11 +10,18 @@ import {
   gatewayCircuit,
   shouldRetryHttpError,
 } from "../../monitoring/gatewayResilience.ts";
+import {createCircuitBreaker} from "./сircuitBreaker.ts";
 
 const AUTH_LOGIN_URL = "http://localhost:4004/login";
 const RETURN_TO = "http://localhost:5173/";
 
 const instance = axios.create({ baseURL: "http://localhost:4004/" });
+
+const gatewayCircuit = createCircuitBreaker({
+  failureThreshold: 5,
+  successThreshold: 2,
+  resetTimeoutMs: 10_000,
+});
 
 const REQ_START = Symbol.for("archipatt.reqStart");
 const INFRA_RETRY = "_archipattInfraRetry";
@@ -25,55 +32,29 @@ type ConfigExtras = AxiosRequestConfig & {
   _retry?: boolean;
 };
 
-function attachIdempotencyKey(config: AxiosRequestConfig): void {
-  const m = config.method?.toUpperCase();
-  if (!m || !["POST", "PUT", "PATCH", "DELETE"].includes(m)) return;
-  config.headers = config.headers ?? {};
-  const h = config.headers as Record<string, string | undefined>;
-  if (h["Idempotency-Key"] ?? h["idempotency-key"]) return;
-  const sym = Symbol.for("archipatt.idempotencyKey");
-  type WithKey = AxiosRequestConfig & { [k: symbol]: string | undefined };
-  const w = config as WithKey;
-  if (!w[sym]) {
-    w[sym] =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-  }
-  h["Idempotency-Key"] = w[sym];
-}
-
-function recordCircuitOnFinalError(error: AxiosError): void {
-  const s = error.response?.status;
-  if (s === 401) {
-    gatewayCircuit.recordSuccess();
-    return;
-  }
-  if (
-    !error.response ||
-    (s !== undefined && (s >= 500 || s === 408 || s === 429))
-  ) {
-    gatewayCircuit.recordInfrastructureFailure();
-  } else {
-    gatewayCircuit.recordSuccess();
-  }
-}
-
 instance.interceptors.request.use((config) => {
-  try {
-    gatewayCircuit.beforeRequest();
-  } catch (e) {
-    return Promise.reject(e);
+  if (!gatewayCircuit.canRequest()) {
+    const error = new Error("Circuit breaker OPEN");
+    (error as any).isCircuitBreaker = true;
+    throw error;
   }
-  attachIdempotencyKey(config);
-  const token = tokenStorage.getItem();
-  if (token && typeof token === "string") {
-    config.headers = config.headers ?? {};
-    config.headers["Authorization"] = `Bearer ${token}`;
-  }
-  (config as ConfigExtras)[REQ_START] = Date.now();
+
   return config;
 });
+
+instance.interceptors.response.use(
+    (res) => {
+      gatewayCircuit.recordSuccess();
+      return res;
+    },
+    (err) => {
+      const status = err.response?.status;
+
+      gatewayCircuit.recordFailure(status);
+
+      throw err;
+    }
+);
 
 let isRefreshing = false;
 let failedQueue: {
@@ -115,8 +96,6 @@ instance.interceptors.response.use(
     }
 
     reportAxiosError(error);
-    recordCircuitOnFinalError(error);
-
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
 

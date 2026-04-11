@@ -5,7 +5,6 @@ import type {SetColorSchemeRequest} from "../../../generated/api/customTypes/set
 import type {HiddenAccountsResponse} from "../../../generated/api/customTypes/settings/HiddenAccountsResponse.ts";
 import type {AddHiddenAccountRequest} from "../../../generated/api/customTypes/settings/AddHiddenAccountRequest.ts";
 
-/** Через gateway (4004) → те же метрики мониторинга, что и для остальных API */
 const clientSettings = {
     getColorScheme: async () => {
         const response: AxiosResponse<ColorSchemeResponse> = await instance.get(
