@@ -14,8 +14,10 @@ import { Notifications } from "@mantine/notifications";
 import { initRumMonitoring, sendRumReactError } from "./monitoring/rum.ts";
 import {queryClient} from "./shared/clients/queryClient.ts";
 import {ErrorBoundary} from "react-error-boundary";
+// import {serviceWorkerRegistartion} from "./serviceWorker/serviceWorkerRegistration.ts";
 
 initRumMonitoring();
+// serviceWorkerRegistartion()
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

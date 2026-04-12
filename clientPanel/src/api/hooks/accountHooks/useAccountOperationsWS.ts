@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { tokenStorage } from "../../../shared/storage/tokenStorage";
 import type { AccountOperation } from "../../../../generated/api/core";
+import Cookies from "js-cookie";
 
 const GATEWAY_WS =
   (import.meta.env.VITE_GATEWAY_WS_URL as string | undefined)?.replace(
@@ -17,7 +18,7 @@ const useAccountOperationsWS = (id: string) => {
   useEffect(() => {
     if (!id) return;
 
-    const token = tokenStorage.getItem();
+    const token = Cookies.get('token')
     const socket = new WebSocket(
       `${GATEWAY_WS}/ws/accounts/${id}/operations?authorization=${encodeURIComponent(`Bearer ${token ?? ""}`)}`,
     );

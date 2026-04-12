@@ -17,6 +17,7 @@ const useLogout = () => {
             userStorage.removeItem()
             queryClient.invalidateQueries({ queryKey: ['user'] })
             Cookies.remove('auth_session')
+            Cookies.remove('token')
             window.location.replace(AUTH_LINK)
         }
     })

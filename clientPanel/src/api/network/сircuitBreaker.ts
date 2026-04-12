@@ -73,4 +73,4 @@ export function createCircuitBreaker(opts: CircuitBreakerOptions) {
     };
 }
 
-export { createCircuitBreaker }
+export { createCircuitBreaker as circuitBreaker }
