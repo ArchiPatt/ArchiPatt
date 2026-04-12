@@ -24,10 +24,15 @@ export const useAuth = () => {
    }, [])
 
    useEffect(() => {
-      if (user.isError && !code) {
-         window.location.replace('http://localhost:4000/login?return_to=http://localhost:5183/')
+      console.log('useAuth user.error', user.error)
+      if (user.error && !code) {
+         const status = (user.error as import('axios').AxiosError)?.response?.status
+         console.log('useAuth user.error status', status)
+         if (status === 401) {
+            window.location.replace('http://localhost:4000/login?return_to=http://localhost:5183/')
+         }
       }
-   }, [user.isError])
+   }, [user.error])
 
    useEffect(() => {
       if (code) {
