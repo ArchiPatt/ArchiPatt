@@ -1,22 +1,23 @@
-const idempotencyKey = () => {
+import type {AxiosRequestConfig} from "axios";
 
+const IDEMPOTENCY_METHODS = ['POST', 'PUT', 'PATCH']
+
+
+const idempotencyKey = (config: AxiosRequestConfig) => {
+    const method = config.method?.toUpperCase()
+    if (!method || !IDEMPOTENCY_METHODS.includes(method)) {
+        return
+    }
+
+    const header = config.headers ?? {}
+
+    config.headers = header
+
+    if (header["Idempotency-Key"] ?? header["idempotency-key"]) return
+
+    const key = crypto.randomUUID()
+
+    header["Idempotency-Key"] = key
 }
 
-
-// function attachIdempotencyKey(config: AxiosRequestConfig): void {
-//     const m = config.method?.toUpperCase();
-//     if (!m || !["POST", "PUT", "PATCH", "DELETE"].includes(m)) return;
-//     config.headers = config.headers ?? {};
-//     const h = config.headers as Record<string, string | undefined>;
-//     if (h["Idempotency-Key"] ?? h["idempotency-key"]) return;
-//     const sym = Symbol.for("archipatt.idempotencyKey");
-//     type WithKey = AxiosRequestConfig & { [k: symbol]: string | undefined };
-//     const w = config as WithKey;
-//     if (!w[sym]) {
-//         w[sym] =
-//             typeof crypto !== "undefined" && "randomUUID" in crypto
-//                 ? crypto.randomUUID()
-//                 : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-//     }
-//     h["Idempotency-Key"] = w[sym];
-// }
+export { idempotencyKey }

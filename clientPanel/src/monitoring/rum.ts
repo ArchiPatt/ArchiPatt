@@ -1,4 +1,5 @@
 import axios from "axios";
+import { getCurrentTraceId } from "../shared/trace/traceContext.ts";
 
 const SOURCE =
   (import.meta.env.VITE_RUM_SOURCE as string | undefined)?.trim() ||
@@ -31,7 +32,8 @@ type SendRumOpts = {
 };
 
 export function sendRumEvent(opts: SendRumOpts): void {
-  const traceId = crypto.randomUUID();
+  // Используем глобальный traceId для связи всех событий в сессии
+  const traceId = getCurrentTraceId();
   const pathBase =
     opts.path ??
     opts.route ??

@@ -1,5 +1,6 @@
 import {instance} from "../network/instance.ts";
 import type {TokenResponse} from "../../../generated/api/authHooks";
+import { resetTraceId } from "../../shared/trace/traceContext.ts";
 
 const authApi = {
     accessToken: async (token: string) => {
@@ -26,6 +27,8 @@ const authApi = {
     },
     logout: async () => {
         await instance.post("logout");
+        // Сбрасываем traceId при logout
+        resetTraceId();
     }
 }
 

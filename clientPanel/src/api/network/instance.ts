@@ -10,6 +10,8 @@ import {
   gatewayCircuit,
   shouldRetryHttpError,
 } from "../../monitoring/gatewayResilience.ts";
+import {idempotencyKey} from "./idempotencyKey.ts";
+import { getCurrentTraceId } from "../../shared/trace/traceContext.ts";
 
 const AUTH_LOGIN_URL = "http://localhost:4004/login";
 const RETURN_TO = "http://localhost:5173/";
@@ -24,24 +26,6 @@ type ConfigExtras = AxiosRequestConfig & {
   [INFRA_RETRY]?: number;
   _retry?: boolean;
 };
-
-function attachIdempotencyKey(config: AxiosRequestConfig): void {
-  const m = config.method?.toUpperCase();
-  if (!m || !["POST", "PUT", "PATCH", "DELETE"].includes(m)) return;
-  config.headers = config.headers ?? {};
-  const h = config.headers as Record<string, string | undefined>;
-  if (h["Idempotency-Key"] ?? h["idempotency-key"]) return;
-  const sym = Symbol.for("archipatt.idempotencyKey");
-  type WithKey = AxiosRequestConfig & { [k: symbol]: string | undefined };
-  const w = config as WithKey;
-  if (!w[sym]) {
-    w[sym] =
-      typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
-  }
-  h["Idempotency-Key"] = w[sym];
-}
 
 function recordCircuitOnFinalError(error: AxiosError): void {
   const s = error.response?.status;
@@ -65,12 +49,15 @@ instance.interceptors.request.use((config) => {
   } catch (e) {
     return Promise.reject(e);
   }
-  attachIdempotencyKey(config);
+  idempotencyKey(config);
   const token = tokenStorage.getItem();
   if (token && typeof token === "string") {
     config.headers = config.headers ?? {};
     config.headers["Authorization"] = `Bearer ${token}`;
   }
+  // Добавляем traceId для трассировки запроса
+  config.headers = config.headers ?? {};
+  config.headers["x-trace-id"] = getCurrentTraceId();
   (config as ConfigExtras)[REQ_START] = Date.now();
   return config;
 });
