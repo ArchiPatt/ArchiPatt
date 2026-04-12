@@ -64,7 +64,11 @@ async function processCommand(
       );
       if (!result) return replyErr(404, "account_not_found");
       if (result === "closed") return replyErr(400, "account_closed");
-      notifyNewOperation(command.accountId, result.operation);
+      notifyNewOperation(
+        command.accountId,
+        result.operation,
+        result.account.clientId,
+      );
       return replyOk(200, result.account, { operation: result.operation });
     }
 
@@ -77,7 +81,11 @@ async function processCommand(
       if (result === "closed") return replyErr(400, "account_closed");
       if (result === "insufficient_balance")
         return replyErr(400, "insufficient_balance");
-      notifyNewOperation(command.accountId, result.operation);
+      notifyNewOperation(
+        command.accountId,
+        result.operation,
+        result.account.clientId,
+      );
       return replyOk(200, result.account, { operation: result.operation });
     }
 
@@ -96,7 +104,11 @@ async function processCommand(
       if (result === "closed") return replyErr(400, "account_closed");
       if (result === "insufficient_balance")
         return replyErr(400, "insufficient_balance");
-      notifyNewOperation(command.accountId, result.op as AccountOperation);
+      notifyNewOperation(
+        command.accountId,
+        result.op as AccountOperation,
+        result.clientId,
+      );
       return replyOk(result.created ? 201 : 200, result.op, {
         operation: result.op,
       });
@@ -119,8 +131,16 @@ async function processCommand(
         return replyErr(400, "insufficient_balance");
       if (result === "exchange_rate_unavailable")
         return replyErr(503, "exchange_rate_unavailable");
-      notifyNewOperation(command.fromAccountId, result.fromOperation);
-      notifyNewOperation(command.toAccountId, result.toOperation);
+      notifyNewOperation(
+        command.fromAccountId,
+        result.fromOperation,
+        result.fromClientId,
+      );
+      notifyNewOperation(
+        command.toAccountId,
+        result.toOperation,
+        result.toClientId,
+      );
       return replyOk(
         200,
         { ok: true },
@@ -148,7 +168,11 @@ async function processCommand(
         return replyErr(400, "insufficient_balance");
       if (result === "exchange_rate_unavailable")
         return replyErr(503, "exchange_rate_unavailable");
-      notifyNewOperation(command.toAccountId, result.toAccountOperation);
+      notifyNewOperation(
+        command.toAccountId,
+        result.toAccountOperation,
+        result.toClientId,
+      );
       return replyOk(
         200,
         { ok: true },
@@ -175,7 +199,11 @@ async function processCommand(
         return replyErr(400, "insufficient_balance");
       if (result === "exchange_rate_unavailable")
         return replyErr(503, "exchange_rate_unavailable");
-      notifyNewOperation(command.fromAccountId, result.fromAccountOperation);
+      notifyNewOperation(
+        command.fromAccountId,
+        result.fromAccountOperation,
+        result.fromClientId,
+      );
       return replyOk(
         200,
         { ok: true },

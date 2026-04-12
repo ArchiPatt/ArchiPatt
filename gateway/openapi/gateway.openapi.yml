@@ -54,6 +54,29 @@ paths:
         "404":
           description: Счёт не найден
 
+  /ws/client/operations:
+    get:
+      tags: [WebSocket, Core]
+      summary: WebSocket – операции клиента по всем счетам (роль client)
+      description: |
+        Проксирование на Core. Поток операций по всем счетам залогиненного клиента (JWT `sub`).
+        Только для роли `client`; snapshot и push, как в Core `/ws/client/operations`.
+        Авторизация: `Authorization: Bearer <token>` или query `authorization=Bearer%20<token>`.
+      parameters:
+        - in: query
+          name: authorization
+          required: false
+          schema:
+            type: string
+          description: Bearer token (альтернатива заголовку)
+      responses:
+        "101":
+          description: Switching Protocols – WebSocket подключение установлено
+        "401":
+          description: Не авторизован
+        "403":
+          description: Доступ запрещён
+
   /health:
     get:
       tags: [Gateway]

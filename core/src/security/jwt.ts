@@ -73,8 +73,13 @@ export async function verifyBearerToken(
     const { payload } = await jwtVerify(token, jwks, {
       issuer: expectedIssuer,
     });
-    if (typeof payload.jti === "string" && (await isRevoked(payload.jti))) {
-      return null;
+    if (typeof payload.jti === "string") {
+      try {
+        if (await isRevoked(payload.jti)) return null;
+      } catch (revErr) {
+        console.warn("[Core JWT] isRevoked failed:", String(revErr));
+        return null;
+      }
     }
     return payload;
   } catch (e) {
@@ -86,7 +91,7 @@ export async function verifyBearerToken(
       "| JWKS:",
       JWKS_URL,
     );
-    throw e;
+    return null;
   }
 }
 

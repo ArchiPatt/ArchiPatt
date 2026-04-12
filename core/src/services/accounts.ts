@@ -86,6 +86,28 @@ export async function findRecentOperationsGlobally(
   return { items, total };
 }
 
+export async function findRecentOperationsForClient(
+  ds: DataSource,
+  clientId: string,
+  opts: { limit: number },
+) {
+  const qb = ds
+    .getRepository(AccountOperation)
+    .createQueryBuilder("op")
+    .innerJoin(Account, "acc", "acc.id = op.accountId")
+    .where("acc.clientId = :clientId", { clientId })
+    .orderBy("op.createdAt", "DESC")
+    .take(opts.limit);
+  const items = await qb.getMany();
+  const total = await ds
+    .getRepository(AccountOperation)
+    .createQueryBuilder("op")
+    .innerJoin(Account, "acc", "acc.id = op.accountId")
+    .where("acc.clientId = :clientId", { clientId })
+    .getCount();
+  return { items, total };
+}
+
 export async function findOperationByIdempotency(
   ds: DataSource,
   accountId: string,
@@ -209,7 +231,14 @@ export async function postOperation(
       idempotencyKey: params.idempotencyKey,
     },
   });
-  if (dup) return { op: dup, created: false };
+  if (dup) {
+    const account = await em.findOne(Account, { where: { id: dup.accountId } });
+    return {
+      op: dup,
+      created: false,
+      clientId: account?.clientId,
+    };
+  }
 
   const account = await em.findOne(Account, {
     where: { id: params.accountId },
@@ -234,7 +263,7 @@ export async function postOperation(
       meta: params.meta ?? null,
     }),
   );
-  return { op, created: true };
+  return { op, created: true, clientId: account.clientId };
 }
 
 export async function transferFromMaster(
@@ -248,7 +277,7 @@ export async function transferFromMaster(
     meta?: Record<string, unknown> | null;
   },
 ): Promise<
-  | { success: true; toAccountOperation: AccountOperation }
+  | { success: true; toAccountOperation: AccountOperation; toClientId: string }
   | null
   | "closed"
   | "insufficient_balance"
@@ -258,7 +287,14 @@ export async function transferFromMaster(
   const existing = await em.findOne(AccountOperation, {
     where: { accountId: params.toAccountId, idempotencyKey: clientKey },
   });
-  if (existing) return { success: true, toAccountOperation: existing };
+  if (existing) {
+    const acc = await em.findOne(Account, { where: { id: params.toAccountId } });
+    return {
+      success: true,
+      toAccountOperation: existing,
+      toClientId: acc?.clientId ?? "",
+    };
+  }
 
   const master = await em.findOne(Account, {
     where: { id: params.masterAccountId },
@@ -338,7 +374,11 @@ export async function transferFromMaster(
       meta: toMeta,
     }),
   );
-  return { success: true, toAccountOperation };
+  return {
+    success: true,
+    toAccountOperation,
+    toClientId: toAccount.clientId,
+  };
 }
 
 export async function transferToMaster(
@@ -352,7 +392,7 @@ export async function transferToMaster(
     meta?: Record<string, unknown> | null;
   },
 ): Promise<
-  | { success: true; fromAccountOperation: AccountOperation }
+  | { success: true; fromAccountOperation: AccountOperation; fromClientId: string }
   | null
   | "closed"
   | "insufficient_balance"
@@ -362,7 +402,16 @@ export async function transferToMaster(
   const existing = await em.findOne(AccountOperation, {
     where: { accountId: params.fromAccountId, idempotencyKey: clientKey },
   });
-  if (existing) return { success: true, fromAccountOperation: existing };
+  if (existing) {
+    const acc = await em.findOne(Account, {
+      where: { id: params.fromAccountId },
+    });
+    return {
+      success: true,
+      fromAccountOperation: existing,
+      fromClientId: acc?.clientId ?? "",
+    };
+  }
 
   const master = await em.findOne(Account, {
     where: { id: params.masterAccountId },
@@ -442,7 +491,11 @@ export async function transferToMaster(
       meta: masterMeta,
     }),
   );
-  return { success: true, fromAccountOperation };
+  return {
+    success: true,
+    fromAccountOperation,
+    fromClientId: fromAccount.clientId,
+  };
 }
 
 export async function transferBetweenAccounts(
@@ -458,6 +511,8 @@ export async function transferBetweenAccounts(
       success: true;
       fromOperation: AccountOperation;
       toOperation: AccountOperation;
+      fromClientId: string;
+      toClientId: string;
     }
   | null
   | "same_account"
@@ -485,12 +540,19 @@ export async function transferBetweenAccounts(
           type: "transfer_in",
         },
       });
-      if (existingIn)
+      if (existingIn) {
+        const [fromAcc, toAcc] = await Promise.all([
+          em.findOne(Account, { where: { id: params.fromAccountId } }),
+          em.findOne(Account, { where: { id: params.toAccountId } }),
+        ]);
         return {
           success: true,
           fromOperation: existingOut,
           toOperation: existingIn,
+          fromClientId: fromAcc?.clientId ?? "",
+          toClientId: toAcc?.clientId ?? "",
         };
+      }
     }
   }
 
@@ -586,5 +648,11 @@ export async function transferBetweenAccounts(
       meta: metaTo,
     }),
   );
-  return { success: true, fromOperation, toOperation };
+  return {
+    success: true,
+    fromOperation,
+    toOperation,
+    fromClientId: fromAccount.clientId,
+    toClientId: toAccount.clientId,
+  };
 }

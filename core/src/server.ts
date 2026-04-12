@@ -10,6 +10,7 @@ import { registerDocsRoutes } from "./routes/docs";
 import { registerAccountsRoutes } from "./routes/accounts";
 import { registerDashboardRoutes } from "./routes/dashboard";
 import { registerWsAccountsRoutes } from "./routes/ws-accounts";
+import { registerWsClientOperationsRoutes } from "./routes/ws-client-operations";
 import { registerWsStaffOperationsRoutes } from "./routes/ws-staff-operations";
 import { registerSimulatedInstability } from "./plugins/simulatedInstability";
 import { registerServiceMonitoring } from "./plugins/serviceMonitoring";
@@ -53,6 +54,7 @@ export async function buildApp(): Promise<FastifyInstance> {
   registerAccountsRoutes(app);
   registerDashboardRoutes(app);
   registerWsAccountsRoutes(app);
+  registerWsClientOperationsRoutes(app);
   registerWsStaffOperationsRoutes(app);
   app.get("/health", async () => ({ ok: true }));
 

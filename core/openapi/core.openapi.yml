@@ -639,6 +639,31 @@ paths:
           description: Доступ запрещён
         "404":
           description: Счёт не найден
+  /ws/client/operations:
+    get:
+      tags: [Core]
+      summary: WebSocket – операции клиента по всем счетам (роль client)
+      description: |
+        Поток уведомлений об операциях по **всем счетам** профиля из JWT (`sub` = id клиента в users).
+        Доступно только при роли `client` в токене; сотрудники (employee/admin) должны использовать `/ws/staff/operations`.
+
+        При подключении — snapshot последних 80 операций по всем счетам клиента, затем push при новых операциях.
+
+        Авторизация: заголовок `Authorization: Bearer <token>` или query `authorization=Bearer%20<token>`.
+      parameters:
+        - in: query
+          name: authorization
+          required: false
+          schema:
+            type: string
+          description: Bearer token (альтернатива заголовку)
+      responses:
+        "101":
+          description: Switching Protocols – WebSocket подключение установлено
+        "401":
+          description: Не авторизован
+        "403":
+          description: Доступ запрещён (нет роли client или пользователь — сотрудник)
   /internal/accounts/{id}/operations:
     post:
       tags: [Internal]

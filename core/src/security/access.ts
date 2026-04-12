@@ -27,3 +27,24 @@ export function canCloseAccount(
 ): boolean {
   return canReadAccount(payload, clientId);
 }
+
+/** WebSocket по счёту: сотрудники — как раньше; клиент — только с ролью `client`. */
+export function canUseAccountOperationsWs(
+  payload: JWTPayload | null,
+  accountClientId: string,
+): boolean {
+  if (!canReadAccount(payload, accountClientId)) return false;
+  if (canManageAll(payload)) return true;
+  return hasRole(payload, "client");
+}
+
+/**
+ * Агрегированный поток операций клиента по всем счетам (не для employee/admin).
+ */
+export function canUseClientOperationsStream(
+  payload: JWTPayload | null,
+): boolean {
+  if (!payload?.sub) return false;
+  if (canManageAll(payload)) return false;
+  return hasRole(payload, "client");
+}
