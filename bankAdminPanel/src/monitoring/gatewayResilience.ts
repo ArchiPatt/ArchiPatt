@@ -43,14 +43,14 @@ class GatewayCircuitBreaker {
 
 export const gatewayCircuit = new GatewayCircuitBreaker()
 
-export function canRetryIdempotentRequest(cfg: AxiosRequestConfig): boolean {
+export const canRetryIdempotentRequest = (cfg: AxiosRequestConfig) => {
    const m = (cfg.method ?? 'GET').toUpperCase()
    if (m === 'GET' || m === 'HEAD' || m === 'OPTIONS') return true
    const h = cfg.headers as Record<string, string | undefined>
    return Boolean(h?.['Idempotency-Key'] ?? h?.['idempotency-key'])
 }
 
-export function shouldRetryHttpError(err: unknown): boolean {
+export const shouldRetryHttpError = (err: unknown) => {
    if (!axios.isAxiosError(err)) return false
    if (err.response?.status === 401) return true
    if (!err.response) return true
@@ -58,7 +58,7 @@ export function shouldRetryHttpError(err: unknown): boolean {
    return s >= 500 || s === 408 || s === 429
 }
 
-export async function axiosRetryDelay(attemptIndex: number): Promise<void> {
+export const axiosRetryDelay = async (attemptIndex: number) => {
    const ms = 80 * 2 ** attemptIndex + Math.floor(Math.random() * 40)
    await new Promise((r) => setTimeout(r, ms))
 }
