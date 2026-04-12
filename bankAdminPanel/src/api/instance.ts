@@ -18,22 +18,19 @@ type ConfigExtras = AxiosRequestConfig & {
    [INFRA_RETRY]?: number
 }
 
-function attachIdempotencyKey(config: AxiosRequestConfig): void {
-   const m = config.method?.toUpperCase()
-   if (!m || !['POST', 'PUT', 'PATCH', 'DELETE'].includes(m)) return
-   config.headers = config.headers ?? {}
-   const h = config.headers as Record<string, string | undefined>
-   if (h['Idempotency-Key'] ?? h['idempotency-key']) return
-   const sym = Symbol.for('archipatt.idempotencyKey')
-   type WithKey = typeof config & { [k: symbol]: string | undefined }
-   const w = config as WithKey
-   if (!w[sym]) {
-      w[sym] =
-         typeof crypto !== 'undefined' && 'randomUUID' in crypto
-            ? crypto.randomUUID()
-            : `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
-   }
-   h['Idempotency-Key'] = w[sym]
+const MUTATING_METHODS = ['POST', 'PUT', 'PATCH', 'DELETE']
+const IDEMPOTENCY_CACHE_KEY = '__idempotencyKey'
+
+const attachIdempotencyKey = (config: AxiosRequestConfig & { [IDEMPOTENCY_CACHE_KEY]?: string }) => {
+   const method = config.method?.toUpperCase()
+   if (!method || !MUTATING_METHODS.includes(method)) return
+
+   const headers = (config.headers ?? {}) as Record<string, string | undefined>
+   config.headers = headers
+   if (headers['Idempotency-Key'] ?? headers['idempotency-key']) return
+
+   config[IDEMPOTENCY_CACHE_KEY] ??= crypto.randomUUID()
+   headers['Idempotency-Key'] = config[IDEMPOTENCY_CACHE_KEY]
 }
 
 function recordCircuitOnFinalError(error: AxiosError): void {
