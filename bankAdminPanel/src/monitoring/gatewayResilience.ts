@@ -11,8 +11,11 @@ class GatewayCircuitBreaker {
    private outcomes: boolean[] = []
 
    beforeRequest(): void {
+      const fails = this.outcomes.filter((x) => !x).length
+      console.log(fails / this.outcomes.length, this.outcomes)
       if (Date.now() < this.openUntil) {
          const err = new Error('Сервис временно недоступен (слишком много ошибок). Повторите позже.')
+         console.log('Сервис временно недоступен (слишком много ошибок). Повторите позже.')
          ;(err as Error & { code?: string }).code = 'CIRCUIT_OPEN'
          throw err
       }
@@ -49,7 +52,7 @@ export function canRetryIdempotentRequest(cfg: AxiosRequestConfig): boolean {
 
 export function shouldRetryHttpError(err: unknown): boolean {
    if (!axios.isAxiosError(err)) return false
-   if (err.response?.status === 401) return false
+   if (err.response?.status === 401) return true
    if (!err.response) return true
    const s = err.response.status
    return s >= 500 || s === 408 || s === 429

@@ -33,10 +33,11 @@ const attachIdempotencyKey = (config: AxiosRequestConfig & { [IDEMPOTENCY_CACHE_
    headers['Idempotency-Key'] = config[IDEMPOTENCY_CACHE_KEY]
 }
 
-function recordCircuitOnFinalError(error: AxiosError): void {
+const recordCircuitOnFinalError = (error: AxiosError) => {
    const s = error.response?.status
+   console.log('recordCircuitOnFinalError', error.response, s)
    if (s === 401) {
-      gatewayCircuit.recordSuccess()
+      gatewayCircuit.recordInfrastructureFailure()
       return
    }
    if (!error.response || (s !== undefined && (s >= 500 || s === 408 || s === 429))) {
@@ -74,6 +75,9 @@ instance.interceptors.response.use(
    async (error: AxiosError) => {
       const originalRequest = error.config as ConfigExtras
 
+      reportAxiosError(error)
+      recordCircuitOnFinalError(error)
+
       if (shouldRetryHttpError(error) && originalRequest && canRetryIdempotentRequest(originalRequest)) {
          const n = originalRequest[INFRA_RETRY] ?? 0
          if (n < 3) {
@@ -83,8 +87,6 @@ instance.interceptors.response.use(
          }
       }
 
-      reportAxiosError(error)
-      recordCircuitOnFinalError(error)
       return Promise.reject(error)
    }
 )
